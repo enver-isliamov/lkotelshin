@@ -1,43 +1,22 @@
-const ADMIN_ID = '96609347';
-const API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec'; // замените на свой ID
-let sheetUrl = DEFAULT_API_URL;
+// script.js — JS-файл на GitHub Pages
 
+const urlParams = new URLSearchParams(window.location.search);
+const auth = urlParams.get('auth');
+const container = document.getElementById('container');
 
-function onTelegramAuth(user) {
-  const chatId = user.id.toString();
-  const app = document.getElementById('app');
-  app.innerHTML = 'Загрузка...';
-
-  if (chatId === ADMIN_ID) {
-    app.innerHTML = '<h2>Добро пожаловать, админ!</h2>';
-    return;
-  }
-
-  fetch(`${API_URL}?chat_id=${chatId}`)
+if (!auth) {
+  container.innerHTML = '<h1>⛔ Нет токена доступа</h1>';
+} else {
+  fetch(`https://script.google.com/macros/s/ВАШ_DEPLOY_URL/exec?auth=${auth}`)
     .then(res => res.json())
     .then(data => {
-      if (!data || Object.keys(data).length === 0) {
-        app.innerHTML = 'Вы ещё не зарегистрированы. Пожалуйста, свяжитесь с администратором.';
+      if (data.allowed) {
+        container.innerHTML = `<h1>👋 Добро пожаловать, ${data.name}!</h1>`;
       } else {
-        showUserData(app, data);
+        container.innerHTML = '<h1>⛔ Доступ запрещён</h1>';
       }
     })
     .catch(() => {
-      app.innerHTML = 'Ошибка при загрузке данных.';
+      container.innerHTML = '<h1>⚠️ Ошибка при проверке доступа</h1>';
     });
 }
-
-function showUserData(container, data) {
-  container.innerHTML = '<h2>Ваш заказ:</h2>';
-  const card = document.createElement('div');
-  card.className = 'card';
-  for (const [key, value] of Object.entries(data)) {
-    const p = document.createElement('p');
-    p.innerHTML = `<strong>${key}:</strong> ${value}`;
-    card.appendChild(p);
-  }
-  container.appendChild(card);
-}
-
-// запуск после загрузки
-onTelegramAuth(window.Telegram.WebApp.initDataUnsafe.user);
