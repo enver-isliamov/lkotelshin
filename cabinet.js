@@ -1,4 +1,4 @@
-Uhh// script.js — JS-файл на GitHub Pages
+Uhh// script.js — JS-файл на GitHub Pages .
 
 const urlParams = new URLSearchParams(window.location.search);
 const auth = urlParams.get('auth');
