@@ -3,20 +3,20 @@ const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5Wyaawg
 let sheetUrl = DEFAULT_API_URL;
 
 function onTelegramAuth(user) {
-  const chatId = user.id.toString();
-  const app = document.getElementById('app');
-  document.getElementById('telegram-login').style.display = 'none';
-  app.style.display = 'block';
+  // НЕ используется, авторизация через параметры URL
+}
 
-  if (chatId === ADMIN_ID) {
-    app.innerHTML = `
-      <h2>Админ панель</h2>
-      <input type="text" id="sheetLink" placeholder="Новая ссылка" value="${sheetUrl}" />
-      <button onclick="saveSheetURL()">Сохранить</button>
-    `;
-    return;
-  }
+const user = Telegram.WebApp.initDataUnsafe.user;
+const chatId = user.id.toString();
+const app = document.getElementById('app');
 
+if (chatId === ADMIN_ID) {
+  app.innerHTML = `
+    <h2>Админ панель</h2>
+    <input type="text" id="sheetLink" placeholder="Новая ссылка" value="${sheetUrl}" />
+    <button onclick="saveSheetURL()">Сохранить</button>
+  `;
+} else {
   fetch(`${sheetUrl}?chat_id=${chatId}`)
     .then(res => res.json())
     .then(data => {
