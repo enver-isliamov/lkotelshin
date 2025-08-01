@@ -1,5 +1,5 @@
 const ADMIN_ID = '96609347';
-const API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec; // замените на свой ID
+const API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec'; // замените на свой ID
 let sheetUrl = DEFAULT_API_URL;
 
 
