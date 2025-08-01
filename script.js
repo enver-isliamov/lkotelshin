@@ -1,40 +1,30 @@
 const ADMIN_ID = '96609347';
-const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec; // замените на свой ID
 let sheetUrl = DEFAULT_API_URL;
 
-const user = Telegram.WebApp.initDataUnsafe.user;
-const chatId = user.id.toString();
-const app = document.getElementById('app');
 
-if (chatId === ADMIN_ID) {
-  app.innerHTML = `
-    <h2>Админ панель</h2>
-    <input type="text" id="sheetLink" placeholder="Новая ссылка" value="${sheetUrl}" />
-    <button onclick="saveSheetURL()">Сохранить</button>
-  `;
-} else {
-  fetch(`${sheetUrl}?chat_id=${chatId}`)
+function onTelegramAuth(user) {
+  const chatId = user.id.toString();
+  const app = document.getElementById('app');
+  app.innerHTML = 'Загрузка...';
+
+  if (chatId === ADMIN_ID) {
+    app.innerHTML = '<h2>Добро пожаловать, админ!</h2>';
+    return;
+  }
+
+  fetch(`${API_URL}?chat_id=${chatId}`)
     .then(res => res.json())
     .then(data => {
       if (!data || Object.keys(data).length === 0) {
-        app.innerHTML = '<p>Данные по вашему номеру не найдены. Обратитесь в поддержку.</p>';
+        app.innerHTML = 'Вы ещё не зарегистрированы. Пожалуйста, свяжитесь с администратором.';
       } else {
         showUserData(app, data);
       }
     })
     .catch(() => {
-      app.innerHTML = '<p>Ошибка при загрузке данных</p>';
+      app.innerHTML = 'Ошибка при загрузке данных.';
     });
-}
-
-function saveSheetURL() {
-  const url = document.getElementById('sheetLink').value;
-  if (url.includes('script.google.com')) {
-    sheetUrl = url;
-    alert('Ссылка обновлена. Перезагрузите страницу.');
-  } else {
-    alert('Неверная ссылка');
-  }
 }
 
 function showUserData(container, data) {
@@ -48,3 +38,6 @@ function showUserData(container, data) {
   }
   container.appendChild(card);
 }
+
+// запуск после загрузки
+onTelegramAuth(window.Telegram.WebApp.initDataUnsafe.user);
