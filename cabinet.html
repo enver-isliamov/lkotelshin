@@ -1,36 +1,47 @@
-<script>
-function getQueryParams() {
-  const params = {};
-  const search = new URLSearchParams(window.location.search);
-  for (const [key, val] of search.entries()) {
-    params[key] = val;
-  }
-  return params;
-}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Личный кабинет</title>
+</head>
+<body>
+  <div id="app">Загрузка...</div>
 
-function validateTelegramAuth(params) {
-  const botToken = 'YOUR_BOT_TOKEN'; // НЕ вставляй прямо в JS на фронте, это небезопасно
-  const dataCheckString = Object.keys(params)
-    .filter(k => k !== 'hash')
-    .sort()
-    .map(k => `${k}=${params[k]}`)
-    .join('\n');
+  <script>
+    function getQueryParams() {
+      const params = {};
+      const search = new URLSearchParams(window.location.search);
+      for (const [key, val] of search.entries()) {
+        params[key] = val;
+      }
+      return params;
+    }
 
-  const secretKey = CryptoJS.HmacSHA256(botToken, 'WebAppData'); // библиотека crypto-js
-  const computedHash = CryptoJS.HmacSHA256(dataCheckString, secretKey).toString(CryptoJS.enc.Hex);
+    const params = getQueryParams();
+    const chatId = params.id;
+    const firstName = params.first_name || '';
+    const username = params.username || '';
 
-  return computedHash === params.hash;
-}
+    if (!chatId) {
+      document.getElementById('app').innerText = 'Ошибка: Chat ID не получен';
+    } else {
+      window.Telegram = {
+        WebApp: {
+          initDataUnsafe: {
+            user: {
+              id: chatId,
+              first_name: firstName,
+              username: username
+            }
+          },
+          ready: () => {}
+        }
+      };
 
-const params = getQueryParams();
-if (!params.id) {
-  document.body.innerText = 'Ошибка: Telegram авторизация не прошла.';
-} else {
-  // Дополнительно можно проверить подпись (hash)
-  // validateTelegramAuth(params);
-
-  // Вывести пользователя
-  document.body.innerHTML = `<h2>Здравствуйте, ${params.first_name}!</h2><p>Ваш ID: ${params.id}</p>`;
-  // Далее можно подгрузить заказ через chat_id и т.п.
-}
-</script>
+      const script = document.createElement('script');
+      script.src = './script.js';
+      document.body.appendChild(script);
+    }
+  </script>
+</body>
+</html>
