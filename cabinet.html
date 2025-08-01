@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Личный кабинет</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: sans-serif;
@@ -45,9 +45,8 @@
             document.getElementById('user-data').innerText = 'Пользователь не найден.';
           }
         })
-        .catch(err => {
+        .catch(() => {
           document.getElementById('user-data').innerText = 'Ошибка загрузки данных.';
-          console.error(err);
         });
     }
   </script>
