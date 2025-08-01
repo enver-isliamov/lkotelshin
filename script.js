@@ -1,5 +1,6 @@
 const ADMIN_ID = '96609347';
 const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec';
+let sheetUrl = DEFAULT_API_URL;
 
 async function initApp() {
   const tg = window.Telegram.WebApp;
@@ -13,12 +14,10 @@ async function initApp() {
     return;
   }
 
-  let sheetUrl = localStorage.getItem('sheet_url') || DEFAULT_API_URL;
-
   if (chatId === ADMIN_ID) {
     app.innerHTML = `
       <h2>Админ панель</h2>
-      <input type="text" id="sheetLink" placeholder="Вставьте ссылку на API Google Sheets" />
+      <input type="text" id="sheetLink" placeholder="Вставьте новую ссылку на API Google Sheets" value="${sheetUrl}" />
       <button onclick="saveSheetURL()">Сохранить ссылку</button>
     `;
     return;
@@ -41,8 +40,8 @@ async function initApp() {
 function saveSheetURL() {
   const url = document.getElementById('sheetLink').value;
   if (url.includes('script.google.com')) {
-    localStorage.setItem('sheet_url', url);
-    alert('Ссылка сохранена! Перезагрузите страницу.');
+    sheetUrl = url;
+    alert('Ссылка обновлена! Перезагрузите страницу.');
   } else {
     alert('Неверная ссылка');
   }
@@ -63,7 +62,6 @@ async function verifyPhone(chatId, sheetUrl) {
     const res = await fetch(`${sheetUrl}?phone=${encodeURIComponent(phone)}`);
     const data = await res.json();
     if (data && data.chat_id && data.chat_id === chatId) {
-      localStorage.setItem('verified', 'true');
       showUserData(app, data);
     } else {
       alert('Номер не найден или не соответствует вашему аккаунту.');
