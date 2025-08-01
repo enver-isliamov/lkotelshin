@@ -5,14 +5,31 @@
   <title>Вход через Telegram</title>
 </head>
 <body>
-  <h1>Добро пожаловать!</h1>
+  <h1>Войти через Telegram</h1>
 
   <script async src="https://telegram.org/js/telegram-widget.js?22"
     data-telegram-login="OtelshinBot" 
     data-size="large"
-    data-auth-url="https://enver-isliamov.github.io/lk.otelshin.ru/cabinet.html"
+    data-userpic="false"
     data-request-access="write"
-    data-userpic="false">
+    data-on-auth="handleTelegramAuth">
+  </script>
+
+  <script>
+    function handleTelegramAuth(user) {
+      const chatId = user.id;
+      const firstName = user.first_name || '';
+      const username = user.username || '';
+
+      // Перенаправляем пользователя в кабинет
+      const query = new URLSearchParams({
+        id: chatId,
+        first_name: firstName,
+        username: username
+      }).toString();
+
+      window.location.href = `cabinet.html?${query}`;
+    }
   </script>
 </body>
 </html>
