@@ -2,10 +2,6 @@ const ADMIN_ID = '96609347';
 const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec';
 let sheetUrl = DEFAULT_API_URL;
 
-function onTelegramAuth(user) {
-  // НЕ используется, авторизация через параметры URL
-}
-
 const user = Telegram.WebApp.initDataUnsafe.user;
 const chatId = user.id.toString();
 const app = document.getElementById('app');
@@ -21,7 +17,7 @@ if (chatId === ADMIN_ID) {
     .then(res => res.json())
     .then(data => {
       if (!data || Object.keys(data).length === 0) {
-        requestPhoneAssociation(app, sheetUrl, chatId);
+        app.innerHTML = '<p>Данные по вашему номеру не найдены. Обратитесь в поддержку.</p>';
       } else {
         showUserData(app, data);
       }
@@ -39,31 +35,6 @@ function saveSheetURL() {
   } else {
     alert('Неверная ссылка');
   }
-}
-
-function requestPhoneAssociation(container, sheetUrl, chatId) {
-  container.innerHTML = `
-    <h2>Введите номер телефона</h2>
-    <input type="tel" id="phoneInput" placeholder="+7XXXXXXXXXX" />
-    <button onclick="verifyPhone('${chatId}', '${sheetUrl}')">Отправить</button>
-  `;
-}
-
-function verifyPhone(chatId, sheetUrl) {
-  const phone = document.getElementById('phoneInput').value;
-  const app = document.getElementById('app');
-  fetch(`${sheetUrl}?phone=${encodeURIComponent(phone)}`)
-    .then(res => res.json())
-    .then(data => {
-      if (data && data.chat_id && data.chat_id === chatId) {
-        showUserData(app, data);
-      } else {
-        alert('Номер не найден или не соответствует вашему аккаунту.');
-      }
-    })
-    .catch(() => {
-      alert('Ошибка при проверке номера');
-    });
 }
 
 function showUserData(container, data) {
