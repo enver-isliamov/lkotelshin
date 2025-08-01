@@ -2,51 +2,37 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Личный кабинет</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
       font-family: sans-serif;
-      margin: 2em;
-      background: #f9f9f9;
-      color: #333;
-    }
-    #user-data {
-      background: white;
-      padding: 1em;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      text-align: center;
+      padding: 40px;
     }
   </style>
 </head>
 <body>
-  <h1>Добро пожаловать!</h1>
-  <div id="user-data">Загрузка данных...</div>
+  <h2>🔄 Проверка доступа...</h2>
 
   <script>
-    const chatId = new URLSearchParams(window.location.search).get('chat_id');
+    const urlParams = new URLSearchParams(window.location.search);
+    const auth = urlParams.get('auth');
 
-    if (!chatId) {
-      document.getElementById('user-data').innerText = 'Ошибка: отсутствует Chat ID';
+    if (!auth) {
+      document.body.innerHTML = '<h1>⛔ Нет токена доступа</h1>';
     } else {
-      fetch(`https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec?chat_id=${chatId}`)
+      fetch(`https://script.google.com/macros/s/ВАШ_DEPLOY_URL/exec?auth=${auth}`)
         .then(res => res.json())
         .then(data => {
-          if (data.status === 'success') {
-            const user = data.user;
-            document.getElementById('user-data').innerHTML = `
-              <p><strong>Имя:</strong> ${user.name}</p>
-              <p><strong>Телефон:</strong> ${user.phone}</p>
-              <p><strong>Номер авто:</strong> ${user.car}</p>
-              <p><strong>Заказ:</strong> ${user.order}</p>
-              <p><strong>Срок:</strong> ${user.duration}</p>
-            `;
+          if (data.allowed) {
+            document.body.innerHTML = `<h1>👋 Добро пожаловать, ${data.name}!</h1>`;
           } else {
-            document.getElementById('user-data').innerText = 'Пользователь не найден.';
+            document.body.innerHTML = '<h1>⛔ Доступ запрещён</h1>';
           }
         })
         .catch(() => {
-          document.getElementById('user-data').innerText = 'Ошибка загрузки данных.';
+          document.body.innerHTML = '<h1>⚠️ Ошибка при проверке доступа</h1>';
         });
     }
   </script>
