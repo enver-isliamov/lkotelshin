@@ -1,46 +1,54 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Личный кабинет</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 2em;
+      background: #f9f9f9;
+      color: #333;
+    }
+    #user-data {
+      background: white;
+      padding: 1em;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+  </style>
 </head>
 <body>
-  <div id="app">Загрузка...</div>
+  <h1>Добро пожаловать!</h1>
+  <div id="user-data">Загрузка данных...</div>
 
   <script>
-    function getQueryParams() {
-      const params = {};
-      const search = new URLSearchParams(window.location.search);
-      for (const [key, val] of search.entries()) {
-        params[key] = val;
-      }
-      return params;
-    }
-
-    const params = getQueryParams();
-    const chatId = params.id;
-    const firstName = params.first_name || '';
-    const username = params.username || '';
+    const chatId = new URLSearchParams(window.location.search).get('chat_id');
 
     if (!chatId) {
-      document.getElementById('app').innerText = 'Ошибка: Chat ID не получен';
+      document.getElementById('user-data').innerText = 'Ошибка: отсутствует Chat ID';
     } else {
-      window.Telegram = {
-        WebApp: {
-          initDataUnsafe: {
-            user: {
-              id: chatId,
-              first_name: firstName,
-              username: username
-            }
-          },
-          ready: () => {}
-        }
-      };
-
-      const script = document.createElement('script');
-      script.src = './script.js'; // логика получения данных
-      document.body.appendChild(script);
+      fetch(`https://script.google.com/macros/s/ВАШ_SCRIPT_ID/exec?chat_id=${chatId}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            const user = data.user;
+            document.getElementById('user-data').innerHTML = `
+              <p><strong>Имя:</strong> ${user.name}</p>
+              <p><strong>Телефон:</strong> ${user.phone}</p>
+              <p><strong>Номер авто:</strong> ${user.car}</p>
+              <p><strong>Заказ:</strong> ${user.order}</p>
+              <p><strong>Срок:</strong> ${user.duration}</p>
+            `;
+          } else {
+            document.getElementById('user-data').innerText = 'Пользователь не найден.';
+          }
+        })
+        .catch(err => {
+          document.getElementById('user-data').innerText = 'Ошибка загрузки данных.';
+          console.error(err);
+        });
     }
   </script>
 </body>
