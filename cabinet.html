@@ -4,37 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Личный кабинет</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 40px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>🔄 Проверка доступа...</h2>
+  <div id="container">
+    <h2>🔄 Проверка доступа...</h2>
+  </div>
 
-  <script>
-    const urlParams = new URLSearchParams(window.location.search);
-    const auth = urlParams.get('auth');
-
-    if (!auth) {
-      document.body.innerHTML = '<h1>⛔ Нет токена доступа</h1>';
-    } else {
-      fetch(`https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec?auth=${auth}`)
-        .then(res => res.json())
-        .then(data => {
-          if (data.allowed) {
-            document.body.innerHTML = `<h1>👋 Добро пожаловать, ${data.name}!</h1>`;
-          } else {
-            document.body.innerHTML = '<h1>⛔ Доступ запрещён</h1>';
-          }
-        })
-        .catch(() => {
-          document.body.innerHTML = '<h1>⚠️ Ошибка при проверке доступа</h1>';
-        });
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
