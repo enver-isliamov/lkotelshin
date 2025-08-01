@@ -8,39 +8,29 @@
   <div id="app">Загрузка...</div>
 
   <script>
-    function getQueryParams() {
-      const params = {};
-      const search = new URLSearchParams(window.location.search);
-      for (const [key, val] of search.entries()) {
-        params[key] = val;
-      }
-      return params;
-    }
-
-    const params = getQueryParams();
-    const chatId = params.id;
-    const firstName = params.first_name || '';
-    const username = params.username || '';
+    const params = new URLSearchParams(window.location.search);
+    const chatId = params.get("chat_id");
 
     if (!chatId) {
-      document.getElementById('app').innerText = 'Ошибка: Chat ID не получен';
+      document.getElementById("app").innerText = "Ошибка: Chat ID не найден";
     } else {
-      window.Telegram = {
-        WebApp: {
-          initDataUnsafe: {
-            user: {
-              id: chatId,
-              first_name: firstName,
-              username: username
-            }
-          },
-          ready: () => {}
-        }
-      };
-
-      const script = document.createElement('script');
-      script.src = './script.js';
-      document.body.appendChild(script);
+      fetch("https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?chat_id=" + chatId)
+        .then(res => res.json())
+        .then(data => {
+          if (data.name) {
+            document.getElementById("app").innerHTML = `
+              <h3>Добро пожаловать, ${data.name}</h3>
+              <p>Телефон: ${data.phone}</p>
+              <p>Ваш заказ: ${data.order}</p>
+              <p>Дата: ${data.date}</p>
+            `;
+          } else {
+            document.getElementById("app").innerText = "Клиент не найден";
+          }
+        })
+        .catch(() => {
+          document.getElementById("app").innerText = "Ошибка запроса";
+        });
     }
   </script>
 </body>
