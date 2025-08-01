@@ -2,46 +2,40 @@ const ADMIN_ID = '96609347';
 const DEFAULT_API_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec';
 let sheetUrl = DEFAULT_API_URL;
 
-async function initApp() {
-  const tg = window.Telegram.WebApp;
-  tg.ready();
-  const user = tg.initDataUnsafe?.user;
-  const chatId = user?.id?.toString();
+function onTelegramAuth(user) {
+  const chatId = user.id.toString();
   const app = document.getElementById('app');
-
-  if (!chatId) {
-    app.innerHTML = '<p>Ошибка: не удалось получить ChatID</p>';
-    return;
-  }
+  document.getElementById('telegram-login').style.display = 'none';
+  app.style.display = 'block';
 
   if (chatId === ADMIN_ID) {
     app.innerHTML = `
       <h2>Админ панель</h2>
-      <input type="text" id="sheetLink" placeholder="Вставьте новую ссылку на API Google Sheets" value="${sheetUrl}" />
-      <button onclick="saveSheetURL()">Сохранить ссылку</button>
+      <input type="text" id="sheetLink" placeholder="Новая ссылка" value="${sheetUrl}" />
+      <button onclick="saveSheetURL()">Сохранить</button>
     `;
     return;
   }
 
-  try {
-    const res = await fetch(`${sheetUrl}?chat_id=${chatId}`);
-    const data = await res.json();
-
-    if (!data || Object.keys(data).length === 0) {
-      requestPhoneAssociation(app, sheetUrl, chatId);
-    } else {
-      showUserData(app, data);
-    }
-  } catch (e) {
-    app.innerHTML = '<p>Ошибка при загрузке данных</p>';
-  }
+  fetch(`${sheetUrl}?chat_id=${chatId}`)
+    .then(res => res.json())
+    .then(data => {
+      if (!data || Object.keys(data).length === 0) {
+        requestPhoneAssociation(app, sheetUrl, chatId);
+      } else {
+        showUserData(app, data);
+      }
+    })
+    .catch(() => {
+      app.innerHTML = '<p>Ошибка при загрузке данных</p>';
+    });
 }
 
 function saveSheetURL() {
   const url = document.getElementById('sheetLink').value;
   if (url.includes('script.google.com')) {
     sheetUrl = url;
-    alert('Ссылка обновлена! Перезагрузите страницу.');
+    alert('Ссылка обновлена. Перезагрузите страницу.');
   } else {
     alert('Неверная ссылка');
   }
@@ -55,20 +49,21 @@ function requestPhoneAssociation(container, sheetUrl, chatId) {
   `;
 }
 
-async function verifyPhone(chatId, sheetUrl) {
+function verifyPhone(chatId, sheetUrl) {
   const phone = document.getElementById('phoneInput').value;
   const app = document.getElementById('app');
-  try {
-    const res = await fetch(`${sheetUrl}?phone=${encodeURIComponent(phone)}`);
-    const data = await res.json();
-    if (data && data.chat_id && data.chat_id === chatId) {
-      showUserData(app, data);
-    } else {
-      alert('Номер не найден или не соответствует вашему аккаунту.');
-    }
-  } catch (e) {
-    alert('Ошибка при проверке номера');
-  }
+  fetch(`${sheetUrl}?phone=${encodeURIComponent(phone)}`)
+    .then(res => res.json())
+    .then(data => {
+      if (data && data.chat_id && data.chat_id === chatId) {
+        showUserData(app, data);
+      } else {
+        alert('Номер не найден или не соответствует вашему аккаунту.');
+      }
+    })
+    .catch(() => {
+      alert('Ошибка при проверке номера');
+    });
 }
 
 function showUserData(container, data) {
@@ -82,5 +77,3 @@ function showUserData(container, data) {
   }
   container.appendChild(card);
 }
-
-window.onload = initApp;
