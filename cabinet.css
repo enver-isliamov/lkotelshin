@@ -1,11 +1,22 @@
+/* style.css */
 body {
-  font-family: sans-serif;
-  padding: 2rem;
-  background: #f9f9f9;
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
 }
-#app {
+
+#container {
+  text-align: center;
   background: white;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+}
+
+h1, h2 {
+  color: #333;
 }
