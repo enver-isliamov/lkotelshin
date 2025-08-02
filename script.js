@@ -1,22 +1,23 @@
-Uhh// script.js — JS-файл на GitHub Pages .
-
+// Чтение параметров из URL
 const urlParams = new URLSearchParams(window.location.search);
 const auth = urlParams.get('auth');
-const container = document.getElementById('container');
 
-if (!auth) {
-  container.innerHTML = '<h1>⛔ Нет токена доступа</h1>';
-} else {
-  fetch(`https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec?auth=${auth}`)
+document.getElementById('status').textContent = 'Авторизация...';
+
+if (auth) {
+  fetch("https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec", {
+    method: "POST",
+    body: JSON.stringify({ chat_id: auth.replace('telegram_', '') }),
+    headers: { "Content-Type": "application/json" }
+  })
     .then(res => res.json())
     .then(data => {
-      if (data.allowed) {
-        container.innerHTML = `<h1>👋 Добро пожаловать, ${data.name}!</h1>`;
+      if (data.status === "success") {
+        document.getElementById('status').textContent = "Добро пожаловать, " + (data.client[1] || "пользователь");
       } else {
-        container.innerHTML = '<h1>⛔ Доступ запрещён</h1>';
+        document.getElementById('status').textContent = data.message;
       }
-    })
-    .catch(() => {
-      container.innerHTML = '<h1>⚠️ Ошибка при проверке доступа</h1>';
     });
+} else {
+  document.getElementById('status').textContent = 'Не найдены параметры авторизации.';
 }
