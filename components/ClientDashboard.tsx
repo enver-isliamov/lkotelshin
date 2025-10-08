@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ClientData, OrderHistory } from '../types';
 import InfoCard from './InfoCard';
 import HistoryTable from './HistoryTable';
@@ -34,6 +34,15 @@ const HeaderSkeleton: React.FC = () => (
 
 const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHistory, isDemo, onBack, visibleFields, isLoading }) => {
   const [activeTab, setActiveTab] = useState<Tab>('current');
+  const visibleSet = useMemo(() => new Set(visibleFields), [visibleFields]);
+
+  const isHeaderInfoVisible = useMemo(() => {
+    if (!clientData) return false;
+    const fieldsToCheck = ['Телефон', 'Номер Авто', 'Адрес клиента'];
+    const hasVisibleFields = fieldsToCheck.some(field => visibleSet.has(field) && clientData[field]);
+    const hasPendingStatus = clientData['Статус сделки'] === 'Ожидает обработки';
+    return hasVisibleFields || hasPendingStatus;
+  }, [clientData, visibleSet]);
 
   if (!isLoading && !clientData) {
     return (
@@ -85,7 +94,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
           <>
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 pt-1">
-                    <h1 className="text-2xl font-bold break-words leading-tight">{clientData['Имя клиента']}</h1>
+                    <h1 className="text-xl font-bold break-words leading-tight">{clientData['Имя клиента']}</h1>
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-4">
                     {isDemo && (
@@ -110,19 +119,21 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
                 </div>
             </div>
 
-            <div className="bg-tg-secondary-bg p-4 rounded-lg shadow-md space-y-3">
-                <InfoRow icon={<PhoneIcon />} value={clientData['Телефон']} />
-                <InfoRow icon={<CarPlateIcon />} value={clientData['Номер Авто']} />
-                <InfoRow icon={<HomeIcon />} value={clientData['Адрес клиента']} />
-                 {clientData['Статус сделки'] === 'Ожидает обработки' && (
-                    <div className="flex items-center gap-3">
-                         <div className="flex-shrink-0 w-5 h-5 text-tg-hint"><StatusIcon /></div>
-                        <div className="text-sm inline-block bg-yellow-100 text-yellow-800 font-medium px-2 py-0.5 rounded-full dark:bg-yellow-900 dark:text-yellow-200">
-                          {clientData['Статус сделки']}
-                        </div>
-                    </div>
-                )}
-            </div>
+            {isHeaderInfoVisible && (
+              <div className="bg-tg-secondary-bg p-4 rounded-lg shadow-md space-y-3">
+                  {visibleSet.has('Телефон') && <InfoRow icon={<PhoneIcon />} value={clientData['Телефон']} />}
+                  {visibleSet.has('Номер Авто') && <InfoRow icon={<CarPlateIcon />} value={clientData['Номер Авто']} />}
+                  {visibleSet.has('Адрес клиента') && <InfoRow icon={<HomeIcon />} value={clientData['Адрес клиента']} />}
+                  {clientData['Статус сделки'] === 'Ожидает обработки' && (
+                      <div className="flex items-center gap-3">
+                          <div className="flex-shrink-0 w-5 h-5 text-tg-hint"><StatusIcon /></div>
+                          <div className="text-sm inline-block bg-yellow-100 text-yellow-800 font-medium px-2 py-0.5 rounded-full dark:bg-yellow-900 dark:text-yellow-200">
+                            {clientData['Статус сделки']}
+                          </div>
+                      </div>
+                  )}
+              </div>
+            )}
         </>
       )}
 
