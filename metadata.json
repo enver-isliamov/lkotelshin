@@ -1,0 +1,4 @@
+{
+  "name": "Client Cabinet",
+  "description": "A web application for clients to view their personal cabinet, with data sourced from a Google Sheet. Clients can view their current service details and order history. Admins can configure which data fields are visible to clients."
+}

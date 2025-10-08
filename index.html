@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Client Cabinet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root {
+        --tg-theme-bg-color: #f0f2f5; /* Light gray background */
+        --tg-theme-text-color: #1c1e21; /* Dark text */
+        --tg-theme-hint-color: #606770; /* Muted text */
+        --tg-theme-link-color: #007bff; /* Standard blue link */
+        --tg-theme-button-color: #007bff; /* Blue button */
+        --tg-theme-button-text-color: #ffffff; /* White button text */
+        --tg-theme-secondary-bg-color: #ffffff; /* White for cards */
+      }
+    </style>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'tg-bg': 'var(--tg-theme-bg-color, #ffffff)',
+              'tg-text': 'var(--tg-theme-text-color, #000000)',
+              'tg-hint': 'var(--tg-theme-hint-color, #999999)',
+              'tg-link': 'var(--tg-theme-link-color, #2481cc)',
+              'tg-button': 'var(--tg-theme-button-color, #5288c1)',
+              'tg-button-text': 'var(--tg-theme-button-text-color, #ffffff)',
+              'tg-secondary-bg': 'var(--tg-theme-secondary-bg-color, #f1f1f1)',
+            },
+          },
+        },
+      }
+    </script>
+  <script type="importmap">
+{
+  "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-tg-bg text-tg-text">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
