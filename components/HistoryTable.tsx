@@ -102,22 +102,22 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
               {/* Timeline decorator */}
               <div className="flex flex-col items-center relative">
                  <div className="absolute top-9 left-1/2 w-px h-[calc(100%-2rem)] bg-repeat-y bg-[length:1px_8px]" style={{
-                     backgroundImage: index < history.length - 1 ? `linear-gradient(to bottom, #cbd5e1 50%, transparent 50%)` : 'none',
+                     backgroundImage: index < history.length - 1 ? `linear-gradient(to bottom, #e5e7eb 50%, transparent 50%)` : 'none',
                      transform: 'translateX(-50%)'
                  }}></div>
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300 flex items-center justify-center font-semibold z-10">
+                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 flex items-center justify-center font-semibold z-10">
                     <CheckIcon />
                 </div>
               </div>
               {/* Card Content */}
-              <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg mb-4">
+              <div className="w-full bg-gray-50/80 dark:bg-gray-800/40 p-3 rounded-lg mb-3">
                 <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                  <h3 className="font-bold text-lg text-tg-text">{orderTitle}</h3>
+                  <h3 className="font-semibold text-base text-tg-text">{orderTitle}</h3>
                   {order['Статус'] && <StatusBadge status={order['Статус']} />}
                 </div>
                 <div className="flex flex-wrap justify-between items-center text-sm gap-x-4 gap-y-1">
                    <p className="text-tg-hint">{period}</p>
-                   <p className="text-tg-text font-semibold">{order['Сумма'] ? `${order['Сумма'].replace(/\s/g, '')} ₽` : ''}</p>
+                   <p className="text-tg-text font-medium">{order['Сумма'] ? `${order['Сумма'].replace(/\s/g, '')} ₽` : ''}</p>
                 </div>
               </div>
             </div>
