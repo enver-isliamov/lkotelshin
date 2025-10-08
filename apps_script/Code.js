@@ -8,6 +8,44 @@
  */
 const SPREADSHEET_ID = '1IBBn38ZD-TOgzO9VjYAyKz8mchg_RwWyD6kZ0Lu729A';
 
+// !!! ВАЖНО: Вставьте сюда токен вашего Telegram бота !!!
+// Вы можете получить его у @BotFather в Telegram.
+const BOT_TOKEN = 'ВАШ_ТЕЛЕГРАМ_БОТ_ТОКЕН';
+
+// !!! ВАЖНО: Вставьте сюда ваш Chat ID для получения уведомлений !!!
+// Вы можете узнать свой ID у бота @userinfobot в Telegram.
+const ADMIN_CHAT_ID = '96609347'; 
+
+/**
+ * Helper function to send a message via Telegram Bot API.
+ * @param {string} chatId - The chat ID to send the message to.
+ * @param {string} text - The message text.
+ */
+function sendMessage(chatId, text) {
+  if (!BOT_TOKEN || BOT_TOKEN === 'ВАШ_ТЕЛЕГРАМ_БОТ_ТОКЕН') {
+    console.log('Bot token is not configured. Skipping message send.');
+    return; // Don't try to send if token is not set
+  }
+  const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage';
+  const payload = {
+    chat_id: String(chatId),
+    text: text,
+    parse_mode: 'HTML' // Use HTML for bold text
+  };
+  const options = {
+    method: 'post',
+    contentType: 'application/json',
+    payload: JSON.stringify(payload)
+  };
+  try {
+    UrlFetchApp.fetch(url, options);
+  } catch (e) {
+    // Log the error but don't crash the main function
+    console.error('Telegram API error: ' + e.toString());
+  }
+}
+
+
 /**
  * Helper function to create a JSON response with correct headers.
  * @param {Object} data - The data to be stringified.
@@ -144,8 +182,6 @@ function doPost(e) {
       const data = sheet.getDataRange().getValues();
       const existingUser = data.find(row => row[chatIdColIndex] == chatId);
       if(existingUser) {
-        // You might want to update the existing user or return an error
-        // For now, we'll just prevent duplicates.
         return createJsonResponse({ result: 'exists', message: 'Пользователь с таким Chat ID уже существует.' });
       }
 
@@ -156,9 +192,23 @@ function doPost(e) {
       newRow[headers.indexOf('Статус сделки')] = 'Ожидает обработки';
       
       sheet.appendRow(newRow);
+
+      // Send notification to admin
+      const notificationText = `<b>Новая заявка!</b>\n\nПользователь оставил заявку в боте.\n<b>Телефон:</b> ${phone}\n<b>Chat ID:</b> ${chatId}`;
+      sendMessage(ADMIN_CHAT_ID, notificationText);
       
       return createJsonResponse({ result: 'success', message: 'Пользователь успешно добавлен.' });
     }
+
+    if (requestData.action === 'sendMessageFromBot') {
+      const { chatId, text } = requestData;
+      if (!chatId || !text) {
+        return createJsonResponse({ error: 'Требуется Chat ID и текст сообщения.' });
+      }
+      sendMessage(chatId, text);
+      return createJsonResponse({ result: 'success', message: 'Сообщение отправлено.' });
+    }
+
 
     if (requestData.action === 'updateConfig') {
       const { key, value } = requestData;
