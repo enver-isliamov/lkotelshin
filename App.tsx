@@ -121,6 +121,7 @@ const App: React.FC = () => {
   useEffect(() => {
     // This effect now depends on authStatus. It will only run after we have a userId.
     if (authStatus !== 'success' || !userId) {
+        setIsLoading(false);
         return;
     }
     
@@ -253,21 +254,17 @@ const App: React.FC = () => {
     return <NewUserForm chatId={userId} onSubmit={handleNewUserSubmit} />;
   }
 
-  if (isLoading) {
-    return <Loader />;
-  }
-  
   if (error && !isAdmin) {
     const isConfigError = error.startsWith("Пожалуйста, настройте URL-адрес Google Apps Script");
     return <ErrorMessage type={isConfigError ? 'config' : 'data'} message={error} />;
   }
-
 
   return (
     <div className="min-h-screen p-4">
       {isAdmin ? (
          viewingClient ? (
           <ClientDashboard 
+            isLoading={false} // Data is pre-fetched, so no loading here
             clientData={viewingClient}
             orderHistory={viewingClientHistory}
             isDemo={false} // Never demo mode when admin is viewing
@@ -276,6 +273,7 @@ const App: React.FC = () => {
           />
         ) : (
           <AdminSettings 
+            isLoading={isLoading}
             allClients={allClients} 
             webBaseColumns={WEB_BASE_COLUMNS}
             onClientSelect={handleAdminSelectClient}
@@ -285,6 +283,7 @@ const App: React.FC = () => {
         )
       ) : (
         <ClientDashboard 
+          isLoading={isLoading}
           clientData={clientData} 
           orderHistory={orderHistory} 
           isDemo={isDemoMode}
