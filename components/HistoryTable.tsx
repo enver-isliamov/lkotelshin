@@ -22,9 +22,14 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
 const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
   if (history.length === 0) {
     return (
-      <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-6 text-center">
-        <h2 className="text-2xl font-semibold mb-2">История заказов</h2>
-        <p className="text-tg-hint">У вас пока нет завершенных заказов.</p>
+      <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-8 text-center flex flex-col items-center">
+        <div className="text-tg-hint mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        </div>
+        <h2 className="text-2xl font-semibold mb-2">История пуста</h2>
+        <p className="text-tg-hint max-w-xs">Здесь будет отображаться список ваших прошлых заказов и услуг.</p>
       </div>
     );
   }
