@@ -94,7 +94,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
           <>
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 pt-1">
-                    <h1 className="text-xl font-bold break-words leading-tight">{clientData['Имя клиента']}</h1>
+                    <h1 className="text-lg font-bold break-words leading-tight">{clientData['Имя клиента']}</h1>
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-4">
                     {isDemo && (
