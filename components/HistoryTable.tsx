@@ -4,6 +4,7 @@ import { OrderHistory } from '../types';
 
 interface HistoryTableProps {
   history: OrderHistory[];
+  isLoading: boolean;
 }
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
@@ -18,8 +19,56 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   );
 };
 
+const HistoryTableSkeleton: React.FC = () => (
+  <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6 animate-pulse">
+    <div className="h-7 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md mb-6 border-b border-tg-hint/20 pb-3"></div>
+    
+    {/* Mobile Skeleton */}
+    <div className="space-y-4 md:hidden">
+      {[...Array(3)].map((_, i) => (
+        <div key={i} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg space-y-3">
+          <div className="flex justify-between items-center">
+            <div className="h-4 w-1/4 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+            <div className="h-4 w-1/3 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+          </div>
+          <div className="flex justify-between items-center">
+            <div className="h-4 w-1/5 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+            <div className="h-6 w-1/4 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+          </div>
+        </div>
+      ))}
+    </div>
 
-const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
+    {/* Desktop Skeleton */}
+    <div className="hidden md:block">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b-2 border-tg-hint">
+            <th className="p-3"><div className="h-5 w-1/3 bg-gray-300 dark:bg-gray-700 rounded-md"></div></th>
+            <th className="p-3"><div className="h-5 w-1/3 bg-gray-300 dark:bg-gray-700 rounded-md"></div></th>
+            <th className="p-3"><div className="h-5 w-1/3 bg-gray-300 dark:bg-gray-700 rounded-md"></div></th>
+          </tr>
+        </thead>
+        <tbody>
+          {[...Array(3)].map((_, i) => (
+            <tr key={i} className="border-b border-tg-hint/50">
+              <td className="p-3"><div className="h-5 w-3/4 bg-gray-300 dark:bg-gray-700 rounded-md"></div></td>
+              <td className="p-3"><div className="h-5 w-3/4 bg-gray-300 dark:bg-gray-700 rounded-md"></div></td>
+              <td className="p-3"><div className="h-6 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-full"></div></td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+
+const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
+  if (isLoading) {
+    return <HistoryTableSkeleton />;
+  }
+  
   if (history.length === 0) {
     return (
       <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-8 text-center flex flex-col items-center">
@@ -39,7 +88,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
 
   return (
     <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6">
-      <h2 className="text-2xl font-semibold mb-6 border-b border-tg-hint pb-3">История заказов</h2>
+      <h2 className="text-2xl font-semibold mb-6 border-b border-tg-hint/20 pb-3">История заказов</h2>
       
       {/* Mobile Card View */}
       <div className="space-y-4 md:hidden">
@@ -62,7 +111,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
       {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-left">
-          <thead className="border-b-2 border-tg-hint">
+          <thead className="border-b-2 border-tg-hint/50">
             <tr>
               {headers.map(header => (
                 <th key={header} className="p-3 text-sm font-bold uppercase text-tg-hint">{header}</th>
@@ -71,7 +120,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history }) => {
           </thead>
           <tbody>
             {history.map((order, index) => (
-              <tr key={index} className="border-b border-tg-hint/50">
+              <tr key={index} className="border-b border-tg-hint/20">
                 {headers.map(header => (
                   <td key={header} className="p-3 text-tg-text">
                     {header === 'Статус' ? (
