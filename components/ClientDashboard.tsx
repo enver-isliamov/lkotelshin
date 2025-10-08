@@ -13,7 +13,7 @@ interface ClientDashboardProps {
   onBack?: () => void;
 }
 
-type Tab = 'current' | 'history';
+type Tab = 'current' | 'archive';
 
 const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHistory, isDemo, onBack, visibleFields, isLoading }) => {
   const [activeTab, setActiveTab] = useState<Tab>('current');
@@ -93,14 +93,14 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
 
       <div className="grid grid-cols-2 gap-2 p-1 bg-tg-secondary-bg rounded-lg shadow-inner">
         <TabButton tab="current" label="Текущий заказ" />
-        <TabButton tab="history" label="История заказов" />
+        <TabButton tab="archive" label="Архив" />
       </div>
 
       <main>
         <div style={{ display: activeTab === 'current' ? 'block' : 'none' }}>
             <InfoCard clientData={clientData} visibleFields={visibleFields} isLoading={isLoading} />
         </div>
-        <div style={{ display: activeTab === 'history' ? 'block' : 'none' }}>
+        <div style={{ display: activeTab === 'archive' ? 'block' : 'none' }}>
             <HistoryTable history={orderHistory} isLoading={isLoading} />
         </div>
       </main>
