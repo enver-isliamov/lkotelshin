@@ -7,6 +7,7 @@ import ClientDashboard from './components/ClientDashboard';
 import AdminSettings from './components/AdminSettings';
 import Loader from './components/Loader';
 import NewUserForm from './components/NewUserForm';
+import ErrorMessage from './components/ErrorMessage';
 
 // Add Telegram Web App types to the global window object
 declare global {
@@ -216,14 +217,7 @@ const App: React.FC = () => {
   }
 
   if (authStatus === 'error') {
-     return (
-        <div className="flex items-center justify-center h-screen p-4 text-center">
-            <div className="bg-tg-secondary-bg p-6 rounded-lg shadow-xl">
-                <h2 className="text-xl font-bold text-red-500 mb-2">Ошибка аутентификации</h2>
-                <p className="text-tg-hint">{authErrorMessage}</p>
-            </div>
-        </div>
-    );
+     return <ErrorMessage type="auth" message={authErrorMessage} />;
   }
 
   if (isNewUser && userId && !isAdmin) {
@@ -235,15 +229,10 @@ const App: React.FC = () => {
   }
   
   if (error && !isAdmin) {
-     return (
-      <div className="flex items-center justify-center h-screen p-4 text-center">
-        <div className="bg-tg-secondary-bg p-6 rounded-lg shadow-xl">
-          <h2 className="text-xl font-bold text-red-500 mb-2">Ошибка</h2>
-          <p className="text-tg-hint">{error}</p>
-        </div>
-      </div>
-    );
+    const isConfigError = error.startsWith("Пожалуйста, настройте URL-адрес Google Apps Script");
+    return <ErrorMessage type={isConfigError ? 'config' : 'data'} message={error} />;
   }
+
 
   return (
     <div className="min-h-screen p-4">
