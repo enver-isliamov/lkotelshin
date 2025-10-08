@@ -79,7 +79,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
            {isLoading ? (
             <div className="mt-1 h-7 w-48 mx-auto bg-gray-300 dark:bg-gray-700 rounded-md animate-pulse"></div>
           ) : clientData ? (
-            <p className="text-tg-hint text-lg">{onBack ? clientData['Имя клиента'] : `Здравствуйте, ${clientData['Имя клиента']}!`}</p>
+            <p className="text-tg-hint text-lg">{onBack ? clientData['Имя клиента'] : clientData['Имя клиента']}</p>
           ) : null}
 
           {!isLoading && clientData && clientData['Статус сделки'] === 'Ожидает обработки' && (
