@@ -68,11 +68,21 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   if (!clientData) {
     return null; // Should be handled by parent component
   }
+  
+  const visibleSet = new Set(visibleFields);
+  const isFieldVisible = (field: string) => visibleSet.has(field);
+
+  // Section Visibility Logic
+  const isMainInfoVisible = !!clientData['Заказ - QR'] || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков');
+  const isTimingVisible = (isFieldVisible('Начало') && isFieldVisible('Окончание')) || isFieldVisible('Напомнить');
+  const isFinanceVisible = isFieldVisible('Общая сумма') || isFieldVisible('Долг');
+  const isLocationVisible = isFieldVisible('Склад хранения') || isFieldVisible('Ячейка');
+
 
   const InfoItem: React.FC<{ label: string; value?: string | null; isEmphasized?: boolean }> = ({ label, value, isEmphasized = false }) => {
     if (!value) return null;
     // Always show "Заказ - QR", but respect visibility settings for other fields
-    if (label !== 'Заказ - QR' && !visibleFields.includes(label)) return null;
+    if (label !== 'Заказ - QR' && !isFieldVisible(label)) return null;
 
     return (
       <div className={isEmphasized ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-3 rounded-lg border border-tg-hint/10" : ""}>
@@ -83,7 +93,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   };
 
   const FinancialItem: React.FC<{ label: string; value?: string | null; isDebt?: boolean }> = ({ label, value, isDebt = false }) => {
-      if (!value || !visibleFields.includes(label)) return null;
+      if (!value || !isFieldVisible(label)) return null;
       
       const isValuePositive = parseFloat(value.replace(/\s/g, '')) > 0;
       const valueClass = isDebt && isValuePositive ? "text-red-500 font-bold" : "text-tg-text";
@@ -97,7 +107,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   }
 
   const ProgressBar: React.FC<{ start?: string; end?: string }> = ({ start, end }) => {
-    if (!start || !end || !visibleFields.includes('Начало') || !visibleFields.includes('Окончание')) return null;
+    if (!start || !end || !isFieldVisible('Начало') || !isFieldVisible('Окончание')) return null;
 
     const startDate = parseDate(start);
     const endDate = parseDate(end);
@@ -129,33 +139,40 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
       <h2 className="text-2xl font-semibold mb-6 border-b border-tg-hint/20 pb-3">Детали заказа</h2>
       <div className="space-y-5">
 
-        <Section title="Основная информация" icon={<CarIcon />}>
-          <InfoItem label="Заказ - QR" value={clientData['Заказ - QR']} isEmphasized />
-          <InfoItem label="Номер Авто" value={clientData['Номер Авто']} />
-          <div className="grid grid-cols-2 gap-4">
-            <InfoItem label="Кол-во шин" value={clientData['Кол-во шин']} />
-            <InfoItem label="Наличие дисков" value={clientData['Наличие дисков']} />
-          </div>
-        </Section>
+        {isMainInfoVisible && (
+            <Section title="Основная информация" icon={<CarIcon />}>
+                <InfoItem label="Заказ - QR" value={clientData['Заказ - QR']} isEmphasized />
+                <div className="grid grid-cols-2 gap-4">
+                    <InfoItem label="Кол-во шин" value={clientData['Кол-во шин']} />
+                    <InfoItem label="Наличие дисков" value={clientData['Наличие дисков']} />
+                </div>
+            </Section>
+        )}
         
-        <Section title="Сроки хранения" icon={<CalendarIcon />}>
-           <ProgressBar start={clientData['Начало']} end={clientData['Окончание']} />
-           <InfoItem label="Напомнить" value={clientData['Напомнить']} />
-        </Section>
+        {isTimingVisible && (
+            <Section title="Сроки хранения" icon={<CalendarIcon />}>
+                <ProgressBar start={clientData['Начало']} end={clientData['Окончание']} />
+                <InfoItem label="Напомнить" value={clientData['Напомнить']} />
+            </Section>
+        )}
 
-        <Section title="Финансы" icon={<WalletIcon />}>
-           <div className="grid grid-cols-2 gap-4">
-            <InfoItem label="Общая сумма" value={clientData['Общая сумма']} />
-            <FinancialItem label="Долг" value={clientData['Долг']} isDebt />
-           </div>
-        </Section>
+        {isFinanceVisible && (
+            <Section title="Финансы" icon={<WalletIcon />}>
+                <div className="grid grid-cols-2 gap-4">
+                    <InfoItem label="Общая сумма" value={clientData['Общая сумма']} />
+                    <FinancialItem label="Долг" value={clientData['Долг']} isDebt />
+                </div>
+            </Section>
+        )}
 
-        <Section title="Место хранения" icon={<LocationIcon />}>
-          <div className="grid grid-cols-2 gap-4">
-            <InfoItem label="Склад хранения" value={clientData['Склад хранения']} />
-            <InfoItem label="Ячейка" value={clientData['Ячейка']} />
-          </div>
-        </Section>
+        {isLocationVisible && (
+            <Section title="Место хранения" icon={<LocationIcon />}>
+                <div className="grid grid-cols-2 gap-4">
+                    <InfoItem label="Склад хранения" value={clientData['Склад хранения']} />
+                    <InfoItem label="Ячейка" value={clientData['Ячейка']} />
+                </div>
+            </Section>
+        )}
         
       </div>
     </div>
