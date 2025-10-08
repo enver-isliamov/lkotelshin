@@ -79,7 +79,8 @@ function doGet(e) {
       return createJsonResponse([]);
     }
 
-    const headers = values.shift(); 
+    const headers = values.shift();
+    const chatIdColumnIndex = headers.indexOf('Chat ID');
     
     const data = values.map((row) => {
       const obj = {};
@@ -91,6 +92,20 @@ function doGet(e) {
       return obj;
     });
 
+    const chatId = e.parameter.chatId;
+    if (chatId && chatIdColumnIndex !== -1) {
+      const filteredData = data.filter(row => row['Chat ID'] === chatId);
+      
+      // For WebBase, we expect a single client, so return the first match or null.
+      if (sheetName === 'WebBase') {
+        return createJsonResponse(filteredData.length > 0 ? filteredData[0] : null);
+      }
+      
+      // For other sheets like Archive, return all matching entries as an array.
+      return createJsonResponse(filteredData);
+    }
+
+    // If no chatId is provided, return all data from the sheet.
     return createJsonResponse(data);
 
   } catch (error) {
