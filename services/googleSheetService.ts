@@ -19,16 +19,16 @@ async function handleApiResponse<T>(promise: Promise<Response>, context: string)
       throw new Error(data.error);
     }
 
-    // CORE FIX: Ensure the result is always an array to prevent crashes.
+    // CRITICAL FIX: The API should ALWAYS return an array. If it returns a single
+    // object or something else, it's a sign of a server-side or deployment error.
+    // Instead of trying to guess and fix the data (which hid the root cause),
+    // we now throw a clear error so the user knows exactly what's wrong.
     if (Array.isArray(data)) {
       return data;
     }
-    // If the API returned a single object for a single result, wrap it in an array.
-    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
-      return [data];
-    }
-    // Default to an empty array for any other case (null, empty object from API, etc.)
-    return [];
+
+    console.error(`API returned unexpected non-array data for "${context}":`, data);
+    throw new Error(`API вернуло некорректные данные. Ожидался массив, но был получен другой тип. Это может быть проблемой с развертыванием скрипта. Пожалуйста, переопубликуйте скрипт с доступом "Все".`);
 
   } catch (error) {
     console.error(`Ошибка во время "${context}":`, error);
