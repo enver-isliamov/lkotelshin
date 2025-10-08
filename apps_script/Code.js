@@ -18,17 +18,54 @@ function createJsonResponse(data) {
     .setMimeType(ContentService.MimeType.JSON);
 }
 
+/**
+ * Reads the 'Config' sheet and returns settings as a key-value object.
+ * @param {GoogleAppsScript.Spreadsheet.Spreadsheet} ss - The spreadsheet instance.
+ */
+function getConfig(ss) {
+  const configSheet = ss.getSheetByName('Config');
+  if (!configSheet) {
+    // If no config sheet, return empty object so the app can use defaults.
+    return {}; 
+  }
+  const range = configSheet.getDataRange();
+  const values = range.getValues();
+  
+  const config = {};
+  // Start from row 1 to skip headers
+  for (let i = 1; i < values.length; i++) {
+    const row = values[i];
+    const key = row[0];
+    const value = row[1];
+    if (key) {
+      try {
+        // Try to parse value as JSON (for arrays, etc.)
+        config[key] = JSON.parse(value);
+      } catch (e) {
+        // If not JSON, use as plain string
+        config[key] = value;
+      }
+    }
+  }
+  return config;
+}
+
 
 /**
  * Handles HTTP GET requests to the web app.
  * @param {Object} e - The event parameter containing request details.
- * e.g. e.parameter.sheet will contain the name of the sheet to fetch.
  */
 function doGet(e) {
-  const sheetName = e.parameter.sheet || 'WebBase';
-  
   try {
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+
+    // Handle config requests
+    if (e.parameter.action === 'getConfig') {
+      const config = getConfig(ss);
+      return createJsonResponse(config);
+    }
+
+    const sheetName = e.parameter.sheet || 'WebBase';
     const sheet = ss.getSheetByName(sheetName);
 
     if (!sheet) {
@@ -91,7 +128,6 @@ function doPost(e) {
         return createJsonResponse({ error: 'Не найдены обязательные колонки "Chat ID" или "Телефон" в листе "WebBase".' });
       }
       
-      // Create a new row array filled with empty strings to ensure correct length
       const newRow = Array(headers.length).fill('');
       newRow[chatIdColIndex] = chatId;
       newRow[phoneColIndex] = phone;
@@ -99,6 +135,36 @@ function doPost(e) {
       sheet.appendRow(newRow);
       
       return createJsonResponse({ result: 'success', message: 'Пользователь успешно добавлен.' });
+    }
+
+    if (requestData.action === 'updateConfig') {
+      const { key, value } = requestData;
+      if (!key || value === undefined) {
+        return createJsonResponse({ error: 'Требуется "key" и "value" для обновления конфигурации.' });
+      }
+
+      const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+      let sheet = ss.getSheetByName('Config');
+      if (!sheet) {
+        sheet = ss.insertSheet('Config');
+        sheet.appendRow(['Key', 'Value']); // Add headers
+      }
+
+      const data = sheet.getDataRange().getValues();
+      let keyFound = false;
+      for (let i = 0; i < data.length; i++) {
+        if (data[i][0] === key) {
+          sheet.getRange(i + 1, 2).setValue(JSON.stringify(value, null, 2));
+          keyFound = true;
+          break;
+        }
+      }
+
+      if (!keyFound) {
+        sheet.appendRow([key, JSON.stringify(value, null, 2)]);
+      }
+      
+      return createJsonResponse({ result: 'success', message: 'Конфигурация обновлена.' });
     }
     
     return createJsonResponse({ error: 'Неверное действие.' });
