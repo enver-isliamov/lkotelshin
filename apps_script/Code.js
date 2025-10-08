@@ -1,4 +1,3 @@
-
 // This code should be pasted into the Google Apps Script editor.
 // See instructions.md for a step-by-step guide.
 
@@ -95,13 +94,8 @@ function doGet(e) {
     const chatId = e.parameter.chatId;
     if (chatId && chatIdColumnIndex !== -1) {
       const filteredData = data.filter(row => row['Chat ID'] === chatId);
-      
-      // For WebBase, we expect a single client, so return the first match or null.
-      if (sheetName === 'WebBase') {
-        return createJsonResponse(filteredData.length > 0 ? filteredData[0] : null);
-      }
-      
-      // For other sheets like Archive, return all matching entries as an array.
+      // ALWAYS return an array. The frontend is designed to handle an array for all cases.
+      // This simplifies the API, makes it consistent, and fixes the core bug.
       return createJsonResponse(filteredData);
     }
 
@@ -143,9 +137,20 @@ function doPost(e) {
         return createJsonResponse({ error: 'Не найдены обязательные колонки "Chat ID" или "Телефон" в листе "WebBase".' });
       }
       
+      // Check if user already exists
+      const data = sheet.getDataRange().getValues();
+      const existingUser = data.find(row => row[chatIdColIndex] == chatId);
+      if(existingUser) {
+        // You might want to update the existing user or return an error
+        // For now, we'll just prevent duplicates.
+        return createJsonResponse({ result: 'exists', message: 'Пользователь с таким Chat ID уже существует.' });
+      }
+
       const newRow = Array(headers.length).fill('');
       newRow[chatIdColIndex] = chatId;
       newRow[phoneColIndex] = phone;
+      newRow[headers.indexOf('Имя клиента')] = 'Новый клиент';
+      newRow[headers.indexOf('Статус сделки')] = 'Ожидает обработки';
       
       sheet.appendRow(newRow);
       
