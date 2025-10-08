@@ -40,6 +40,18 @@ export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive'): Pr
 
 
 /**
+ * Fetches data from a sheet for a specific Chat ID.
+ * @param sheetName The name of the sheet to fetch from.
+ * @param chatId The Chat ID to filter by.
+ * @returns A promise that resolves to an array of records matching the Chat ID.
+ */
+export async function fetchSheetDataByChatId<T>(sheetName: 'WebBase' | 'Archive', chatId: string): Promise<T[]> {
+  const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&chatId=${chatId}&_=${new Date().getTime()}`;
+  return handleApiResponse<T[]>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение данных по chatId с листа ${sheetName}`);
+}
+
+
+/**
  * Fetches the application configuration from the 'Config' sheet.
  * @returns A promise that resolves to a configuration object.
  */
