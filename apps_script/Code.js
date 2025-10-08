@@ -86,7 +86,8 @@ function doGet(e) {
       const obj = {};
       headers.forEach((header, index) => {
         if (header) {
-          obj[header] = row[index];
+          // CRITICAL FIX: Trim every cell value to handle data entry errors (extra spaces).
+          obj[header] = row[index] ? row[index].trim() : '';
         }
       });
       return obj;
@@ -94,9 +95,9 @@ function doGet(e) {
 
     const chatId = e.parameter.chatId;
     if (chatId && chatIdColumnIndex !== -1) {
-      const filteredData = data.filter(row => row['Chat ID'] === chatId);
+       // Use loose equality (==) for robustness, e.g., to match "123" with 123.
+      const filteredData = data.filter(row => row['Chat ID'] == chatId);
       // ALWAYS return an array. The frontend is designed to handle an array for all cases.
-      // This simplifies the API, makes it consistent, and fixes the core bug.
       return createJsonResponse(filteredData);
     }
 
