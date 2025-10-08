@@ -5,9 +5,10 @@ import { VISIBLE_CLIENT_FIELDS } from '../constants';
 interface AdminSettingsProps {
   allClients: ClientData[];
   webBaseColumns: string[];
+  onClientSelect: (client: ClientData) => void;
 }
 
-const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns }) => {
+const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns, onClientSelect }) => {
   const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set(VISIBLE_CLIENT_FIELDS));
   const [generatedConfig, setGeneratedConfig] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState('');
@@ -81,27 +82,25 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
         <div className="max-h-[60vh] overflow-y-auto">
             {Object.keys(groupedAndFilteredClients).sort().map(letter => (
                 <div key={letter}>
-                    <div className="sticky top-0 bg-gray-200 dark:bg-gray-800 px-4 py-1.5 border-b border-t border-gray-300 dark:border-gray-700 z-10">
-                        <h3 className="font-bold text-tg-text">{letter}</h3>
+                    <div className="sticky top-0 bg-tg-secondary-bg/95 dark:bg-gray-800/95 backdrop-blur-sm px-4 sm:px-6 py-1 border-b border-t border-tg-hint/20 z-10">
+                        <h3 className="text-sm font-bold uppercase text-tg-hint tracking-wider">{letter}</h3>
                     </div>
                     <ul className="divide-y divide-tg-hint/20">
                         {groupedAndFilteredClients[letter].map(client => (
                             <li key={client['Chat ID']}>
-                                <a
-                                    href={`/?clientId=${client['Chat ID']}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                <button
+                                    onClick={() => onClientSelect(client)}
                                     title={`Открыть кабинет клиента: ${client['Имя клиента']}`}
-                                    className="flex w-full items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                                    className="flex w-full items-center gap-4 px-4 sm:px-6 py-3 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors text-left"
                                 >
-                                    <div className="flex-shrink-0 h-11 w-11 rounded-full bg-tg-link text-white flex items-center justify-center font-bold text-lg">
+                                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-tg-link text-white flex items-center justify-center font-bold text-base">
                                         {getInitials(client['Имя клиента'])}
                                     </div>
                                     <div>
                                         <p className="font-semibold text-tg-text">{client['Имя клиента'] || 'Имя не указано'}</p>
                                         <p className="text-sm text-tg-hint">{client['Телефон'] || `ID: ${client['Chat ID']}`}</p>
                                     </div>
-                                </a>
+                                </button>
                             </li>
                         ))}
                     </ul>
