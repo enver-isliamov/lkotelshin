@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { ClientData } from '../types';
-import { VISIBLE_CLIENT_FIELDS } from '../constants';
 
 interface InfoCardProps {
   clientData: ClientData;
+  visibleFields: string[];
 }
 
 // Utility to parse Russian date format DD.MM.YYYY
@@ -29,59 +29,61 @@ const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.
   </div>
 );
 
-const InfoItem: React.FC<{ label: string; value?: string | null }> = ({ label, value }) => {
-  if (!value || !VISIBLE_CLIENT_FIELDS.includes(label)) return null;
-  return (
-    <div>
-      <p className="text-sm text-tg-hint">{label}</p>
-      <p className="text-md font-medium text-tg-text">{value}</p>
-    </div>
-  );
-};
 
-const FinancialItem: React.FC<{ label: string; value?: string | null; isDebt?: boolean }> = ({ label, value, isDebt = false }) => {
-    if (!value || !VISIBLE_CLIENT_FIELDS.includes(label)) return null;
+const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields }) => {
+
+  const InfoItem: React.FC<{ label: string; value?: string | null }> = ({ label, value }) => {
+    if (!value || !visibleFields.includes(label)) return null;
+    return (
+      <div>
+        <p className="text-sm text-tg-hint">{label}</p>
+        <p className="text-md font-medium text-tg-text">{value}</p>
+      </div>
+    );
+  };
+
+  const FinancialItem: React.FC<{ label: string; value?: string | null; isDebt?: boolean }> = ({ label, value, isDebt = false }) => {
+      if (!value || !visibleFields.includes(label)) return null;
+      
+      const isValuePositive = parseFloat(value.replace(/\s/g, '')) > 0;
+      const valueClass = isDebt && isValuePositive ? "text-red-500 font-bold" : "text-tg-text";
+
+      return (
+          <div>
+              <p className="text-sm text-tg-hint">{label}</p>
+              <p className={`text-md font-medium ${valueClass}`}>{value}</p>
+          </div>
+      )
+  }
+
+  const ProgressBar: React.FC<{ start?: string; end?: string }> = ({ start, end }) => {
+    if (!start || !end || !visibleFields.includes('Начало') || !visibleFields.includes('Окончание')) return null;
+
+    const startDate = parseDate(start);
+    const endDate = parseDate(end);
+    const today = new Date();
     
-    const isValuePositive = parseFloat(value.replace(/\s/g, '')) > 0;
-    const valueClass = isDebt && isValuePositive ? "text-red-500 font-bold" : "text-tg-text";
+    if (!startDate || !endDate || endDate < startDate) return null;
+
+    const totalDuration = endDate.getTime() - startDate.getTime();
+    const elapsedDuration = today.getTime() - startDate.getTime();
+    
+    let progress = (elapsedDuration / totalDuration) * 100;
+    progress = Math.max(0, Math.min(100, progress)); // Clamp between 0 and 100
 
     return (
-        <div>
-            <p className="text-sm text-tg-hint">{label}</p>
-            <p className={`text-md font-medium ${valueClass}`}>{value}</p>
+      <div>
+        <div className="flex justify-between text-sm text-tg-hint mb-1">
+          <span>{start}</span>
+          <span>{end}</span>
         </div>
-    )
-}
-
-const ProgressBar: React.FC<{ start?: string; end?: string }> = ({ start, end }) => {
-  if (!start || !end || !VISIBLE_CLIENT_FIELDS.includes('Начало') || !VISIBLE_CLIENT_FIELDS.includes('Окончание')) return null;
-
-  const startDate = parseDate(start);
-  const endDate = parseDate(end);
-  const today = new Date();
-  
-  if (!startDate || !endDate || endDate < startDate) return null;
-
-  const totalDuration = endDate.getTime() - startDate.getTime();
-  const elapsedDuration = today.getTime() - startDate.getTime();
-  
-  let progress = (elapsedDuration / totalDuration) * 100;
-  progress = Math.max(0, Math.min(100, progress)); // Clamp between 0 and 100
-
-  return (
-    <div>
-      <div className="flex justify-between text-sm text-tg-hint mb-1">
-        <span>{start}</span>
-        <span>{end}</span>
+        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+          <div className="bg-tg-link h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+        </div>
       </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-        <div className="bg-tg-link h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
-      </div>
-    </div>
-  );
-};
-
-const InfoCard: React.FC<InfoCardProps> = ({ clientData }) => {
+    );
+  };
+  
   return (
     <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6">
       <h2 className="text-2xl font-semibold mb-6 border-b border-tg-hint pb-3">Детали заказа</h2>
