@@ -185,17 +185,20 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
       <div className="bg-tg-secondary-bg p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold mb-4 border-b border-tg-hint/20 pb-2">Настройка видимых полей для клиента</h2>
         <p className="text-tg-hint mb-6">Отметьте поля, которые будут видны клиентам. Настройки применяются для всех сразу после сохранения.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="flex flex-wrap gap-3">
           {webBaseColumns.map(field => (
-            <label key={field} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-tg-bg transition-colors">
-              <input
-                type="checkbox"
-                checked={visibleFields.has(field)}
-                onChange={() => handleToggle(field)}
-                className="h-5 w-5 rounded border-gray-300 text-tg-link focus:ring-tg-link"
-              />
-              <span className="text-tg-text">{field}</span>
-            </label>
+            <button
+                key={field}
+                type="button"
+                onClick={() => handleToggle(field)}
+                className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ease-in-out transform hover:scale-105 ${
+                    visibleFields.has(field)
+                        ? 'bg-tg-link text-white shadow-md'
+                        : 'bg-tg-bg text-tg-text ring-1 ring-inset ring-tg-hint/30 hover:bg-tg-hint/10'
+                }`}
+              >
+              {field}
+            </button>
           ))}
         </div>
         <button 
