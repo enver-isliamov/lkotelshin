@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchAllSheetData, addNewUser, fetchConfig, updateConfig } from './services/googleSheetService';
+import { fetchAllSheetData, addNewUser, fetchConfig, updateConfig, fetchSheetDataByChatId } from './services/googleSheetService';
 import { ClientData, OrderHistory } from './types';
 import { ADMIN_CHAT_ID, APPS_SCRIPT_URL, WEB_BASE_COLUMNS, DEMO_CHAT_ID, DEFAULT_VISIBLE_CLIENT_FIELDS } from './constants';
 import ClientDashboard from './components/ClientDashboard';
@@ -148,24 +148,26 @@ const App: React.FC = () => {
         
         setIsDemoMode(false);
 
-        // Fetch all data once and then filter on the client side
-        const [webBaseData, archiveData] = await Promise.all([
-            fetchAllSheetData<ClientData>('WebBase'),
-            fetchAllSheetData<OrderHistory>('Archive')
-        ]);
-
         if (isAdmin) {
+            // Admin fetches all data
+            const [webBaseData, archiveData] = await Promise.all([
+                fetchAllSheetData<ClientData>('WebBase'),
+                fetchAllSheetData<OrderHistory>('Archive')
+            ]);
             setAllClients(webBaseData);
             setAllHistory(archiveData);
             return;
         }
         
-        const currentClient = webBaseData.find(c => c['Chat ID'] === userId);
-        
-        if (currentClient) {
-            setClientData(currentClient);
-            const clientHistory = archiveData.filter(h => h['Chat ID'] === userId);
-            setOrderHistory(clientHistory);
+        // Regular user fetches only their specific data
+        const [clientResult, historyResult] = await Promise.all([
+            fetchSheetDataByChatId<ClientData>('WebBase', userId),
+            fetchSheetDataByChatId<OrderHistory>('Archive', userId)
+        ]);
+
+        if (clientResult && clientResult.length > 0) {
+            setClientData(clientResult[0]);
+            setOrderHistory(historyResult);
             setIsNewUser(false);
         } else {
             setIsNewUser(true);
