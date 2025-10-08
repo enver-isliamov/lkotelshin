@@ -81,31 +81,26 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
         <div className="max-h-[60vh] overflow-y-auto">
             {Object.keys(groupedAndFilteredClients).sort().map(letter => (
                 <div key={letter}>
-                    <div className="sticky top-0 bg-gray-100 dark:bg-gray-800 px-4 py-1 border-b border-t border-gray-200 dark:border-gray-700 z-10">
-                        <h3 className="text-sm font-bold uppercase text-tg-link">{letter}</h3>
+                    <div className="sticky top-0 bg-gray-200 dark:bg-gray-800 px-4 py-1.5 border-b border-t border-gray-300 dark:border-gray-700 z-10">
+                        <h3 className="font-bold text-tg-text">{letter}</h3>
                     </div>
                     <ul className="divide-y divide-tg-hint/20">
                         {groupedAndFilteredClients[letter].map(client => (
-                            <li key={client['Chat ID']} className="px-4 py-3 flex justify-between items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                <div className="flex items-center gap-4">
-                                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-tg-link text-white flex items-center justify-center font-bold">
+                            <li key={client['Chat ID']}>
+                                <a
+                                    href={`/?clientId=${client['Chat ID']}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title={`Открыть кабинет клиента: ${client['Имя клиента']}`}
+                                    className="flex w-full items-center gap-4 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                                >
+                                    <div className="flex-shrink-0 h-11 w-11 rounded-full bg-tg-link text-white flex items-center justify-center font-bold text-lg">
                                         {getInitials(client['Имя клиента'])}
                                     </div>
                                     <div>
                                         <p className="font-semibold text-tg-text">{client['Имя клиента'] || 'Имя не указано'}</p>
                                         <p className="text-sm text-tg-hint">{client['Телефон'] || `ID: ${client['Chat ID']}`}</p>
                                     </div>
-                                </div>
-                                <a
-                                    href={`/?clientId=${client['Chat ID']}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    title="Открыть кабинет клиента"
-                                    className="p-2 rounded-full text-tg-hint hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-tg-link transition-colors"
-                                >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                                    </svg>
                                 </a>
                             </li>
                         ))}
