@@ -35,7 +35,7 @@ const InfoCardSkeleton: React.FC = () => (
     <div className="h-7 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md mb-6 border-b border-tg-hint/20 pb-3"></div>
     <div className="space-y-5">
       {/* Skeleton for each section */}
-      {[...Array(4)].map((_, i) => (
+      {[...Array(5)].map((_, i) => (
         <div key={i} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
           <div className="flex items-center mb-3">
             <div className="h-6 w-6 mr-3 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
@@ -59,6 +59,30 @@ const InfoCardSkeleton: React.FC = () => (
   </div>
 );
 
+const getStatusStyling = (status: string) => {
+    switch (status?.toLowerCase()) {
+        case 'активен':
+            return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        case 'завершен':
+            return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
+        case 'просрочен':
+            return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
+        case 'ожидает обработки':
+            return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+        default:
+            return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
+    }
+};
+
+const StatusBadge: React.FC<{ status?: string | null }> = ({ status }) => {
+    if (!status) return null;
+    return (
+        <span className={`px-2.5 py-1 text-sm font-medium rounded-full ${getStatusStyling(status)}`}>
+            {status}
+        </span>
+    );
+};
+
 
 const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoading }) => {
   if (isLoading) {
@@ -73,10 +97,11 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   const isFieldVisible = (field: string) => visibleSet.has(field);
 
   // Section Visibility Logic
-  const isMainInfoVisible = !!clientData['Заказ - QR'] || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков');
-  const isTimingVisible = (isFieldVisible('Начало') && isFieldVisible('Окончание')) || isFieldVisible('Напомнить');
-  const isFinanceVisible = isFieldVisible('Общая сумма') || isFieldVisible('Долг');
+  const isMainInfoVisible = isFieldVisible('Заказ - QR') || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков') || isFieldVisible('DOT CODE');
+  const isTimingVisible = (isFieldVisible('Начало') && isFieldVisible('Окончание')) || isFieldVisible('Напомнить') || isFieldVisible('Срок');
+  const isFinanceVisible = isFieldVisible('Общая сумма') || isFieldVisible('Долг') || isFieldVisible('Цена за месяц');
   const isLocationVisible = isFieldVisible('Склад хранения') || isFieldVisible('Ячейка');
+  const isDealDetailsVisible = isFieldVisible('Договор') || isFieldVisible('Статус сделки') || isFieldVisible('Источник трафика');
 
 
   const InfoItem: React.FC<{ label: string; value?: string | null; isEmphasized?: boolean }> = ({ label, value, isEmphasized = false }) => {
@@ -88,6 +113,19 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
       <div className={isEmphasized ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-3 rounded-lg border border-tg-hint/10" : ""}>
         <p className="text-sm text-tg-hint">{label}</p>
         <p className={`text-md font-medium ${isEmphasized ? 'text-lg text-tg-link' : 'text-tg-text'}`}>{value}</p>
+      </div>
+    );
+  };
+  
+  const StatusItem: React.FC<{ label: string; value?: string | null; }> = ({ label, value }) => {
+    if (!value || !isFieldVisible(label)) return null;
+
+    return (
+      <div>
+        <p className="text-sm text-tg-hint">{label}</p>
+        <div className="mt-1">
+          <StatusBadge status={value} />
+        </div>
       </div>
     );
   };
@@ -142,9 +180,10 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
         {isMainInfoVisible && (
             <Section title="Основная информация" icon={<CarIcon />}>
                 <InfoItem label="Заказ - QR" value={clientData['Заказ - QR']} isEmphasized />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-2 gap-4 pt-2">
                     <InfoItem label="Кол-во шин" value={clientData['Кол-во шин']} />
                     <InfoItem label="Наличие дисков" value={clientData['Наличие дисков']} />
+                    <InfoItem label="DOT CODE" value={clientData['DOT CODE']} />
                 </div>
             </Section>
         )}
@@ -152,7 +191,10 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
         {isTimingVisible && (
             <Section title="Сроки хранения" icon={<CalendarIcon />}>
                 <ProgressBar start={clientData['Начало']} end={clientData['Окончание']} />
-                <InfoItem label="Напомнить" value={clientData['Напомнить']} />
+                <div className="grid grid-cols-2 gap-4 pt-2">
+                    <InfoItem label="Срок" value={clientData['Срок']} />
+                    <InfoItem label="Напомнить" value={clientData['Напомнить']} />
+                </div>
             </Section>
         )}
 
@@ -160,6 +202,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
             <Section title="Финансы" icon={<WalletIcon />}>
                 <div className="grid grid-cols-2 gap-4">
                     <InfoItem label="Общая сумма" value={clientData['Общая сумма']} />
+                    <InfoItem label="Цена за месяц" value={clientData['Цена за месяц']} />
                     <FinancialItem label="Долг" value={clientData['Долг']} isDebt />
                 </div>
             </Section>
@@ -171,6 +214,16 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
                     <InfoItem label="Склад хранения" value={clientData['Склад хранения']} />
                     <InfoItem label="Ячейка" value={clientData['Ячейка']} />
                 </div>
+            </Section>
+        )}
+
+        {isDealDetailsVisible && (
+            <Section title="Детали сделки" icon={<DocumentIcon />}>
+                <div className="grid grid-cols-2 gap-4">
+                    <InfoItem label="Договор" value={clientData['Договор']} />
+                    <InfoItem label="Источник трафика" value={clientData['Источник трафика']} />
+                </div>
+                <StatusItem label="Статус сделки" value={clientData['Статус сделки']} />
             </Section>
         )}
         
@@ -201,6 +254,11 @@ const LocationIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
+);
+const DocumentIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
 );
 
 export default InfoCard;
