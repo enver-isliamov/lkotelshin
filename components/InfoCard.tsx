@@ -69,12 +69,12 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
     return null; // Should be handled by parent component
   }
 
-  const InfoItem: React.FC<{ label: string; value?: string | null }> = ({ label, value }) => {
+  const InfoItem: React.FC<{ label: string; value?: string | null; isEmphasized?: boolean }> = ({ label, value, isEmphasized = false }) => {
     if (!value || !visibleFields.includes(label)) return null;
     return (
-      <div>
+      <div className={isEmphasized ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-3 rounded-lg border border-tg-hint/10" : ""}>
         <p className="text-sm text-tg-hint">{label}</p>
-        <p className="text-md font-medium text-tg-text">{value}</p>
+        <p className={`text-md font-medium ${isEmphasized ? 'text-lg text-tg-link' : 'text-tg-text'}`}>{value}</p>
       </div>
     );
   };
@@ -127,6 +127,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
       <div className="space-y-5">
 
         <Section title="Основная информация" icon={<CarIcon />}>
+          <InfoItem label="Заказ - QR" value={clientData['Заказ - QR']} isEmphasized />
           <InfoItem label="Номер Авто" value={clientData['Номер Авто']} />
           <div className="grid grid-cols-2 gap-4">
             <InfoItem label="Кол-во шин" value={clientData['Кол-во шин']} />
