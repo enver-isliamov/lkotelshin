@@ -70,7 +70,10 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   }
 
   const InfoItem: React.FC<{ label: string; value?: string | null; isEmphasized?: boolean }> = ({ label, value, isEmphasized = false }) => {
-    if (!value || !visibleFields.includes(label)) return null;
+    if (!value) return null;
+    // Always show "Заказ - QR", but respect visibility settings for other fields
+    if (label !== 'Заказ - QR' && !visibleFields.includes(label)) return null;
+
     return (
       <div className={isEmphasized ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-3 rounded-lg border border-tg-hint/10" : ""}>
         <p className="text-sm text-tg-hint">{label}</p>
