@@ -43,6 +43,63 @@ export async function fetchSheetData<T>(sheetName: 'WebBase' | 'Archive'): Promi
 }
 
 /**
+ * Fetches the application configuration from the 'Config' sheet.
+ * @returns A promise that resolves to a configuration object.
+ */
+export async function fetchConfig(): Promise<{ [key: string]: any }> {
+  if ((APPS_SCRIPT_URL as string) === 'ВАШ_URL_СКРИПТА' || !APPS_SCRIPT_URL) {
+    console.warn('URL-адрес Google Apps Script не настроен, используется конфигурация по умолчанию.');
+    return {};
+  }
+
+  const url = `${APPS_SCRIPT_URL}?action=getConfig&_=${new Date().getTime()}`;
+
+  try {
+    const response = await fetch(url, { method: 'GET', redirect: 'follow' });
+    if (!response.ok) return {};
+    const data = await response.json();
+    return data.error ? {} : data;
+  } catch (error) {
+    console.error('Не удалось загрузить конфигурацию:', error);
+    return {}; // Return empty object on error to allow fallback to defaults
+  }
+}
+
+/**
+ * Updates the application configuration in the 'Config' sheet.
+ * @param key The configuration key to update.
+ * @param value The new value for the key.
+ */
+export async function updateConfig(key: string, value: any): Promise<{result: string}> {
+  if ((APPS_SCRIPT_URL as string) === 'ВАШ_URL_СКРИПТА' || !APPS_SCRIPT_URL) {
+    throw new Error('URL-адрес Google Apps Script не настроен.');
+  }
+
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'updateConfig', key, value })
+    });
+    
+    if (!response.ok) throw new Error(`Ошибка сети: ${response.statusText}`);
+    
+    const result = await response.json();
+    if (result.error) throw new Error(result.error);
+    
+    return result;
+
+  } catch (error) {
+    console.error('Ошибка при обновлении конфигурации:', error);
+    if (error instanceof Error) {
+      throw new Error(`Не удалось сохранить настройки: ${error.message}`);
+    }
+    throw new Error('Не удалось сохранить настройки.');
+  }
+}
+
+/**
  * Adds a new user to the 'WebBase' sheet.
  * @param chatId The user's Telegram Chat ID.
  * @param phone The user's phone number.
