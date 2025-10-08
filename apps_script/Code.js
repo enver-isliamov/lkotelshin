@@ -10,7 +10,7 @@ const SPREADSHEET_ID = '1IBBn38ZD-TOgzO9VjYAyKz8mchg_RwWyD6kZ0Lu729A';
 
 // !!! ВАЖНО: Вставьте сюда токен вашего Telegram бота !!!
 // Вы можете получить его у @BotFather в Telegram.
-const BOT_TOKEN = 'ВАШ_ТЕЛЕГРАМ_БОТ_ТОКЕН';
+const BOT_TOKEN = '7736209408:AAEZUQ-t1PEo7P-Fxv5WgsJoP69DAbVAi5w';
 
 // !!! ВАЖНО: Вставьте сюда ваш Chat ID для получения уведомлений !!!
 // Вы можете узнать свой ID у бота @userinfobot в Telegram.
