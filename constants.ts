@@ -9,10 +9,10 @@
 export const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx9JVpaW5WyaawgUWFrVquTh4SG6yOWw5g9_f3YLlXf3Oq_dZvnjKblTqZsQBlkSe9rAg/exec'; // <-- ВСТАВЬТЕ СЮДА URL ВАШЕГО СКРИПТА
 
 // Chat ID администратора для доступа к панели настроек
-export const ADMIN_CHAT_ID = '123456789'; // <-- УКАЖИТЕ СВОЙ CHAT_ID АДМИНА
+export const ADMIN_CHAT_ID = '96609347'; // <-- УКАЖИТЕ СВОЙ CHAT_ID АДМИНА
 
 // ID для демонстрационного режима
-export const DEMO_CHAT_ID = 'demo_user';
+export const DEMO_CHAT_ID = 'demo';
 
 // Все возможные колонки из листа 'WebBase'
 export const WEB_BASE_COLUMNS: string[] = [
