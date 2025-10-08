@@ -204,6 +204,34 @@ const App: React.FC = () => {
       throw new Error("User ID is not available for submission.");
     }
     await addNewUser(userId, phone);
+    
+    // After successful submission, create a temporary client object to show the dashboard
+    const newClientRecord: ClientData = {
+        'Chat ID': userId,
+        'Телефон': phone,
+        'Имя клиента': 'Новый клиент',
+        'Статус сделки': 'Ожидает обработки',
+        'Номер Авто': '', 
+        'Заказ - QR': '', 
+        'Цена за месяц': '', 
+        'Кол-во шин': '', 
+        'Наличие дисков': '', 
+        'Начало': '', 
+        'Срок': '', 
+        'Напомнить': '', 
+        'Окончание': '', 
+        'Склад хранения': '', 
+        'Ячейка': '', 
+        'Общая сумма': '', 
+        'Долг': '', 
+        'Договор': '', 
+        'Адрес клиента': '', 
+        'Источник трафика': 'Новая заявка',
+        'DOT CODE': ''
+    };
+    setClientData(newClientRecord);
+    setOrderHistory([]);
+    setIsNewUser(false); // This will switch the view to ClientDashboard
   };
   
   const handleConfigSave = async (fields: string[]) => {
