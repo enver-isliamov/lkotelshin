@@ -7,6 +7,7 @@ interface ClientDashboardProps {
   clientData: ClientData | null;
   orderHistory: OrderHistory[];
   isDemo?: boolean;
+  onBack?: () => void;
 }
 
 type Tab = 'current' | 'history';
@@ -18,7 +19,7 @@ const TelegramIcon = () => (
 );
 
 
-const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHistory, isDemo }) => {
+const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHistory, isDemo, onBack }) => {
   const [activeTab, setActiveTab] = useState<Tab>('current');
 
   if (!clientData) {
@@ -55,20 +56,30 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
           <p><span className="font-bold">Демо-режим:</span> Вы просматриваете тестовые данные.</p>
         </div>
       )}
+      {onBack && (
+         <button onClick={onBack} className="flex items-center text-tg-link font-semibold transition-opacity hover:opacity-80">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
+            </svg>
+            Назад к списку
+        </button>
+      )}
       <header className="space-y-4">
         <div className="text-center">
-          <h1 className="text-3xl font-bold">Личный кабинет</h1>
-          <p className="text-tg-hint text-lg">Здравствуйте, {clientData['Имя клиента']}!</p>
+          <h1 className="text-3xl font-bold">{onBack ? 'Кабинет клиента' : 'Личный кабинет'}</h1>
+          <p className="text-tg-hint text-lg">{onBack ? clientData['Имя клиента'] : `Здравствуйте, ${clientData['Имя клиента']}!`}</p>
         </div>
-        <a 
-          href="https://t.me/EnrikeTomas" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="flex items-center justify-center w-full bg-tg-button text-tg-button-text font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity"
-        >
-          <TelegramIcon />
-          Связаться с менеджером
-        </a>
+        {!onBack && (
+            <a 
+            href="https://t.me/EnrikeTomas" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-full bg-tg-button text-tg-button-text font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity"
+            >
+            <TelegramIcon />
+            Связаться с менеджером
+            </a>
+        )}
       </header>
 
 
