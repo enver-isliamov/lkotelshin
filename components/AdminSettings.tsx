@@ -35,11 +35,18 @@ const PhoneIcon: React.FC = () => (
 );
 const ChatIcon: React.FC = () => (
      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM2 10a8 8 0 1116 0 8 8 0 01-16 0z" clipRule="evenodd" fillRule="evenodd" />
-        <path d="M5.5 10.5l2 2 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" transform="translate(1, -1)"/>
-         <path d="M14.5 9.5l-2-2-4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" transform="translate(-1, 1)"/>
+        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
      </svg>
 );
+
+const fieldGroups: Record<string, string[]> = {
+  "Контактная информация": ["Имя клиента", "Телефон", "Номер Авто", "Адрес клиента"],
+  "Детали заказа": ["Заказ - QR", "Кол-во шин", "Наличие дисков", "DOT CODE"],
+  "Сроки и даты": ["Начало", "Окончание", "Срок", "Напомнить"],
+  "Место хранения": ["Склад хранения", "Ячейка"],
+  "Финансы": ["Цена за месяц", "Общая сумма", "Долг"],
+  "Информация о сделке": ["Договор", "Статус сделки", "Источник трафика"],
+};
 
 
 const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns, onClientSelect, initialVisibleFields, onConfigSave, isLoading }) => {
@@ -81,6 +88,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
       newSet.add(field);
     }
     setVisibleFields(newSet);
+    setSaveStatus('idle'); // Reset save status on change
   };
   
   const handleSaveConfig = async () => {
@@ -142,11 +150,31 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
     </button>
   );
 
+  const FieldToggle: React.FC<{ field: string; isVisible: boolean; onToggle: (field: string) => void }> = ({ field, isVisible, onToggle }) => (
+    <div
+      onClick={() => onToggle(field)}
+      className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-tg-bg"
+      role="checkbox"
+      aria-checked={isVisible}
+      tabIndex={0}
+      onKeyDown={(e) => (e.key === ' ' || e.key === 'Enter') && onToggle(field)}
+    >
+      <div className={`w-5 h-5 rounded flex-shrink-0 border-2 ${isVisible ? 'bg-tg-link border-tg-link' : 'border-tg-hint/50 bg-tg-bg'} flex items-center justify-center transition-all`}>
+        {isVisible && (
+          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        )}
+      </div>
+      <span className="font-medium text-tg-text select-none">{field}</span>
+    </div>
+  );
+
   return (
     <div className="bg-gray-50 dark:bg-gray-800/20 p-2 sm:p-4 rounded-xl">
         <div className="w-full max-w-3xl mx-auto space-y-6">
           <header className="text-center pt-2">
-            <h2 className="text-2xl font-bold">Панель администратора</h2>
+            <h2 className="text-lg font-semibold">Панель администратора</h2>
             <p className="text-tg-hint mt-1">Всего клиентов в базе: {isLoading ? '...' : allClients.length}</p>
           </header>
           
@@ -160,7 +188,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
             <div style={{ display: activeTab === 'clients' ? 'block' : 'none' }}>
               <div className="bg-tg-secondary-bg rounded-lg shadow-lg overflow-hidden">
                 <div className="p-4 sm:p-6 border-b border-tg-hint/20">
-                    <h2 className="text-2xl font-semibold mb-4">Список клиентов</h2>
+                    <h2 className="text-xl font-semibold mb-4">Список клиентов</h2>
                     <div className="relative">
                         <input
                             type="text"
@@ -221,7 +249,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         onClick={(e) => e.stopPropagation()}
-                                                        title={`Написать в Telegram`}
+                                                        title={`Написать клиенту в Telegram`}
                                                         className="p-2 rounded-full hover:bg-tg-hint/10 hover:text-tg-link transition-colors"
                                                     >
                                                         <ChatIcon />
@@ -253,25 +281,32 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
 
             {/* Field Configuration Section */}
             <div style={{ display: activeTab === 'settings' ? 'block' : 'none' }}>
-              <div className="bg-tg-secondary-bg p-6 rounded-lg shadow-lg">
-                <h2 className="text-2xl font-semibold mb-4 border-b border-tg-hint/20 pb-2">Настройка видимых полей для клиента</h2>
-                <p className="text-tg-hint mb-6">Отметьте поля, которые будут видны клиентам. Настройки применяются для всех сразу после сохранения.</p>
-                <div className="flex flex-wrap gap-3">
-                  {webBaseColumns.map(field => (
-                    <button
-                        key={field}
-                        type="button"
-                        onClick={() => handleToggle(field)}
-                        className={`px-4 py-2 text-sm font-medium rounded-full transition-all duration-200 ease-in-out transform hover:scale-105 ${
-                            visibleFields.has(field)
-                                ? 'bg-tg-link text-white shadow-md'
-                                : 'bg-tg-bg text-tg-text ring-1 ring-inset ring-tg-hint/30 hover:bg-tg-hint/10'
-                        }`}
-                      >
-                      {field}
-                    </button>
-                  ))}
+              <div className="bg-tg-secondary-bg p-4 sm:p-6 rounded-lg shadow-lg">
+                <div className="mb-6 pb-3 border-b border-tg-hint/20">
+                  <h2 className="text-xl font-semibold">Настройка видимых полей</h2>
+                  <p className="text-tg-hint mt-1">Выберите информацию, которую будут видеть клиенты в своем кабинете.</p>
                 </div>
+                
+                <div className="space-y-6">
+                    {Object.entries(fieldGroups).map(([groupName, fields]) => (
+                        <div key={groupName}>
+                            <h4 className="text-md font-semibold text-tg-text mb-2 pb-2 border-b border-tg-hint/10">{groupName}</h4>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
+                                {fields
+                                  .filter(field => webBaseColumns.includes(field))
+                                  .map(field => (
+                                    <FieldToggle 
+                                      key={field}
+                                      field={field} 
+                                      isVisible={visibleFields.has(field)} 
+                                      onToggle={handleToggle} 
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
                 <button 
                     onClick={handleSaveConfig} 
                     disabled={saveStatus === 'saving'}
