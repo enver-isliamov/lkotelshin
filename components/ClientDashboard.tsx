@@ -15,7 +15,7 @@ interface ClientDashboardProps {
 type Tab = 'current' | 'history';
 
 const TelegramIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
     <path d="M12 0c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm7.647 8.533-2.147 10.04c-.15.703-.64.88-1.21.543l-4.08-3.003-1.97 1.893c-.21.21-.39.39-.77.39l.28-4.16 7.79-7.003c.33-.29-.08-.44-.51-.15l-9.59 6.043-4.01-.12c-.69-.02-1.01-.42-.58-1.02l11.09-8.54c.64-.49 1.21-.23 1.01.6z"/>
   </svg>
 );
@@ -50,14 +50,28 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-6">
-       {isDemo && (
-        <div className="bg-tg-secondary-bg border border-tg-hint/20 p-3 rounded-lg flex items-center text-sm text-tg-hint" role="alert">
-          <svg xmlns="http://www.w.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0 text-tg-link" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-          </svg>
-          <p><span className="font-semibold text-tg-text">Демо-режим:</span> Вы просматриваете тестовые данные.</p>
+       <div className="flex flex-wrap items-center justify-end gap-4">
+          {isDemo && (
+            <div className="flex-grow bg-tg-secondary-bg border border-tg-hint/20 p-3 rounded-lg flex items-center text-sm text-tg-hint" role="alert">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-3 flex-shrink-0 text-tg-link" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+              </svg>
+              <p><span className="font-semibold text-tg-text">Демо-режим:</span> Вы просматриваете тестовые данные.</p>
+            </div>
+          )}
+          {!onBack && (
+            <a 
+              href="https://t.me/EnrikeTomas" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="flex-shrink-0 bg-tg-button text-tg-button-text rounded-lg shadow-md flex items-center justify-center gap-2 px-3 py-2 hover:opacity-90 transition-opacity"
+              aria-label="Связаться с менеджером"
+            >
+              <TelegramIcon />
+              <span className="font-semibold text-sm hidden sm:inline">Связаться</span>
+            </a>
+          )}
         </div>
-      )}
       {onBack && (
          <button onClick={onBack} className="flex items-center text-tg-link font-semibold transition-opacity hover:opacity-80">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -70,18 +84,12 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
         <div className="text-center">
           <h1 className="text-3xl font-bold">{onBack ? 'Кабинет клиента' : 'Личный кабинет'}</h1>
           <p className="text-tg-hint text-lg">{onBack ? clientData['Имя клиента'] : `Здравствуйте, ${clientData['Имя клиента']}!`}</p>
+          {clientData['Статус сделки'] === 'Ожидает обработки' && (
+            <div className="mt-2 inline-block bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full dark:bg-yellow-900 dark:text-yellow-200">
+              Статус: {clientData['Статус сделки']}
+            </div>
+          )}
         </div>
-        {!onBack && (
-            <a 
-            href="https://t.me/EnrikeTomas" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-full bg-tg-button text-tg-button-text font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity"
-            >
-            <TelegramIcon />
-            Связаться с менеджером
-            </a>
-        )}
       </header>
 
 
