@@ -182,7 +182,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
                                                 <div className="flex-1">
                                                     <div className="flex items-center gap-2">
                                                         <span className={`h-2.5 w-2.5 rounded-full ${getStatusColor(client['Статус сделки'])}`} title={`Статус: ${client['Статус сделки']}`}></span>
-                                                        <p className="font-semibold text-tg-text">{client['Имя клиента'] || 'Имя не указано'}</p>
+                                                        <p className="font-semibold text-sm text-tg-text">{client['Имя клиента'] || 'Имя не указано'}</p>
                                                     </div>
                                                     <p className="text-sm text-tg-hint pl-[18px]">{client['Телефон'] || `ID: ${client['Chat ID']}`}</p>
                                                 </div>
