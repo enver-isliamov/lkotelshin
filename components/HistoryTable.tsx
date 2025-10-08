@@ -84,26 +84,32 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
       
       {/* Vertical Timeline View */}
       <div className="space-y-6">
-        {history.slice().reverse().map((order, index) => (
-          <div key={index} className="flex gap-4">
-            {/* Timeline decorator */}
-            <div className="flex flex-col items-center">
-              <div className="flex-shrink-0 h-8 w-8 rounded-full bg-tg-link/20 text-tg-link flex items-center justify-center font-semibold">{history.length - index}</div>
-              {index < history.length - 1 && <div className="w-px h-full bg-tg-hint/30"></div>}
-            </div>
-            {/* Card Content */}
-            <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-              <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                <h3 className="font-bold text-lg text-tg-text">{order['Услуга'] || 'Услуга не указана'}</h3>
-                {order['Статус'] && <StatusBadge status={order['Статус']} />}
+        {history.slice().reverse().map((order, index) => {
+          const period = (order['Начало'] && order['Окончание']) 
+              ? `${order['Начало']} - ${order['Окончание']}` 
+              : (order['Дата'] || 'Дата не указана');
+
+          return (
+            <div key={index} className="flex gap-4">
+              {/* Timeline decorator */}
+              <div className="flex flex-col items-center">
+                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-tg-link/20 text-tg-link flex items-center justify-center font-semibold">{history.length - index}</div>
+                {index < history.length - 1 && <div className="w-px h-full bg-tg-hint/30"></div>}
               </div>
-              <div className="flex flex-wrap justify-between items-center text-sm gap-x-4 gap-y-1">
-                 <p className="text-tg-hint">{order['Дата'] || 'Дата не указана'}</p>
-                 <p className="text-tg-text font-semibold">{order['Сумма'] ? `${order['Сумма'].replace(/\s/g, '')} ₽` : ''}</p>
+              {/* Card Content */}
+              <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
+                  <h3 className="font-bold text-lg text-tg-text">{order['Услуга'] || 'Услуга не указана'}</h3>
+                  {order['Статус'] && <StatusBadge status={order['Статус']} />}
+                </div>
+                <div className="flex flex-wrap justify-between items-center text-sm gap-x-4 gap-y-1">
+                   <p className="text-tg-hint">{period}</p>
+                   <p className="text-tg-text font-semibold">{order['Сумма'] ? `${order['Сумма'].replace(/\s/g, '')} ₽` : ''}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
