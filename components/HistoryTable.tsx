@@ -88,6 +88,8 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
           const period = (order['Начало'] && order['Окончание']) 
               ? `${order['Начало']} - ${order['Окончание']}` 
               : (order['Дата'] || 'Дата не указана');
+          
+          const orderTitle = order['Услуга'] || order['Заказ - QR'] || 'Заказ без названия';
 
           return (
             <div key={index} className="flex gap-4">
@@ -99,7 +101,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
               {/* Card Content */}
               <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
                 <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
-                  <h3 className="font-bold text-lg text-tg-text">{order['Услуга'] || 'Услуга не указана'}</h3>
+                  <h3 className="font-bold text-lg text-tg-text">{orderTitle}</h3>
                   {order['Статус'] && <StatusBadge status={order['Статус']} />}
                 </div>
                 <div className="flex flex-wrap justify-between items-center text-sm gap-x-4 gap-y-1">
