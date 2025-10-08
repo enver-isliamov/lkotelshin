@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchSheetData, addNewUser, fetchConfig, updateConfig } from './services/googleSheetService';
+import { fetchAllSheetData, fetchClientData, fetchClientHistory, addNewUser, fetchConfig, updateConfig } from './services/googleSheetService';
 import { ClientData, OrderHistory } from './types';
 import { ADMIN_CHAT_ID, APPS_SCRIPT_URL, WEB_BASE_COLUMNS, DEMO_CHAT_ID, DEFAULT_VISIBLE_CLIENT_FIELDS } from './constants';
 import ClientDashboard from './components/ClientDashboard';
@@ -148,25 +148,22 @@ const App: React.FC = () => {
         setIsDemoMode(false);
 
         if (isAdmin) {
-            const webBaseData = await fetchSheetData<ClientData>('WebBase');
+            const webBaseData = await fetchAllSheetData<ClientData>('WebBase');
             setAllClients(webBaseData);
             return;
         }
         
-        const [webBaseData, archiveData] = await Promise.all([
-            fetchSheetData<ClientData>('WebBase'),
-            fetchSheetData<OrderHistory>('Archive')
+        const [currentClient, clientHistory] = await Promise.all([
+            fetchClientData(userId),
+            fetchClientHistory(userId),
         ]);
         
-        const currentClient = webBaseData.find(client => client['Chat ID'] === userId);
         if (currentClient) {
             setClientData(currentClient);
             setIsNewUser(false);
         } else {
             setIsNewUser(true);
         }
-
-        const clientHistory = archiveData.filter(order => order['Chat ID'] === userId);
         setOrderHistory(clientHistory);
 
       } catch (e) {
@@ -184,10 +181,14 @@ const App: React.FC = () => {
     setIsLoading(true);
     setViewingClient(client);
     try {
-      // Fetch history for this specific client on demand
-      const allHistory = await fetchSheetData<OrderHistory>('Archive');
-      const clientHistory = allHistory.filter(order => order['Chat ID'] === client['Chat ID']?.toString());
-      setViewingClientHistory(clientHistory);
+      // Fetch history for this specific client on demand for better performance
+      const clientChatId = client['Chat ID']?.toString();
+      if (clientChatId) {
+        const clientHistory = await fetchClientHistory(clientChatId);
+        setViewingClientHistory(clientHistory);
+      } else {
+        setViewingClientHistory([]);
+      }
     } catch (e) {
       console.error(e);
       setError(e instanceof Error ? e.message : 'Не удалось загрузить историю клиента.');
