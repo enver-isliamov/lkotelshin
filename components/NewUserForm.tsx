@@ -43,8 +43,8 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
   return (
     <div className="flex items-center justify-center h-screen p-4">
       <div className="w-full max-w-sm bg-tg-secondary-bg p-6 rounded-lg shadow-xl text-center">
-        <h2 className="text-xl font-bold mb-2">Регистрация</h2>
-        <p className="text-tg-hint mb-6">Мы не нашли вас в базе клиентов. Пожалуйста, оставьте ваш номер телефона для связи.</p>
+        <h2 className="text-xl font-bold mb-2">Авторизация</h2>
+        <p className="text-tg-hint mb-6">Укажите свой номер чтобы просмотреть информацию из личного кабинета.</p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="phone" className="sr-only">Номер телефона</label>
@@ -65,7 +65,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             disabled={status === 'submitting'}
             className="w-full bg-tg-button text-tg-button-text font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {status === 'submitting' ? 'Отправка...' : 'Отправить'}
+            {status === 'submitting' ? 'Вход...' : 'Войти'}
           </button>
         </form>
       </div>
