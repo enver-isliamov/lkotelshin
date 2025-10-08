@@ -1,13 +1,13 @@
-
 import { APPS_SCRIPT_URL } from '../constants';
 import { ClientData, OrderHistory } from '../types';
 
 /**
  * A generic error handler and response parser for fetch requests to the Apps Script.
+ * This function is now robust and guarantees that the return value is always an array.
  * @param promise The fetch promise to process.
  * @param context A string describing the context of the request for better error logging.
  */
-async function handleApiResponse<T>(promise: Promise<Response>, context: string): Promise<T> {
+async function handleApiResponse<T>(promise: Promise<Response>, context: string): Promise<T[]> {
   try {
     const response = await promise;
     if (!response.ok) {
@@ -18,7 +18,18 @@ async function handleApiResponse<T>(promise: Promise<Response>, context: string)
       // Pass the specific error from Apps Script
       throw new Error(data.error);
     }
-    return data as T;
+
+    // CORE FIX: Ensure the result is always an array to prevent crashes.
+    if (Array.isArray(data)) {
+      return data;
+    }
+    // If the API returned a single object for a single result, wrap it in an array.
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
+      return [data];
+    }
+    // Default to an empty array for any other case (null, empty object from API, etc.)
+    return [];
+
   } catch (error) {
     console.error(`Ошибка во время "${context}":`, error);
     if (error instanceof Error) {
@@ -35,7 +46,7 @@ async function handleApiResponse<T>(promise: Promise<Response>, context: string)
  */
 export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive'): Promise<T[]> {
   const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&_=${new Date().getTime()}`;
-  return handleApiResponse<T[]>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение всех данных с листа ${sheetName}`);
+  return handleApiResponse<T>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение всех данных с листа ${sheetName}`);
 }
 
 
@@ -47,7 +58,7 @@ export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive'): Pr
  */
 export async function fetchSheetDataByChatId<T>(sheetName: 'WebBase' | 'Archive', chatId: string): Promise<T[]> {
   const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&chatId=${chatId}&_=${new Date().getTime()}`;
-  return handleApiResponse<T[]>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение данных по chatId с листа ${sheetName}`);
+  return handleApiResponse<T>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение данных по chatId с листа ${sheetName}`);
 }
 
 
