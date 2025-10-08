@@ -137,3 +137,31 @@ export async function addNewUser(chatId: string, phone: string): Promise<{result
       throw new Error('Не удалось зарегистрировать нового пользователя.');
   }
 }
+
+/**
+ * Sends a message to a client from the bot.
+ * @param chatId The client's Telegram Chat ID.
+ * @param text The message text to send.
+ * @returns A promise that resolves to the result of the operation.
+ */
+export async function sendMessageFromBot(chatId: string, text: string): Promise<{result: string}> {
+   if ((APPS_SCRIPT_URL as string) === 'ВАШ_URL_СКРИПТА' || !APPS_SCRIPT_URL) {
+    throw new Error('URL-адрес Google Apps Script не настроен.');
+  }
+  try {
+    const response = await fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      redirect: 'follow',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'sendMessageFromBot', chatId, text })
+    });
+    if (!response.ok) throw new Error(`Ошибка сети: ${response.statusText}`);
+    const result = await response.json();
+    if (result.error) throw new Error(result.error);
+    return result;
+  } catch (error) {
+      console.error('Ошибка при отправке сообщения:', error);
+      if (error instanceof Error) throw new Error(`Не удалось отправить сообщение: ${error.message}`);
+      throw new Error('Не удалось отправить сообщение.');
+  }
+}
