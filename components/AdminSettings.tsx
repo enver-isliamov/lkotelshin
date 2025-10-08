@@ -8,6 +8,7 @@ interface AdminSettingsProps {
   onClientSelect: (client: ClientData) => void;
   initialVisibleFields: string[];
   onConfigSave: (fields: string[]) => Promise<void>;
+  isLoading: boolean;
 }
 
 const getStatusColor = (status: string) => {
@@ -23,7 +24,7 @@ const getStatusColor = (status: string) => {
     }
 }
 
-const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns, onClientSelect, initialVisibleFields, onConfigSave }) => {
+const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns, onClientSelect, initialVisibleFields, onConfigSave, isLoading }) => {
   const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set(initialVisibleFields));
   const [searchTerm, setSearchTerm] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
@@ -89,6 +90,26 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
     if (!name) return '?';
     return name.charAt(0).toUpperCase();
   };
+  
+  const ListSkeleton = () => (
+    <div className="animate-pulse">
+        <div className="sticky top-0 bg-tg-secondary-bg/95 px-4 sm:px-6 py-1 border-b border-t border-tg-hint/20 z-10 h-[37px]">
+            <div className="h-5 w-1/4 bg-gray-300 dark:bg-gray-700 rounded-md mt-2"></div>
+        </div>
+        <ul className="divide-y divide-tg-hint/20">
+            {[...Array(5)].map((_, i) => (
+                <li key={i} className="flex items-center gap-4 px-4 sm:px-6 py-3">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700"></div>
+                    <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
+                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
+                    </div>
+                </li>
+            ))}
+        </ul>
+    </div>
+  );
+
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-8">
@@ -116,7 +137,9 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto">
-            {Object.keys(groupedAndFilteredClients).length > 0 ? (
+            {isLoading ? (
+                <ListSkeleton />
+             ) : Object.keys(groupedAndFilteredClients).length > 0 ? (
                 Object.keys(groupedAndFilteredClients).sort().map(letter => (
                     <div key={letter}>
                         <div className="sticky top-0 bg-tg-secondary-bg/95 backdrop-blur-sm px-4 sm:px-6 py-1 border-b border-t border-tg-hint/20 z-10">
