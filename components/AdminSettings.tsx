@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { ClientData } from '../types';
 import { VISIBLE_CLIENT_FIELDS } from '../constants';
 
@@ -10,6 +10,27 @@ interface AdminSettingsProps {
 const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns }) => {
   const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set(VISIBLE_CLIENT_FIELDS));
   const [generatedConfig, setGeneratedConfig] = useState<string>('');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const groupedAndFilteredClients = useMemo(() => {
+    const filtered = allClients.filter(client => 
+      client['Имя клиента'] && client['Имя клиента'].toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const grouped: { [key: string]: ClientData[] } = {};
+    
+    filtered
+      .sort((a, b) => (a['Имя клиента'] || '').localeCompare(b['Имя клиента'] || ''))
+      .forEach(client => {
+        const firstLetter = (client['Имя клиента'] || '#')[0].toUpperCase();
+        if (!grouped[firstLetter]) {
+          grouped[firstLetter] = [];
+        }
+        grouped[firstLetter].push(client);
+      });
+
+    return grouped;
+  }, [allClients, searchTerm]);
 
   const handleToggle = (field: string) => {
     const newSet = new Set(visibleFields);
@@ -26,6 +47,11 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
     const configString = `export const VISIBLE_CLIENT_FIELDS: string[] = ${JSON.stringify(configArray, null, 2)};`;
     setGeneratedConfig(configString);
   };
+  
+  const getInitials = (name: string = '') => {
+    if (!name) return '?';
+    return name.charAt(0).toUpperCase();
+  };
 
   return (
     <div className="w-full max-w-3xl mx-auto space-y-8">
@@ -33,31 +59,66 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
         <h1 className="text-3xl font-bold">Панель Администратора</h1>
         <p className="text-tg-hint">Всего клиентов в базе: {allClients.length}</p>
       </header>
-
-      <div className="bg-tg-secondary-bg p-6 rounded-lg shadow-lg">
-        <h2 className="text-2xl font-semibold mb-4 border-b border-tg-hint pb-2">Список клиентов</h2>
-        <div className="max-h-96 overflow-y-auto">
-          <ul className="divide-y divide-tg-hint/20">
-            {allClients.length > 0 ? allClients.map(client => (
-              <li key={client['Chat ID']} className="py-3 flex justify-between items-center gap-4">
-                <div>
-                  <p className="font-semibold text-tg-text">{client['Имя клиента'] || 'Имя не указано'}</p>
-                  <p className="text-sm text-tg-hint">ID: {client['Chat ID']}</p>
+      
+      {/* Client List Card */}
+      <div className="bg-tg-secondary-bg rounded-lg shadow-lg overflow-hidden">
+        <div className="p-4 sm:p-6 border-b border-tg-hint/20">
+            <h2 className="text-2xl font-semibold mb-4">Список клиентов</h2>
+            <div className="relative">
+                <input
+                    type="text"
+                    placeholder="Поиск по имени..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg bg-gray-50 dark:bg-gray-800 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-tg-link"
+                />
+                <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                    <svg className="w-5 h-5 text-tg-hint" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <a 
-                  href={`/?clientId=${client['Chat ID']}`} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="bg-tg-button text-tg-button-text font-bold py-2 px-4 rounded-lg hover:opacity-90 transition-opacity text-sm whitespace-nowrap"
-                >
-                  Открыть кабинет
-                </a>
-              </li>
-            )) : <p className="text-tg-hint py-4 text-center">Клиенты не найдены.</p>}
-          </ul>
+            </div>
+        </div>
+
+        <div className="max-h-[60vh] overflow-y-auto">
+            {Object.keys(groupedAndFilteredClients).sort().map(letter => (
+                <div key={letter}>
+                    <div className="sticky top-0 bg-gray-100 dark:bg-gray-800 px-4 py-1 border-b border-t border-gray-200 dark:border-gray-700 z-10">
+                        <h3 className="text-sm font-bold uppercase text-tg-link">{letter}</h3>
+                    </div>
+                    <ul className="divide-y divide-tg-hint/20">
+                        {groupedAndFilteredClients[letter].map(client => (
+                            <li key={client['Chat ID']} className="px-4 py-3 flex justify-between items-center gap-4 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                <div className="flex items-center gap-4">
+                                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-tg-link text-white flex items-center justify-center font-bold">
+                                        {getInitials(client['Имя клиента'])}
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold text-tg-text">{client['Имя клиента'] || 'Имя не указано'}</p>
+                                        <p className="text-sm text-tg-hint">{client['Телефон'] || `ID: ${client['Chat ID']}`}</p>
+                                    </div>
+                                </div>
+                                <a
+                                    href={`/?clientId=${client['Chat ID']}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Открыть кабинет клиента"
+                                    className="p-2 rounded-full text-tg-hint hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-tg-link transition-colors"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                      <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                                    </svg>
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            ))}
+             {Object.keys(groupedAndFilteredClients).length === 0 && (
+                <p className="text-tg-hint py-8 text-center">Клиенты не найдены.</p>
+             )}
         </div>
       </div>
       
+      {/* Field Configuration Card */}
       <div className="bg-tg-secondary-bg p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold mb-4 border-b border-tg-hint pb-2">Настройка видимых полей для клиента</h2>
         <p className="text-tg-hint mb-6">Отметьте поля, которые должны быть видны клиентам в их личном кабинете.</p>
