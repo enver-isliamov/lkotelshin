@@ -1,12 +1,13 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { ClientData } from '../types';
-import { VISIBLE_CLIENT_FIELDS } from '../constants';
 
 interface AdminSettingsProps {
   allClients: ClientData[];
   webBaseColumns: string[];
   onClientSelect: (client: ClientData) => void;
+  initialVisibleFields: string[];
+  onConfigSave: (fields: string[]) => Promise<void>;
 }
 
 const getStatusColor = (status: string) => {
@@ -22,11 +23,15 @@ const getStatusColor = (status: string) => {
     }
 }
 
-const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns, onClientSelect }) => {
-  const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set(VISIBLE_CLIENT_FIELDS));
-  const [generatedConfig, setGeneratedConfig] = useState<string>('');
+const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns, onClientSelect, initialVisibleFields, onConfigSave }) => {
+  const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set(initialVisibleFields));
   const [searchTerm, setSearchTerm] = useState('');
-  const [isCopied, setIsCopied] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  // Sync state with props when the initial config loads
+  useEffect(() => {
+    setVisibleFields(new Set(initialVisibleFields));
+  }, [initialVisibleFields]);
 
   const groupedAndFilteredClients = useMemo(() => {
     const filtered = allClients.filter(client => 
@@ -57,21 +62,28 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
     }
     setVisibleFields(newSet);
   };
-
-  const generateConfig = () => {
-    const configArray = Array.from(visibleFields);
-    const configString = `export const VISIBLE_CLIENT_FIELDS: string[] = ${JSON.stringify(configArray, null, 2)};`;
-    setGeneratedConfig(configString);
-    setIsCopied(false);
-  };
   
-  const handleCopy = () => {
-    if (!generatedConfig) return;
-    navigator.clipboard.writeText(generatedConfig).then(() => {
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2500);
-    });
-  }
+  const handleSaveConfig = async () => {
+    setSaveStatus('saving');
+    try {
+        await onConfigSave(Array.from(visibleFields));
+        setSaveStatus('saved');
+        setTimeout(() => setSaveStatus('idle'), 2500);
+    } catch (e) {
+        console.error('Failed to save config:', e);
+        setSaveStatus('error');
+        setTimeout(() => setSaveStatus('idle'), 3000);
+    }
+  };
+
+  const getSaveButtonText = () => {
+    switch (saveStatus) {
+        case 'saving': return 'Сохранение...';
+        case 'saved': return '✓ Сохранено!';
+        case 'error': return 'Ошибка! Повторите';
+        default: return 'Сохранить настройки';
+    }
+  };
 
   const getInitials = (name: string = '') => {
     if (!name) return '?';
@@ -149,7 +161,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
       {/* Field Configuration Card */}
       <div className="bg-tg-secondary-bg p-6 rounded-lg shadow-lg">
         <h2 className="text-2xl font-semibold mb-4 border-b border-tg-hint/20 pb-2">Настройка видимых полей для клиента</h2>
-        <p className="text-tg-hint mb-6">Отметьте поля, которые должны быть видны клиентам в их личном кабинете.</p>
+        <p className="text-tg-hint mb-6">Отметьте поля, которые будут видны клиентам. Настройки применяются для всех сразу после сохранения.</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {webBaseColumns.map(field => (
             <label key={field} className="flex items-center space-x-3 cursor-pointer p-2 rounded-md hover:bg-tg-bg transition-colors">
@@ -163,28 +175,15 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
             </label>
           ))}
         </div>
-        <button onClick={generateConfig} className="mt-8 w-full bg-tg-button text-tg-button-text font-bold py-3 px-4 rounded-lg hover:opacity-90 transition-opacity">
-          Сгенерировать конфигурацию
+        <button 
+            onClick={handleSaveConfig} 
+            disabled={saveStatus === 'saving'}
+            className={`mt-8 w-full font-bold py-3 px-4 rounded-lg transition-all duration-300 disabled:opacity-70
+                ${saveStatus === 'saved' ? 'bg-green-500 text-white' : 'bg-tg-button text-tg-button-text hover:opacity-90'}`}
+        >
+          {getSaveButtonText()}
         </button>
       </div>
-
-      {generatedConfig && (
-        <div className="bg-tg-secondary-bg p-6 rounded-lg shadow-lg">
-          <h3 className="text-xl font-semibold mb-2">Новая конфигурация</h3>
-          <p className="text-tg-hint mb-4">Скопируйте этот код и вставьте его в файл <code className="bg-gray-800 text-white px-1.5 py-0.5 rounded-md text-sm">src/constants.ts</code>, заменив существующий массив <code className="bg-gray-800 text-white px-1.5 py-0.5 rounded-md text-sm">VISIBLE_CLIENT_FIELDS</code>. Затем пересоберите и опубликуйте приложение.</p>
-          <div className="relative">
-            <pre className="bg-gray-800 text-white p-4 rounded-md overflow-x-auto text-sm">
-                <code>{generatedConfig}</code>
-            </pre>
-            <button
-                onClick={handleCopy}
-                className="absolute top-2 right-2 bg-gray-600 hover:bg-gray-500 text-white text-xs font-bold py-1 px-2 rounded-md transition-all duration-200"
-            >
-                {isCopied ? 'Скопировано!' : 'Копировать'}
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
