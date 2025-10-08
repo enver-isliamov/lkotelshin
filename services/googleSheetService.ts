@@ -29,33 +29,11 @@ async function handleApiResponse<T>(promise: Promise<Response>, context: string)
 }
 
 /**
- * Fetches data for a single client from the 'WebBase' sheet.
- * @param chatId The ID of the client to fetch.
- * @returns A promise that resolves to the client data object, or null if not found.
- */
-export async function fetchClientData(chatId: string): Promise<ClientData | null> {
-  const params = new URLSearchParams({ sheet: 'WebBase', chatId });
-  const url = `${APPS_SCRIPT_URL}?${params.toString()}`;
-  return handleApiResponse<ClientData | null>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение данных клиента ${chatId}`);
-}
-
-/**
- * Fetches order history for a single client from the 'Archive' sheet.
- * @param chatId The ID of the client whose history to fetch.
- * @returns A promise that resolves to an array of order history items.
- */
-export async function fetchClientHistory(chatId: string): Promise<OrderHistory[]> {
-    const params = new URLSearchParams({ sheet: 'Archive', chatId });
-    const url = `${APPS_SCRIPT_URL}?${params.toString()}`;
-    return handleApiResponse<OrderHistory[]>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение истории клиента ${chatId}`);
-}
-
-/**
- * Fetches all data from a given sheet. Used primarily for the admin panel client list.
- * @param sheetName The name of the sheet to fetch ('WebBase').
+ * Fetches all data from a given sheet. Used for fetching all clients or all history records.
+ * @param sheetName The name of the sheet to fetch ('WebBase' or 'Archive').
  * @returns A promise that resolves to an array of objects representing the sheet rows.
  */
-export async function fetchAllSheetData<T>(sheetName: 'WebBase'): Promise<T[]> {
+export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive'): Promise<T[]> {
   const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&_=${new Date().getTime()}`;
   return handleApiResponse<T[]>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение всех данных с листа ${sheetName}`);
 }
