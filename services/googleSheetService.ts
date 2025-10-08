@@ -7,7 +7,7 @@ import { APPS_SCRIPT_URL } from '../constants';
  * @returns A promise that resolves to an array of objects representing the sheet rows.
  */
 export async function fetchSheetData<T>(sheetName: 'WebBase' | 'Archive'): Promise<T[]> {
-  if ((APPS_SCRIPT_URL as string) === 'https://script.google.com/macros/s/AKfycbxullYnapBhBr38UoU0eghRWS9zoopUVv7IK9P56o0SzKu7ab-pcu_9AwUIZOs5wrTtpQ/exec' || !APPS_SCRIPT_URL) {
+  if ((APPS_SCRIPT_URL as string) === 'ВАШ_URL_СКРИПТА' || !APPS_SCRIPT_URL) {
     throw new Error('Пожалуйста, настройте URL-адрес Google Apps Script в файле constants.ts. Инструкция находится в файле instructions.md.');
   }
 
