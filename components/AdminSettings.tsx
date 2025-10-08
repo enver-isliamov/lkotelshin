@@ -1,6 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { ClientData } from '../types';
+import { DEMO_CHAT_ID } from '../constants';
 
 interface AdminSettingsProps {
   allClients: ClientData[];
@@ -25,6 +26,21 @@ const getStatusColor = (status: string) => {
             return 'bg-yellow-400';
     }
 }
+
+// Action Icons
+const PhoneIcon: React.FC = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+    </svg>
+);
+const ChatIcon: React.FC = () => (
+     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10 2a8 8 0 100 16 8 8 0 000-16zM2 10a8 8 0 1116 0 8 8 0 01-16 0z" clipRule="evenodd" fillRule="evenodd" />
+        <path d="M5.5 10.5l2 2 4.5-4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" transform="translate(1, -1)"/>
+         <path d="M14.5 9.5l-2-2-4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" transform="translate(-1, 1)"/>
+     </svg>
+);
+
 
 const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns, onClientSelect, initialVisibleFields, onConfigSave, isLoading }) => {
   const [activeTab, setActiveTab] = useState<Tab>('clients');
@@ -130,7 +146,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
     <div className="bg-gray-50 dark:bg-gray-800/20 p-2 sm:p-4 rounded-xl">
         <div className="w-full max-w-3xl mx-auto space-y-6">
           <header className="text-center pt-2">
-            <h1 className="text-3xl font-bold">Панель Администратора</h1>
+            <h2 className="text-2xl font-bold">Панель администратора</h2>
             <p className="text-tg-hint mt-1">Всего клиентов в базе: {isLoading ? '...' : allClients.length}</p>
           </header>
           
@@ -170,28 +186,53 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
                                 </div>
                                 <ul className="divide-y divide-tg-hint/20">
                                     {groupedAndFilteredClients[letter].map(client => (
-                                        <li key={client['Chat ID']}>
-                                            <button
+                                        <li key={client['Chat ID']} className="group flex w-full items-center justify-between gap-4 px-4 sm:px-6 py-3 hover:bg-tg-bg transition-colors text-left">
+                                            <div
                                                 onClick={() => onClientSelect(client)}
                                                 title={`Открыть кабинет клиента: ${client['Имя клиента']}`}
-                                                className="group flex w-full items-center gap-4 px-4 sm:px-6 py-3 hover:bg-tg-bg transition-colors text-left"
+                                                className="flex flex-1 items-center gap-4 cursor-pointer min-w-0"
                                             >
                                                 <div className="flex-shrink-0 h-10 w-10 rounded-full bg-tg-link text-white flex items-center justify-center font-bold text-base transition-transform group-hover:scale-110">
                                                     {getInitials(client['Имя клиента'])}
                                                 </div>
-                                                <div className="flex-1">
+                                                <div className="flex-1 min-w-0">
                                                     <div className="flex items-center gap-2">
                                                         <span className={`h-2.5 w-2.5 rounded-full ${getStatusColor(client['Статус сделки'])}`} title={`Статус: ${client['Статус сделки']}`}></span>
-                                                        <p className="font-semibold text-sm text-tg-text">{client['Имя клиента'] || 'Имя не указано'}</p>
+                                                        <p className="font-semibold text-sm text-tg-text truncate">{client['Имя клиента'] || 'Имя не указано'}</p>
                                                     </div>
-                                                    <p className="text-sm text-tg-hint pl-[18px]">{client['Телефон'] || `ID: ${client['Chat ID']}`}</p>
+                                                    <p className="text-sm text-tg-hint pl-[18px] truncate">{client['Телефон'] || `ID: ${client['Chat ID']}`}</p>
                                                 </div>
-                                                <div className="text-tg-hint opacity-0 group-hover:opacity-100 transition-opacity">
+                                            </div>
+                                            
+                                            <div className="flex flex-shrink-0 items-center gap-2 text-tg-hint">
+                                                {client['Телефон'] && (
+                                                    <a
+                                                        href={`tel:${client['Телефон'].replace(/\D/g, '')}`}
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        title={`Позвонить ${client['Телефон']}`}
+                                                        className="p-2 rounded-full hover:bg-tg-hint/10 hover:text-tg-link transition-colors"
+                                                    >
+                                                        <PhoneIcon />
+                                                    </a>
+                                                )}
+                                                {client['Chat ID'] && client['Chat ID'] !== DEMO_CHAT_ID && (
+                                                    <a
+                                                        href={`tg://user?id=${client['Chat ID']}`}
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        title={`Написать в Telegram`}
+                                                        className="p-2 rounded-full hover:bg-tg-hint/10 hover:text-tg-link transition-colors"
+                                                    >
+                                                        <ChatIcon />
+                                                    </a>
+                                                )}
+                                                <div className="text-tg-hint opacity-50 group-hover:opacity-100 transition-opacity pl-1">
                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                                                         <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
                                                     </svg>
                                                 </div>
-                                            </button>
+                                            </div>
                                         </li>
                                     ))}
                                 </ul>
