@@ -55,6 +55,12 @@ const ArchiveIcon = () => (
     </svg>
 );
 
+const CheckIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+);
+
 
 const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
   if (isLoading) {
@@ -83,7 +89,7 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
       </div>
       
       {/* Vertical Timeline View */}
-      <div className="space-y-6">
+      <div className="space-y-2 -ml-2">
         {history.slice().reverse().map((order, index) => {
           const period = (order['Начало'] && order['Окончание']) 
               ? `${order['Начало']} - ${order['Окончание']}` 
@@ -94,12 +100,17 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
           return (
             <div key={index} className="flex gap-4">
               {/* Timeline decorator */}
-              <div className="flex flex-col items-center">
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-tg-link/20 text-tg-link flex items-center justify-center font-semibold">{history.length - index}</div>
-                {index < history.length - 1 && <div className="w-px h-full bg-tg-hint/30"></div>}
+              <div className="flex flex-col items-center relative">
+                 <div className="absolute top-9 left-1/2 w-px h-[calc(100%-2rem)] bg-repeat-y bg-[length:1px_8px]" style={{
+                     backgroundImage: index < history.length - 1 ? `linear-gradient(to bottom, #cbd5e1 50%, transparent 50%)` : 'none',
+                     transform: 'translateX(-50%)'
+                 }}></div>
+                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-green-100 text-green-600 dark:bg-green-900/50 dark:text-green-300 flex items-center justify-center font-semibold z-10">
+                    <CheckIcon />
+                </div>
               </div>
               {/* Card Content */}
-              <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+              <div className="w-full bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg mb-4">
                 <div className="flex flex-wrap justify-between items-start gap-2 mb-2">
                   <h3 className="font-bold text-lg text-tg-text">{orderTitle}</h3>
                   {order['Статус'] && <StatusBadge status={order['Статус']} />}
