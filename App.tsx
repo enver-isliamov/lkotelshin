@@ -1,11 +1,12 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchSheetData } from './services/googleSheetService';
+import { fetchSheetData, addNewUser } from './services/googleSheetService';
 import { ClientData, OrderHistory } from './types';
 import { ADMIN_CHAT_ID, APPS_SCRIPT_URL, WEB_BASE_COLUMNS, DEMO_CHAT_ID } from './constants';
 import ClientDashboard from './components/ClientDashboard';
 import AdminSettings from './components/AdminSettings';
 import Loader from './components/Loader';
+import NewUserForm from './components/NewUserForm';
 
 // Add Telegram Web App types to the global window object
 declare global {
@@ -81,6 +82,9 @@ const App: React.FC = () => {
   // State for admin viewing a specific client
   const [viewingClient, setViewingClient] = useState<ClientData | null>(null);
   const [viewingClientHistory, setViewingClientHistory] = useState<OrderHistory[]>([]);
+  
+  // State for new user registration
+  const [isNewUser, setIsNewUser] = useState(false);
 
 
   useEffect(() => {
@@ -158,8 +162,10 @@ const App: React.FC = () => {
         const currentClient = webBaseData.find(client => client['Chat ID'] === userId);
         if (currentClient) {
           setClientData(currentClient);
+          setIsNewUser(false);
         } else {
-          setError('Клиент с вашим ID не найден.');
+          // Instead of setting an error, trigger the new user registration flow
+          setIsNewUser(true);
         }
 
         const clientHistory = archiveData.filter(order => order['Chat ID'] === userId);
@@ -198,6 +204,13 @@ const App: React.FC = () => {
     setError(null); // Clear any client-specific errors
   };
 
+  const handleNewUserSubmit = async (phone: string) => {
+    if (!userId) {
+      throw new Error("User ID is not available for submission.");
+    }
+    await addNewUser(userId, phone);
+  };
+
   if (authStatus === 'pending') {
     return <Loader />;
   }
@@ -211,6 +224,10 @@ const App: React.FC = () => {
             </div>
         </div>
     );
+  }
+
+  if (isNewUser && userId && !isAdmin) {
+    return <NewUserForm chatId={userId} onSubmit={handleNewUserSubmit} />;
   }
 
   if (isLoading) {
