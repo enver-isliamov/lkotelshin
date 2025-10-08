@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchSheetData, addNewUser } from './services/googleSheetService';
+import { fetchSheetData, addNewUser, fetchConfig, updateConfig } from './services/googleSheetService';
 import { ClientData, OrderHistory } from './types';
-import { ADMIN_CHAT_ID, APPS_SCRIPT_URL, WEB_BASE_COLUMNS, DEMO_CHAT_ID } from './constants';
+import { ADMIN_CHAT_ID, APPS_SCRIPT_URL, WEB_BASE_COLUMNS, DEMO_CHAT_ID, DEFAULT_VISIBLE_CLIENT_FIELDS } from './constants';
 import ClientDashboard from './components/ClientDashboard';
 import AdminSettings from './components/AdminSettings';
 import Loader from './components/Loader';
@@ -14,6 +14,7 @@ declare global {
   interface Window {
     Telegram?: {
       WebApp: {
+        initData: string; // initData is always present in a real Mini App
         initDataUnsafe: {
           user?: {
             id: number;
@@ -87,30 +88,29 @@ const App: React.FC = () => {
   // State for new user registration
   const [isNewUser, setIsNewUser] = useState(false);
 
+  // State for dynamic UI configuration
+  const [visibleFields, setVisibleFields] = useState<string[]>(DEFAULT_VISIBLE_CLIENT_FIELDS);
+
 
   useEffect(() => {
     const tg = window.Telegram?.WebApp;
-    if (tg) {
+    // Mini App Environment: Check for initData which is always present
+    if (tg && tg.initData) {
         tg.ready();
-        
-        // Check if user data is present from Telegram
         if (tg.initDataUnsafe?.user?.id) {
-            const telegramUserId = tg.initDataUnsafe.user.id.toString();
-            setUserId(telegramUserId);
+            setUserId(tg.initDataUnsafe.user.id.toString());
             setAuthStatus('success');
         } else {
-            // User data not found from Telegram. This is the main issue for real users.
-            console.error("Telegram user data not found. App must be launched correctly from a bot menu button.");
             setAuthErrorMessage("Не удалось получить ваш ID пользователя. Пожалуйста, откройте это приложение через кнопку меню в боте Telegram. Если вы уже делаете это, попробуйте перезапустить Telegram.");
             setAuthStatus('error');
         }
-    } else {
-        // Fallback for browser development
-        console.warn("Telegram Web App script not found. Running in browser for development.");
+    } 
+    // Web (Browser for testing) Environment
+    else {
+        console.warn("Running in browser/test mode. Use ?clientId=... to test a specific user.");
         const urlParams = new URLSearchParams(window.location.search);
-        // Allow forcing a user ID or defaulting to demo mode
         const clientId = urlParams.get('clientId');
-        setUserId(clientId || DEMO_CHAT_ID);
+        setUserId(clientId || DEMO_CHAT_ID); // Default to demo if no clientId
         setAuthStatus('success');
     }
   }, []);
@@ -129,44 +129,41 @@ const App: React.FC = () => {
         setIsLoading(false);
         return;
       }
-
-      if (userId === DEMO_CHAT_ID) {
-        setIsDemoMode(true);
-        setClientData(demoClientData);
-        setOrderHistory(demoOrderHistory);
-        setIsLoading(false);
-        return;
-      }
       
-      setIsDemoMode(false);
       setIsLoading(true);
-
-      if (isAdmin) {
-        try {
-          const webBaseData = await fetchSheetData<ClientData>('WebBase');
-          setAllClients(webBaseData);
-        } catch(e) {
-          console.error(e);
-          setError(e instanceof Error ? e.message : 'Не удалось загрузить данные.');
-        } finally {
-          setIsLoading(false);
-        }
-        return;
-      }
-      
       try {
+        // Fetch remote config first, fallback to default if fails
+        const config = await fetchConfig();
+        if (config.visibleClientFields && Array.isArray(config.visibleClientFields)) {
+            setVisibleFields(config.visibleClientFields);
+        }
+
+        if (userId === DEMO_CHAT_ID) {
+            setIsDemoMode(true);
+            setClientData(demoClientData);
+            setOrderHistory(demoOrderHistory);
+            return;
+        }
+        
+        setIsDemoMode(false);
+
+        if (isAdmin) {
+            const webBaseData = await fetchSheetData<ClientData>('WebBase');
+            setAllClients(webBaseData);
+            return;
+        }
+        
         const [webBaseData, archiveData] = await Promise.all([
-          fetchSheetData<ClientData>('WebBase'),
-          fetchSheetData<OrderHistory>('Archive')
+            fetchSheetData<ClientData>('WebBase'),
+            fetchSheetData<OrderHistory>('Archive')
         ]);
         
         const currentClient = webBaseData.find(client => client['Chat ID'] === userId);
         if (currentClient) {
-          setClientData(currentClient);
-          setIsNewUser(false);
+            setClientData(currentClient);
+            setIsNewUser(false);
         } else {
-          // Instead of setting an error, trigger the new user registration flow
-          setIsNewUser(true);
+            setIsNewUser(true);
         }
 
         const clientHistory = archiveData.filter(order => order['Chat ID'] === userId);
@@ -211,6 +208,11 @@ const App: React.FC = () => {
     }
     await addNewUser(userId, phone);
   };
+  
+  const handleConfigSave = async (fields: string[]) => {
+    await updateConfig('visibleClientFields', fields);
+    setVisibleFields(fields); // Update state locally for immediate feedback
+  };
 
   if (authStatus === 'pending') {
     return <Loader />;
@@ -243,12 +245,15 @@ const App: React.FC = () => {
             orderHistory={viewingClientHistory}
             isDemo={false} // Never demo mode when admin is viewing
             onBack={handleAdminBack}
+            visibleFields={visibleFields}
           />
         ) : (
           <AdminSettings 
             allClients={allClients} 
             webBaseColumns={WEB_BASE_COLUMNS}
             onClientSelect={handleAdminSelectClient}
+            initialVisibleFields={visibleFields}
+            onConfigSave={handleConfigSave}
           />
         )
       ) : (
@@ -256,6 +261,7 @@ const App: React.FC = () => {
           clientData={clientData} 
           orderHistory={orderHistory} 
           isDemo={isDemoMode}
+          visibleFields={visibleFields}
         />
       )}
     </div>
