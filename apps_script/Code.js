@@ -78,7 +78,8 @@ function doGet(e) {
       return createJsonResponse([]);
     }
 
-    const headers = values.shift();
+    // Trim headers to prevent issues with leading/trailing whitespace.
+    const headers = values.shift().map(h => h.trim());
     const chatIdColumnIndex = headers.indexOf('Chat ID');
     
     const data = values.map((row) => {
@@ -129,7 +130,8 @@ function doPost(e) {
         return createJsonResponse({ error: 'Лист "WebBase" не найден.' });
       }
       
-      const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+      // Trim headers to ensure indexOf works correctly.
+      const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0].map(h => h.trim());
       const chatIdColIndex = headers.indexOf('Chat ID');
       const phoneColIndex = headers.indexOf('Телефон');
       
