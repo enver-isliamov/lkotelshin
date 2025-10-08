@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchAllSheetData, fetchClientData, fetchClientHistory, addNewUser, fetchConfig, updateConfig } from './services/googleSheetService';
+import { fetchAllSheetData, addNewUser, fetchConfig, updateConfig } from './services/googleSheetService';
 import { ClientData, OrderHistory } from './types';
 import { ADMIN_CHAT_ID, APPS_SCRIPT_URL, WEB_BASE_COLUMNS, DEMO_CHAT_ID, DEFAULT_VISIBLE_CLIENT_FIELDS } from './constants';
 import ClientDashboard from './components/ClientDashboard';
@@ -76,6 +76,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [allClients, setAllClients] = useState<ClientData[]>([]);
+  const [allHistory, setAllHistory] = useState<OrderHistory[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [authStatus, setAuthStatus] = useState<'pending' | 'success' | 'error'>('pending');
@@ -147,24 +148,28 @@ const App: React.FC = () => {
         
         setIsDemoMode(false);
 
+        // Fetch all data once and then filter on the client side
+        const [webBaseData, archiveData] = await Promise.all([
+            fetchAllSheetData<ClientData>('WebBase'),
+            fetchAllSheetData<OrderHistory>('Archive')
+        ]);
+
         if (isAdmin) {
-            const webBaseData = await fetchAllSheetData<ClientData>('WebBase');
             setAllClients(webBaseData);
+            setAllHistory(archiveData);
             return;
         }
         
-        const [currentClient, clientHistory] = await Promise.all([
-            fetchClientData(userId),
-            fetchClientHistory(userId),
-        ]);
+        const currentClient = webBaseData.find(c => c['Chat ID'] === userId);
         
         if (currentClient) {
             setClientData(currentClient);
+            const clientHistory = archiveData.filter(h => h['Chat ID'] === userId);
+            setOrderHistory(clientHistory);
             setIsNewUser(false);
         } else {
             setIsNewUser(true);
         }
-        setOrderHistory(clientHistory);
 
       } catch (e) {
         console.error(e);
@@ -177,23 +182,14 @@ const App: React.FC = () => {
     loadData();
   }, [userId, isAdmin, authStatus]);
   
-  const handleAdminSelectClient = async (client: ClientData) => {
-    setIsLoading(true);
+  const handleAdminSelectClient = (client: ClientData) => {
     setViewingClient(client);
-    try {
-      // Fetch history for this specific client on demand for better performance
-      const clientChatId = client['Chat ID']?.toString();
-      if (clientChatId) {
-        const clientHistory = await fetchClientHistory(clientChatId);
-        setViewingClientHistory(clientHistory);
-      } else {
-        setViewingClientHistory([]);
-      }
-    } catch (e) {
-      console.error(e);
-      setError(e instanceof Error ? e.message : 'Не удалось загрузить историю клиента.');
-    } finally {
-      setIsLoading(false);
+    const clientChatId = client['Chat ID']?.toString();
+    if (clientChatId) {
+      const historyForClient = allHistory.filter(h => h['Chat ID'] === clientChatId);
+      setViewingClientHistory(historyForClient);
+    } else {
+      setViewingClientHistory([]);
     }
   };
 
