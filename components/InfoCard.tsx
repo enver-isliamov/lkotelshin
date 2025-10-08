@@ -3,8 +3,9 @@ import React from 'react';
 import { ClientData } from '../types';
 
 interface InfoCardProps {
-  clientData: ClientData;
+  clientData: ClientData | null;
   visibleFields: string[];
+  isLoading: boolean;
 }
 
 // Utility to parse Russian date format DD.MM.YYYY
@@ -29,8 +30,44 @@ const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.
   </div>
 );
 
+const InfoCardSkeleton: React.FC = () => (
+  <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6 animate-pulse">
+    <div className="h-7 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md mb-6 border-b border-tg-hint/20 pb-3"></div>
+    <div className="space-y-5">
+      {/* Skeleton for each section */}
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+          <div className="flex items-center mb-3">
+            <div className="h-6 w-6 mr-3 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
+            <div className="h-6 w-1/3 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+          </div>
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="h-4 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+                <div className="h-5 w-3/4 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+                <div className="h-5 w-3/4 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+);
 
-const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields }) => {
+
+const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoading }) => {
+  if (isLoading) {
+    return <InfoCardSkeleton />;
+  }
+
+  if (!clientData) {
+    return null; // Should be handled by parent component
+  }
 
   const InfoItem: React.FC<{ label: string; value?: string | null }> = ({ label, value }) => {
     if (!value || !visibleFields.includes(label)) return null;
@@ -86,7 +123,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields }) => {
   
   return (
     <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6">
-      <h2 className="text-2xl font-semibold mb-6 border-b border-tg-hint pb-3">Детали заказа</h2>
+      <h2 className="text-2xl font-semibold mb-6 border-b border-tg-hint/20 pb-3">Детали заказа</h2>
       <div className="space-y-5">
 
         <Section title="Основная информация" icon={<CarIcon />}>
