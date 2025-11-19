@@ -83,10 +83,6 @@ const HistoryTable: React.FC<HistoryTableProps> = ({ history, isLoading }) => {
 
   return (
     <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6">
-       <div className="flex items-center mb-6 border-b border-tg-hint/20 pb-3">
-        <div className="mr-3 text-tg-link"><ArchiveIcon /></div>
-        <h2 className="text-2xl font-semibold">Архив заказов</h2>
-      </div>
       
       {/* Vertical Timeline View */}
       <div className="space-y-2 -ml-2">

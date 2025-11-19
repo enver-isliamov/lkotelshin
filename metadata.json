@@ -1,4 +1,5 @@
 {
-  "name": "Client Cabinet",
-  "description": "A Telegram Mini App for clients to view their personal cabinet, with data from a Google Sheet. Clients can see service details and order history. Admins can view all clients and configure settings."
+  "name": "lk.OtelShin.ru",
+  "description": "Мини-приложение Telegram, позволяющее клиентам просматривать свой личный кабинет с данными из Google Sheet.\n - Клиенты могут просматривать подробную информацию об услугах и историю заказов.\n - Администраторы могут просматривать всех клиентов и настраивать параметры.",
+  "requestFramePermissions": []
 }

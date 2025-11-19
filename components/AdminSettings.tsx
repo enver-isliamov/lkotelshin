@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import { ClientData } from '../types';
 import { DEMO_CHAT_ID } from '../constants';
@@ -275,7 +276,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
               <div style={{ display: activeTab === 'clients' ? 'block' : 'none' }}>
                 <div className="bg-tg-secondary-bg rounded-lg shadow-lg overflow-hidden">
                   <div className="p-4 sm:p-6 border-b border-tg-hint/20">
-                      <h2 className="text-xl font-semibold mb-4">Список клиентов</h2>
                       <div className="relative">
                           <input
                               type="text"

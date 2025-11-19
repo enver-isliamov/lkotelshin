@@ -1,20 +1,26 @@
-// This code should be pasted into the Google Apps Script editor.
-// See instructions.md for a step-by-step guide.
 
 /**
- * The ID of your Google Spreadsheet.
- * You can find this in the URL of your spreadsheet.
- * e.g., https://docs.google.com/spreadsheets/d/SPREADSHEET_ID/edit
+ * ПОЛУЧЕНИЕ КОНФИГУРАЦИИ ИЗ СВОЙСТВ СКРИПТА
+ * 
+ * ВАЖНО: В этом коде нет паролей и токенов.
+ * Они хранятся в настройках проекта Google Apps Script.
+ * 
+ * Как настроить:
+ * 1. В редакторе нажмите на шестеренку (Настройки проекта) слева.
+ * 2. Прокрутите вниз до раздела "Свойства скрипта".
+ * 3. Нажмите "Добавить свойство скрипта" и добавьте три ключа:
+ *    - SPREADSHEET_ID
+ *    - BOT_TOKEN
+ *    - ADMIN_CHAT_ID
  */
-const SPREADSHEET_ID = '1IBBn38ZD-TOgzO9VjYAyKz8mchg_RwWyD6kZ0Lu729A';
 
-// !!! ВАЖНО: Вставьте сюда токен вашего Telegram бота !!!
-// Вы можете получить его у @BotFather в Telegram.
-const BOT_TOKEN = '7736209408:AAEZUQ-t1PEo7P-Fxv5WgsJoP69DAbVAi5w';
+const scriptProperties = PropertiesService.getScriptProperties();
 
-// !!! ВАЖНО: Вставьте сюда ваш Chat ID для получения уведомлений !!!
-// Вы можете узнать свой ID у бота @userinfobot в Telegram.
-const ADMIN_CHAT_ID = '96609347'; 
+// Считывание значений, установленных через меню настроек
+const SPREADSHEET_ID = scriptProperties.getProperty('SPREADSHEET_ID');
+const BOT_TOKEN = scriptProperties.getProperty('BOT_TOKEN');
+const ADMIN_CHAT_ID = scriptProperties.getProperty('ADMIN_CHAT_ID');
+
 
 /**
  * Helper function to send a message via Telegram Bot API.
@@ -22,8 +28,8 @@ const ADMIN_CHAT_ID = '96609347';
  * @param {string} text - The message text.
  */
 function sendMessage(chatId, text) {
-  if (!BOT_TOKEN || BOT_TOKEN === 'ВАШ_ТЕЛЕГРАМ_БОТ_ТОКЕН') {
-    console.log('Bot token is not configured. Skipping message send.');
+  if (!BOT_TOKEN || BOT_TOKEN.includes('ВАШ_')) {
+    console.log('Bot token is not configured in Script Properties. Skipping message send.');
     return; // Don't try to send if token is not set
   }
   const url = 'https://api.telegram.org/bot' + BOT_TOKEN + '/sendMessage';
@@ -94,12 +100,22 @@ function getConfig(ss) {
  */
 function doGet(e) {
   try {
+    if (!SPREADSHEET_ID) {
+       return createJsonResponse({ error: 'SPREADSHEET_ID не настроен в свойствах скрипта (Настройки проекта -> Свойства скрипта).' });
+    }
+
     const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
 
-    // Handle config requests
+    // Handle config requests (publicly accessible for app functionality)
     if (e.parameter.action === 'getConfig') {
       const config = getConfig(ss);
       return createJsonResponse(config);
+    }
+
+    // SECURITY CHECK: Require chatId for any data access
+    const reqChatId = e.parameter.chatId;
+    if (!reqChatId) {
+      return createJsonResponse({ error: 'Access Denied. Chat ID required.' });
     }
 
     const sheetName = e.parameter.sheet || 'WebBase';
@@ -131,16 +147,23 @@ function doGet(e) {
       return obj;
     });
 
-    const chatId = e.parameter.chatId;
-    if (chatId && chatIdColumnIndex !== -1) {
-       // Use loose equality (==) for robustness, e.g., to match "123" with 123.
-      const filteredData = data.filter(row => row['Chat ID'] == chatId);
-      // ALWAYS return an array. The frontend is designed to handle an array for all cases.
-      return createJsonResponse(filteredData);
+    // SECURITY LOGIC:
+    // 1. If the requested Chat ID matches the ADMIN_CHAT_ID (from Script Properties), return EVERYTHING.
+    // 2. Otherwise, return ONLY the data matching the requested Chat ID.
+    
+    if (ADMIN_CHAT_ID && String(reqChatId) === String(ADMIN_CHAT_ID)) {
+       // Admin access: Return all data
+       return createJsonResponse(data);
+    } else {
+       // User access: Filter by their ID
+       if (chatIdColumnIndex !== -1) {
+         const filteredData = data.filter(row => String(row['Chat ID']) === String(reqChatId));
+         return createJsonResponse(filteredData);
+       } else {
+         // Should not happen if sheet structure is correct, but fail safe.
+         return createJsonResponse([]);
+       }
     }
-
-    // If no chatId is provided, return all data from the sheet.
-    return createJsonResponse(data);
 
   } catch (error) {
     return createJsonResponse({ error: error.message });
@@ -153,6 +176,10 @@ function doGet(e) {
  */
 function doPost(e) {
   try {
+    if (!SPREADSHEET_ID) {
+       return createJsonResponse({ error: 'SPREADSHEET_ID не настроен в свойствах скрипта.' });
+    }
+
     const requestData = JSON.parse(e.postData.contents);
     
     if (requestData.action === 'addUser') {
@@ -194,8 +221,10 @@ function doPost(e) {
       sheet.appendRow(newRow);
 
       // Send notification to admin
-      const notificationText = `<b>Новая заявка!</b>\n\nПользователь оставил заявку в боте.\n<b>Телефон:</b> ${phone}\n<b>Chat ID:</b> ${chatId}`;
-      sendMessage(ADMIN_CHAT_ID, notificationText);
+      if (ADMIN_CHAT_ID) {
+        const notificationText = `<b>Новая заявка!</b>\n\nПользователь оставил заявку в боте.\n<b>Телефон:</b> ${phone}\n<b>Chat ID:</b> ${chatId}`;
+        sendMessage(ADMIN_CHAT_ID, notificationText);
+      }
       
       return createJsonResponse({ result: 'success', message: 'Пользователь успешно добавлен.' });
     }

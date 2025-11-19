@@ -1,3 +1,4 @@
+
 import { APPS_SCRIPT_URL } from '../constants';
 import { ClientData, OrderHistory } from '../types';
 
@@ -41,11 +42,13 @@ async function handleApiResponse<T>(promise: Promise<Response>, context: string)
 
 /**
  * Fetches all data from a given sheet. Used for fetching all clients or all history records.
+ * Requires adminChatId to verify authority to fetch full database.
  * @param sheetName The name of the sheet to fetch ('WebBase' or 'Archive').
+ * @param adminChatId The Chat ID of the admin requesting the data.
  * @returns A promise that resolves to an array of objects representing the sheet rows.
  */
-export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive'): Promise<T[]> {
-  const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&_=${new Date().getTime()}`;
+export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive', adminChatId: string): Promise<T[]> {
+  const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&chatId=${adminChatId}&_=${new Date().getTime()}`;
   return handleApiResponse<T>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение всех данных с листа ${sheetName}`);
 }
 

@@ -150,10 +150,10 @@ const App: React.FC = () => {
         setIsDemoMode(false);
 
         if (isAdmin) {
-            // Admin fetches all data
+            // Admin fetches all data, passing their userId for authentication
             const [webBaseData, archiveData] = await Promise.all([
-                fetchAllSheetData<ClientData>('WebBase'),
-                fetchAllSheetData<OrderHistory>('Archive')
+                fetchAllSheetData<ClientData>('WebBase', userId),
+                fetchAllSheetData<OrderHistory>('Archive', userId)
             ]);
             setAllClients(webBaseData);
             setAllHistory(archiveData);

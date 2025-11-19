@@ -174,7 +174,6 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   
   return (
     <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6">
-      <h2 className="text-2xl font-semibold mb-6 border-b border-tg-hint/20 pb-3">Детали заказа</h2>
       <div className="space-y-5">
 
         {isMainInfoVisible && (
