@@ -50,6 +50,8 @@ const demoClientData: ClientData = {
     'Статус сделки': 'Активен',
     'Источник трафика': 'Демо-вход',
     'DOT CODE': '1223',
+    'Размер шин': '175/55 R14',
+    'Сезон': 'Лето'
 };
 
 const demoOrderHistory: OrderHistory[] = [
@@ -230,7 +232,9 @@ const App: React.FC = () => {
         'Договор': '', 
         'Адрес клиента': '', 
         'Источник трафика': 'Новая заявка',
-        'DOT CODE': ''
+        'DOT CODE': '',
+        'Размер шин': '',
+        'Сезон': ''
     };
     setClientData(newClientRecord);
     setOrderHistory([]);
