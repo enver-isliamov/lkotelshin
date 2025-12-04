@@ -83,22 +83,21 @@ const LicensePlateWidget: React.FC<{ value: string }> = ({ value }) => {
   );
 };
 
-const ActionButton: React.FC<{
-  icon: React.ReactNode;
-  label: string;
-  onClick: () => void;
-  colorClass?: string;
-  fullWidth?: boolean;
-}> = ({ icon, label, onClick, colorClass = "text-tg-link", fullWidth = false }) => (
-  <button 
-    onClick={onClick}
-    className={`bg-tg-secondary-bg p-4 rounded-xl shadow-sm border border-tg-hint/10 flex items-center justify-center gap-3 active:scale-[0.98] transition-all hover:bg-tg-bg/50 ${fullWidth ? 'w-full flex-row min-h-[60px]' : 'flex-col min-h-[100px] h-full'}`}
-  >
-    <div className={`p-2 rounded-full bg-tg-bg/50 ${colorClass}`}>
-      {icon}
-    </div>
-    <span className="font-semibold text-sm text-tg-text leading-tight">{label}</span>
-  </button>
+const CompactFooterButton: React.FC<{
+    icon: React.ReactNode;
+    label: string;
+    onClick: () => void;
+    colorClass: string;
+}> = ({ icon, label, onClick, colorClass }) => (
+    <button
+        onClick={onClick}
+        className="bg-tg-secondary-bg p-2 sm:p-3 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 active:scale-[0.96] transition-all hover:bg-tg-bg min-h-[70px]"
+    >
+        <div className={`p-1.5 sm:p-2 rounded-full bg-opacity-20 ${colorClass.split(' ')[0].replace('text-', 'bg-')} ${colorClass}`}>
+            {icon}
+        </div>
+        <span className="font-semibold text-[11px] sm:text-xs text-tg-text leading-tight">{label}</span>
+    </button>
 );
 
 
@@ -253,44 +252,38 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
         )}
       </main>
 
-       {/* Footer Actions Grid - Hidden if in Archive view */}
+       {/* Footer Actions - Compact Row */}
        {!isLoading && clientData && !showArchive && (
         <div className="pt-4 space-y-3">
-             {/* History Button - Standard */}
-             <div className="w-full">
-                <ActionButton 
-                    label="История заказов"
-                    icon={<ClockIcon className="w-6 h-6" />}
+             {/* Unified Row for History, Site, Invite */}
+             <div className="grid grid-cols-3 gap-2">
+                 <CompactFooterButton 
+                    label="История"
+                    icon={<ClockIcon className="w-5 h-5" />}
                     onClick={() => setShowArchive(true)}
-                    colorClass="text-purple-500 bg-purple-100 dark:bg-purple-900/30"
-                    fullWidth={true}
-                />
-             </div>
-
-             {/* Website and Invite - Side by Side */}
-             <div className="grid grid-cols-2 gap-3">
-                <ActionButton 
-                    label="OtelShin.ru"
-                    icon={<GlobeIcon className="w-6 h-6" />}
+                    colorClass="text-purple-600 dark:text-purple-400"
+                 />
+                 <CompactFooterButton 
+                    label="Сайт"
+                    icon={<GlobeIcon className="w-5 h-5" />}
                     onClick={handleOpenWebsite}
-                    colorClass="text-blue-500 bg-blue-100 dark:bg-blue-900/30"
-                />
-                
-                <ActionButton 
-                    label="Пригласить друга"
-                    icon={<ShareIcon className="w-6 h-6" />}
+                    colorClass="text-blue-600 dark:text-blue-400"
+                 />
+                 <CompactFooterButton 
+                    label="Пригласить"
+                    icon={<ShareIcon className="w-5 h-5" />}
                     onClick={handleInvite}
-                    colorClass="text-green-500 bg-green-100 dark:bg-green-900/30"
-                />
+                    colorClass="text-green-600 dark:text-green-400"
+                 />
              </div>
 
-             {/* Care Service - Very Bottom, Distinct style */}
+             {/* Care Service - Bottom Link */}
              <div className="pt-2">
                 <button 
                     onClick={handleOpenSupport}
-                    className="w-full py-4 text-center text-tg-hint text-sm font-medium hover:text-tg-link transition-colors flex items-center justify-center gap-2 opacity-80"
+                    className="w-full py-3 text-center text-tg-hint text-sm font-medium hover:text-tg-link transition-colors flex items-center justify-center gap-2 opacity-70 hover:opacity-100"
                 >
-                    <HeadsetIcon className="w-5 h-5" />
+                    <HeadsetIcon className="w-4 h-4" />
                     <span>Служба заботы</span>
                 </button>
              </div>
