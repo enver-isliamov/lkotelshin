@@ -15,6 +15,11 @@ export const ADMIN_CHAT_ID = '96609347'; // <-- УКАЖИТЕ СВОЙ CHAT_ID 
 // ID для демонстрационного режима (используется в браузере без clientId)
 export const DEMO_CHAT_ID = 'demo';
 
+// Ссылки на внешние ресурсы
+export const WEBSITE_URL = 'https://otelshin.ru'; 
+export const BOT_USERNAME = 'OtelShinBot'; // Имя бота для ссылки приглашения (без @)
+export const SUPPORT_URL = 'https://t.me/EnrikeTomas';
+
 // Все возможные колонки из листа 'WebBase'
 export const WEB_BASE_COLUMNS: string[] = [
   "Имя клиента", "Телефон", "Номер Авто", "Заказ - QR", "Цена за месяц", 
@@ -36,6 +41,7 @@ export const DEFAULT_VISIBLE_CLIENT_FIELDS: string[] = [
   "Наличие дисков",
   "Размер шин",
   "Сезон",
+  "DOT CODE",
   "Начало",
   "Окончание",
   "Склад хранения",
