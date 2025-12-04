@@ -161,9 +161,6 @@ const DotCodeWidget: React.FC<{ value?: string }> = ({ value }) => {
     if (!value) return null;
     
     // Split input by newline to treat each line as a specific tire/entry
-    // Example: 
-    // #1: 1121 (Латка)
-    // #2: 1320
     const lines = value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
     
     if (lines.length === 0) return null;
@@ -174,11 +171,11 @@ const DotCodeWidget: React.FC<{ value?: string }> = ({ value }) => {
         const parts = text.split(/(\(.*\))/); 
         
         return (
-            <span className="truncate">
+            <span>
                 {parts.map((part, i) => {
                     // Detect content in brackets/parentheses and style it
                     if (part.startsWith('(') && part.endsWith(')')) {
-                        return <span key={i} className="text-red-500 font-medium ml-1.5 text-xs tracking-wide">{part}</span>
+                        return <span key={i} className="text-red-500 font-medium ml-1 text-xs tracking-wide">{part}</span>
                     }
                     if (!part.trim()) return null;
                     return <span key={i} className="font-mono font-bold text-tg-text">{part}</span>
@@ -188,26 +185,16 @@ const DotCodeWidget: React.FC<{ value?: string }> = ({ value }) => {
     };
 
     return (
-        <div className="flex flex-col gap-2 py-1 w-full mt-2">
+        <div className="flex flex-col gap-1 py-1 w-full mt-2">
              <span className="text-[10px] uppercase text-tg-hint font-bold tracking-wider block">DOT</span>
-             <div className="grid grid-cols-1 gap-2">
+             <div className="flex flex-wrap gap-2">
                  {lines.map((line, i) => {
-                     // Try to extract ID if format matches "#1: ..."
-                     const match = line.match(/^#?(\d+)[:.]?\s*(.*)$/);
-                     let idx = (i + 1).toString();
-                     let content = line;
-
-                     if (match) {
-                         idx = match[1];
-                         content = match[2];
-                     }
+                     // Remove "#1:", "#1.", "#1 " prefixes to show just the data
+                     const content = line.replace(/^#?\d+[:.]?\s*/, '');
 
                      return (
-                         <div key={i} className="flex items-center bg-white dark:bg-gray-700/50 border border-tg-hint/20 rounded-md p-2 shadow-sm">
-                             <div className="flex-shrink-0 w-6 h-6 rounded-full bg-tg-hint/10 flex items-center justify-center text-[10px] font-bold text-tg-hint mr-3 select-none">
-                                 #{idx}
-                             </div>
-                             <div className="text-sm min-w-0 flex-1">
+                         <div key={i} className="inline-flex items-center bg-white dark:bg-gray-700/50 border border-tg-hint/20 rounded px-2 py-1 shadow-sm">
+                             <div className="text-sm">
                                  {renderContent(content)}
                              </div>
                          </div>
