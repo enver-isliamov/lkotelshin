@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ClientData } from '../types';
 
@@ -89,7 +88,7 @@ const TireWidget: React.FC<{ count: string; size: string; disks: string; season:
     let width = "", profile = "", diameter = "";
     
     // Regex matches common formats like:
-    // 175/55 R14, 175/55R14, 175/55 14
+    // 175/55 R14, 175/55R14, 175/55 14, 215/60 R 17
     const sizeMatch = size ? size.match(/(\d{3})\s*[\/]?\s*(\d{2})?\s*[R|r|Z?R|D|d]?\s*(\d{2})/i) : null;
     
     if (sizeMatch) {
@@ -106,53 +105,51 @@ const TireWidget: React.FC<{ count: string; size: string; disks: string; season:
     const isWinter = seasonLower.includes('зим') || seasonLower.includes('шип');
 
     return (
-        <div className="border border-tg-hint/20 rounded-xl p-3 flex items-stretch bg-white dark:bg-gray-800/80 mb-3 shadow-sm">
+        <div className="border border-tg-hint/20 rounded-xl p-2 flex items-stretch bg-white dark:bg-gray-800/80 mb-3 shadow-sm select-none overflow-hidden">
              {/* Col 1: Count */}
-             <div className="flex flex-col justify-center items-center pr-4 border-r border-tg-hint/20 min-w-[60px]">
-               <span className="text-[10px] uppercase text-tg-hint font-bold tracking-wider mb-0.5">Кол-во</span>
+             <div className="flex flex-col justify-center items-center pr-2 sm:pr-4 border-r border-tg-hint/20 min-w-[3.5rem] sm:min-w-[4.5rem]">
+               <span className="text-[9px] uppercase text-tg-hint font-bold tracking-wider mb-0.5 sm:mb-1">Кол-во</span>
                <div className="flex items-baseline">
-                   <span className="text-2xl font-bold text-tg-text leading-none">{count || '-'}</span>
-                   <span className="text-sm font-medium text-tg-hint ml-1">шт</span>
+                   <span className="text-xl sm:text-2xl font-bold text-tg-text leading-none">{count || '-'}</span>
+                   <span className="text-[10px] font-medium text-tg-hint ml-0.5">шт</span>
                </div>
              </div>
         
              {/* Col 2: Size */}
-             <div className="flex-1 flex items-center justify-center px-2">
+             <div className="flex-1 flex items-center justify-center px-1 min-w-0">
                 {sizeMatch ? (
-                    <div className="flex items-baseline">
-                        <span className="text-2xl font-bold text-tg-text leading-none">{width}</span>
+                    <div className="flex items-baseline whitespace-nowrap">
+                        <span className="text-xl sm:text-2xl font-bold text-tg-text leading-none">{width}</span>
                         {profile && (
                             <>
-                                <span className="text-xl text-tg-hint/50 mx-1 font-light">/</span>
-                                <span className="text-2xl font-bold text-tg-text leading-none">{profile}</span>
+                                <span className="text-lg text-tg-hint/30 mx-0.5 font-light">/</span>
+                                <span className="text-xl sm:text-2xl font-bold text-tg-text leading-none">{profile}</span>
                             </>
                         )}
-                        <span className="text-sm font-bold text-tg-hint/70 ml-1.5 mr-0.5 self-end mb-0.5">R</span>
-                        <span className="text-2xl font-bold text-tg-text leading-none">{diameter}</span>
+                        <span className="text-xs font-bold text-tg-hint/60 ml-1 mr-0.5 self-end mb-0.5 sm:mb-1">R</span>
+                        <span className="text-xl sm:text-2xl font-bold text-tg-text leading-none">{diameter}</span>
                     </div>
                 ) : (
-                    <span className="text-lg font-bold text-tg-text break-all text-center leading-tight">
+                    <span className="text-sm font-bold text-tg-text break-words text-center leading-tight line-clamp-2">
                         {size || 'Размер не указан'}
                     </span>
                 )}
              </div>
              
              {/* Divider */}
-             <div className="w-px bg-tg-hint/20 mx-2"></div>
+             <div className="w-px bg-tg-hint/20 mx-1"></div>
         
              {/* Col 3: Details */}
-             <div className="flex flex-col justify-center pl-1 min-w-[80px]">
-                <div className="flex gap-4 justify-center">
-                   {/* Disk */}
-                   <div className="flex flex-col items-center">
-                      <span className="text-[9px] uppercase text-tg-hint mb-1 font-bold tracking-wide">Диски</span>
-                      <DiskIcon active={!!hasDisks} />
-                   </div>
-                   {/* Season */}
-                   <div className="flex flex-col items-center">
-                      <span className="text-[9px] uppercase text-tg-hint mb-1 font-bold tracking-wide">Сезон</span>
-                      <SeasonIcon isSummer={isSummer} isWinter={isWinter} hasValue={!!season} />
-                   </div>
+             <div className="flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2">
+                {/* Disk */}
+                <div className="flex flex-col items-center w-8">
+                   <span className="text-[8px] sm:text-[9px] uppercase text-tg-hint mb-0.5 sm:mb-1 font-bold tracking-wider">Диски</span>
+                   <DiskIcon active={!!hasDisks} />
+                </div>
+                {/* Season */}
+                <div className="flex flex-col items-center w-8">
+                   <span className="text-[8px] sm:text-[9px] uppercase text-tg-hint mb-0.5 sm:mb-1 font-bold tracking-wider">Сезон</span>
+                   <SeasonIcon isSummer={isSummer} isWinter={isWinter} hasValue={!!season} />
                 </div>
              </div>
         </div>
@@ -295,10 +292,6 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
                 
                 {/* Fallback items if widget is not shown or DOT code */}
                 <div className="grid grid-cols-2 gap-2">
-                    {/* Render standard items only if widget is NOT rendering them (or simple backup)
-                        But here we assume widget handles Count/Size/Disks/Season. 
-                        So we only render leftovers here if any. 
-                     */}
                     <InfoItem label="DOT CODE" value={clientData['DOT CODE']} isCompact={true} />
                 </div>
             </Section>
