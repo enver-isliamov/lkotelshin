@@ -17,18 +17,25 @@ interface ClientDashboardProps {
 type Tab = 'current' | 'archive';
 
 const HeaderSkeleton: React.FC = () => (
-    <>
+    <div className="animate-pulse space-y-4">
+        {/* Title and Badge */}
         <div className="flex justify-between items-start gap-4">
-            <div className="flex-1 space-y-2">
-                <div className="h-8 w-3/4 bg-gray-300 dark:bg-gray-700 rounded-md animate-pulse"></div>
+            <div className="h-7 w-2/3 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+            <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+        </div>
+        
+        {/* Info Box */}
+        <div className="bg-tg-secondary-bg p-4 rounded-xl shadow-sm border border-tg-hint/10 space-y-3">
+            <div className="flex justify-between items-center">
+                 <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+                 <div className="h-6 w-24 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
             </div>
-            <div className="h-10 w-24 bg-gray-300 dark:bg-gray-700 rounded-lg animate-pulse"></div>
+            <div className="space-y-2 pt-1">
+                 <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+                 <div className="h-4 w-1/2 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
+            </div>
         </div>
-        <div className="bg-tg-secondary-bg p-4 rounded-lg shadow-md space-y-3 animate-pulse">
-            <div className="h-5 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
-            <div className="h-5 w-2/3 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
-        </div>
-    </>
+    </div>
 );
 
 const LicensePlateWidget: React.FC<{ value: string }> = ({ value }) => {
@@ -42,27 +49,27 @@ const LicensePlateWidget: React.FC<{ value: string }> = ({ value }) => {
   if (match) {
     const [_, char1, nums, char2, region] = match;
     return (
-      <div className="inline-flex items-stretch bg-white text-black border border-black rounded-[3px] shadow-sm select-none overflow-hidden h-[22px] font-sans mx-1">
+      <div className="inline-flex items-stretch bg-white text-black border border-black rounded-[4px] shadow-sm select-none overflow-hidden h-[24px] font-sans mx-1">
         {/* Left Section: Num & Letters */}
         <div className="flex items-baseline px-1.5 gap-0.5 self-center">
-           <span className="text-[10px] font-bold leading-none">{char1}</span>
-           <span className="text-[16px] font-bold leading-none tracking-widest">{nums}</span>
-           <span className="text-[10px] font-bold leading-none">{char2}</span>
+           <span className="text-[11px] font-bold leading-none">{char1}</span>
+           <span className="text-[18px] font-bold leading-none tracking-widest">{nums}</span>
+           <span className="text-[11px] font-bold leading-none">{char2}</span>
         </div>
         
         {/* Vertical Divider */}
         <div className="w-px bg-black h-full"></div>
         
         {/* Right Section: Region & Flag */}
-        <div className="flex flex-col items-center justify-between w-7 py-[2px]">
-             <span className="text-[9px] font-bold leading-none -mt-px">{region}</span>
+        <div className="flex flex-col items-center justify-between w-8 py-[2px]">
+             <span className="text-[10px] font-bold leading-none -mt-px">{region}</span>
              <div className="flex items-center gap-[1px] mt-auto">
-                <span className="text-[5px] font-bold leading-none">RUS</span>
-                {/* Flag */}
-                <div className="border-[0.5px] border-gray-400 flex flex-col h-[4px] w-[7px]">
-                    <div className="h-1/3 bg-white"></div>
-                    <div className="h-1/3 bg-blue-700"></div>
-                    <div className="h-1/3 bg-red-600"></div>
+                <span className="text-[6px] font-bold leading-none">RUS</span>
+                {/* Flag - simplified for better small-scale rendering */}
+                <div className="border border-gray-300 flex flex-col h-[5px] w-[9px]">
+                    <div className="flex-1 bg-white"></div>
+                    <div className="flex-1 bg-blue-700"></div>
+                    <div className="flex-1 bg-red-600"></div>
                 </div>
              </div>
         </div>
@@ -72,7 +79,7 @@ const LicensePlateWidget: React.FC<{ value: string }> = ({ value }) => {
 
   // Fallback for non-standard numbers
   return (
-      <div className="inline-block px-2 py-0.5 bg-white border border-black rounded-[3px] text-black font-bold text-xs shadow-sm whitespace-nowrap">
+      <div className="inline-block px-2 py-0.5 bg-white border border-black rounded-[4px] text-black font-bold text-sm shadow-sm whitespace-nowrap">
         {value}
       </div>
   );
@@ -118,10 +125,10 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
   const TabButton = ({ tab, label }: { tab: Tab; label: string }) => (
     <button
       onClick={() => setActiveTab(tab)}
-      className={`py-2 px-4 w-full text-center font-semibold rounded-md transition-colors duration-300 ${
+      className={`py-2 px-4 w-full text-center font-semibold rounded-md transition-all duration-200 ${
         activeTab === tab 
           ? 'bg-tg-button text-tg-button-text shadow-sm' 
-          : 'bg-tg-secondary-bg text-tg-text hover:bg-gray-300 dark:hover:bg-gray-600'
+          : 'bg-tg-secondary-bg text-tg-text hover:bg-black/5 dark:hover:bg-white/5'
       }`}
     >
       {label}
@@ -129,7 +136,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
   );
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6">
+    <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6 pb-8">
         {onBack && (
          <button onClick={onBack} className="flex items-center text-tg-link font-semibold transition-opacity hover:opacity-80 -mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -143,27 +150,27 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
           <>
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 pt-1">
-                    <h1 className="text-xl font-bold break-words leading-tight">{clientData['Имя клиента']}</h1>
+                    <h1 className="text-2xl font-bold break-words leading-tight">{clientData['Имя клиента']}</h1>
                 </div>
                 <div className="flex-shrink-0 flex items-center gap-2">
                     {isDemo && (
-                        <div className="bg-tg-secondary-bg border border-tg-hint/20 px-2 py-1 rounded-md flex items-center text-xs text-tg-hint" role="alert">
-                          <span>Демо</span>
+                        <div className="bg-tg-secondary-bg border border-tg-hint/20 px-2 py-1 rounded-md flex items-center text-xs text-tg-hint font-medium" role="alert">
+                          <span>Демо режим</span>
                         </div>
                     )}
                 </div>
             </div>
 
             {isHeaderInfoVisible && (
-              <div className="bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col gap-3">
+              <div className="bg-tg-secondary-bg p-4 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col gap-3">
                   {/* Top Row: Phone and Plate */}
-                  <div className="flex justify-between items-start gap-2">
+                  <div className="flex flex-wrap justify-between items-center gap-2">
                       {visibleSet.has('Телефон') && clientData['Телефон'] ? (
-                          <a href={`tel:${clientData['Телефон'].replace(/[^\d+]/g, '')}`} className="flex items-center gap-2.5 text-tg-link active:opacity-60 transition-opacity">
-                                <div className="p-1.5 bg-tg-link/10 rounded-full text-tg-link">
+                          <a href={`tel:${clientData['Телефон'].replace(/[^\d+]/g, '')}`} className="flex items-center gap-3 text-tg-text hover:text-tg-link transition-colors group">
+                                <div className="p-2 bg-tg-button/10 rounded-full text-tg-button group-hover:scale-110 transition-transform">
                                     <PhoneIcon className="w-4 h-4" />
                                 </div>
-                                <span className="font-bold text-lg leading-none pt-0.5">{clientData['Телефон']}</span>
+                                <span className="font-bold text-lg leading-none">{clientData['Телефон']}</span>
                           </a>
                       ) : (
                           <div></div> // Spacer if phone is hidden
@@ -176,7 +183,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
                   
                   {/* Bottom Row: Address and Status */}
                   {(visibleSet.has('Адрес клиента') || clientData['Статус сделки'] === 'Ожидает обработки') && (
-                      <div className="flex flex-col gap-2 pt-1">
+                      <div className="flex flex-col gap-2 pt-2 border-t border-tg-hint/10">
                            {visibleSet.has('Адрес клиента') && clientData['Адрес клиента'] && (
                                 <div className="flex items-start gap-2 text-tg-hint text-sm">
                                     <HomeIcon className="w-4 h-4 mt-0.5 flex-shrink-0 opacity-70" />
@@ -185,7 +192,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
                            )}
                            
                            {clientData['Статус сделки'] === 'Ожидает обработки' && (
-                                <div className="flex items-center gap-2 text-xs self-start bg-yellow-100 text-yellow-800 px-2 py-1 rounded-md dark:bg-yellow-900/50 dark:text-yellow-200">
+                                <div className="flex items-center gap-2 text-xs self-start bg-yellow-100 text-yellow-800 px-2.5 py-1 rounded-md dark:bg-yellow-900/50 dark:text-yellow-200 mt-1">
                                     <StatusIcon className="w-3.5 h-3.5" />
                                     <span className="font-medium">Ожидает обработки</span>
                                 </div>
@@ -197,8 +204,8 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
         </>
       )}
 
-
-      <div className="grid grid-cols-2 gap-2 p-1 bg-tg-secondary-bg rounded-lg shadow-inner">
+      {/* Tabs */}
+      <div className="grid grid-cols-2 gap-1 p-1 bg-tg-secondary-bg rounded-lg shadow-sm border border-tg-hint/5">
         <TabButton tab="current" label="Текущий заказ" />
         <TabButton tab="archive" label="Архив" />
       </div>
@@ -214,37 +221,42 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
 
        {/* Footer Actions */}
        {!isLoading && clientData && !onBack && (
-        <div className="pt-2 pb-6 space-y-3">
+        <div className="pt-4 space-y-3">
+             {/* Primary Actions Row */}
              <div className="grid grid-cols-2 gap-3">
                 <a 
                     href={WEBSITE_URL} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 text-tg-text active:scale-[0.98] transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    className="bg-tg-secondary-bg p-3.5 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 text-tg-text active:scale-[0.98] transition-all hover:bg-tg-bg/50"
                 >
-                    <GlobeIcon className="w-6 h-6 text-tg-link" />
+                    <GlobeIcon className="w-6 h-6 text-blue-500" />
                     <span className="font-semibold text-sm">Наш сайт</span>
                 </a>
                 
                 <button 
                     onClick={handleInvite}
-                    className="bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 text-tg-text active:scale-[0.98] transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    className="bg-tg-secondary-bg p-3.5 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 text-tg-text active:scale-[0.98] transition-all hover:bg-tg-bg/50"
                 >
-                    <ShareIcon className="w-6 h-6 text-tg-link" />
+                    <ShareIcon className="w-6 h-6 text-green-500" />
                     <span className="font-semibold text-sm">Пригласить</span>
                 </button>
              </div>
 
+             {/* Care Service - Bottom full width */}
              <a 
                 href={SUPPORT_URL} 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="w-full bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex items-center justify-center gap-3 text-tg-text active:scale-[0.98] transition-all group hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                className="w-full bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-xl shadow-sm border border-blue-200 dark:border-blue-800/30 flex items-center justify-center gap-3 text-tg-text active:scale-[0.98] transition-all group"
             >
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-full dark:bg-blue-900/20 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                    <HeadsetIcon className="w-5 h-5" />
+                <div className="bg-white dark:bg-blue-900/50 p-2 rounded-full shadow-sm">
+                     <HeadsetIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 </div>
-                <span className="font-semibold text-sm">Служба заботы</span>
+                <div className="flex flex-col items-start">
+                    <span className="font-bold text-sm leading-tight">Служба заботы</span>
+                    <span className="text-xs text-tg-hint leading-tight">Поддержка 24/7</span>
+                </div>
             </a>
         </div>
        )}
@@ -252,7 +264,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
   );
 };
 
-// Icons with className prop support
+// Validated Icons
 const PhoneIcon = ({className = "w-6 h-6"}: {className?: string}) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
