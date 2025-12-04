@@ -239,9 +239,13 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
                          <div className="flex flex-col gap-2">
                              <StatusItem label="Статус" fieldKey="Статус сделки" value={clientData['Статус сделки']} isCompact={true} />
                             
-                            {/* Storage Info */}
-                            <InfoItem label="Склад" fieldKey="Склад хранения" value={clientData['Склад хранения']} isCompact={true} />
-                            <InfoItem label="Ячейка" value={clientData['Ячейка']} isCompact={true} />
+                            {/* Storage Info - Side by Side in a Grid */}
+                            {( (clientData['Склад хранения'] && isFieldVisible('Склад хранения')) || (clientData['Ячейка'] && isFieldVisible('Ячейка')) ) && (
+                                <div className="grid grid-cols-2 gap-2">
+                                    <InfoItem label="Склад" fieldKey="Склад хранения" value={clientData['Склад хранения']} isCompact={true} />
+                                    <InfoItem label="Ячейка" value={clientData['Ячейка']} isCompact={true} />
+                                </div>
+                            )}
                             
                             {/* Deal Info */}
                             <InfoItem label="Договор" value={clientData['Договор']} isCompact={true} />
