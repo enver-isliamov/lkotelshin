@@ -3,6 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { ClientData, OrderHistory } from '../types';
 import InfoCard from './InfoCard';
 import HistoryTable from './HistoryTable';
+import { WEBSITE_URL, BOT_USERNAME, SUPPORT_URL } from '../constants';
 
 interface ClientDashboardProps {
   clientData: ClientData | null;
@@ -89,6 +90,19 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
     const hasPendingStatus = clientData['Статус сделки'] === 'Ожидает обработки';
     return hasVisibleFields || hasPendingStatus;
   }, [clientData, visibleSet]);
+  
+  const handleInvite = () => {
+    const botLink = `https://t.me/${BOT_USERNAME}`;
+    const text = "Рекомендую Отель Шин! Удобное хранение шин и запись на шиномонтаж.";
+    const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(text)}`;
+    
+    const tg = window.Telegram?.WebApp;
+    if (tg && tg.openTelegramLink) {
+        tg.openTelegramLink(shareUrl);
+    } else {
+        window.open(shareUrl, '_blank');
+    }
+  };
 
   if (!isLoading && !clientData) {
     return (
@@ -180,21 +194,6 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
                   )}
               </div>
             )}
-            
-            {/* Care Service Button */}
-            {!onBack && (
-                <a 
-                    href="https://t.me/EnrikeTomas" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="w-full bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex items-center justify-center gap-3 text-tg-text active:scale-[0.98] transition-all group"
-                >
-                    <div className="p-2 bg-blue-50 text-blue-600 rounded-full dark:bg-blue-900/20 dark:text-blue-400 group-hover:scale-110 transition-transform">
-                        <HeadsetIcon className="w-5 h-5" />
-                    </div>
-                    <span className="font-semibold text-sm">Служба заботы</span>
-                </a>
-            )}
         </>
       )}
 
@@ -212,6 +211,43 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
             <HistoryTable history={orderHistory} isLoading={isLoading} />
         </div>
       </main>
+
+       {/* Footer Actions */}
+       {!isLoading && clientData && !onBack && (
+        <div className="pt-2 pb-6 space-y-3">
+             <div className="grid grid-cols-2 gap-3">
+                <a 
+                    href={WEBSITE_URL} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 text-tg-text active:scale-[0.98] transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                >
+                    <GlobeIcon className="w-6 h-6 text-tg-link" />
+                    <span className="font-semibold text-sm">Наш сайт</span>
+                </a>
+                
+                <button 
+                    onClick={handleInvite}
+                    className="bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 text-tg-text active:scale-[0.98] transition-all hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                >
+                    <ShareIcon className="w-6 h-6 text-tg-link" />
+                    <span className="font-semibold text-sm">Пригласить</span>
+                </button>
+             </div>
+
+             <a 
+                href={SUPPORT_URL} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="w-full bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex items-center justify-center gap-3 text-tg-text active:scale-[0.98] transition-all group hover:bg-gray-50 dark:hover:bg-gray-800/50"
+            >
+                <div className="p-2 bg-blue-50 text-blue-600 rounded-full dark:bg-blue-900/20 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                    <HeadsetIcon className="w-5 h-5" />
+                </div>
+                <span className="font-semibold text-sm">Служба заботы</span>
+            </a>
+        </div>
+       )}
     </div>
   );
 };
@@ -235,6 +271,16 @@ const StatusIcon = ({className = "w-6 h-6"}: {className?: string}) => (
 const HeadsetIcon = ({className = "w-6 h-6"}: {className?: string}) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.25 2.25h3.5a8.25 8.25 0 018.25 8.25v2.25a6 6 0 01-6 6v-4.5a2.25 2.25 0 00-2.25-2.25H12a2.25 2.25 0 00-2.25 2.25v4.5a6 6 0 01-6-6v-2.25a8.25 8.25 0 018.25-8.25zM12.75 14.25v6.75m-1.5-6.75v6.75" />
+    </svg>
+);
+const GlobeIcon = ({className = "w-6 h-6"}: {className?: string}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+    </svg>
+);
+const ShareIcon = ({className = "w-6 h-6"}: {className?: string}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
     </svg>
 );
 
