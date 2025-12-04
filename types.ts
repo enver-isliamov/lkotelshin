@@ -1,3 +1,4 @@
+
 export interface ClientData {
   [key: string]: string;
   'Chat ID': string;
@@ -5,6 +6,7 @@ export interface ClientData {
   'Телефон': string;
   'Номер Авто': string;
   'Заказ - QR': string;
+  'Бренд_Модель': string;
   'Цена за месяц': string;
   'Кол-во шин': string;
   'Наличие дисков': string;
