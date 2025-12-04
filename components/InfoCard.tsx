@@ -189,7 +189,7 @@ const DotCodeWidget: React.FC<{ value?: string }> = ({ value }) => {
 
     return (
         <div className="flex flex-col gap-2 py-1 w-full mt-2">
-             <span className="text-[10px] uppercase text-tg-hint font-bold tracking-wider block">DOT CODE / Состояние</span>
+             <span className="text-[10px] uppercase text-tg-hint font-bold tracking-wider block">DOT</span>
              <div className="grid grid-cols-1 gap-2">
                  {lines.map((line, i) => {
                      // Try to extract ID if format matches "#1: ..."
