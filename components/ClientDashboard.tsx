@@ -88,10 +88,11 @@ const ActionButton: React.FC<{
   label: string;
   onClick: () => void;
   colorClass?: string;
-}> = ({ icon, label, onClick, colorClass = "text-tg-link" }) => (
+  fullWidth?: boolean;
+}> = ({ icon, label, onClick, colorClass = "text-tg-link", fullWidth = false }) => (
   <button 
     onClick={onClick}
-    className="bg-tg-secondary-bg p-4 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-tg-bg/50 h-full min-h-[100px]"
+    className={`bg-tg-secondary-bg p-4 rounded-xl shadow-sm border border-tg-hint/10 flex items-center justify-center gap-3 active:scale-[0.98] transition-all hover:bg-tg-bg/50 ${fullWidth ? 'w-full flex-row min-h-[60px]' : 'flex-col min-h-[100px] h-full'}`}
   >
     <div className={`p-2 rounded-full bg-tg-bg/50 ${colorClass}`}>
       {icon}
@@ -114,8 +115,10 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
   }, [clientData, visibleSet]);
   
   const handleInvite = () => {
+    // Generates a deep link to the bot with a referral parameter
     const botLink = `https://t.me/${BOT_USERNAME}?start=ref`;
     const text = "Рекомендую Отель Шин! Удобное хранение шин и запись на шиномонтаж.";
+    // t.me/share/url allows the user to pick a friend to forward this message to
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(text)}`;
     
     const tg = window.Telegram?.WebApp;
@@ -250,19 +253,22 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
         )}
       </main>
 
-       {/* Footer Actions Grid - Hidden if in Archive view to keep focus, or can be kept if desired. 
-           Design choice: Hide to allow "Back" to be primary nav. */}
+       {/* Footer Actions Grid - Hidden if in Archive view */}
        {!isLoading && clientData && !showArchive && (
-        <div className="pt-2">
-             <div className="grid grid-cols-2 gap-3">
-                
+        <div className="pt-4 space-y-3">
+             {/* History Button - Standard */}
+             <div className="w-full">
                 <ActionButton 
-                    label="История"
+                    label="История заказов"
                     icon={<ClockIcon className="w-6 h-6" />}
                     onClick={() => setShowArchive(true)}
                     colorClass="text-purple-500 bg-purple-100 dark:bg-purple-900/30"
+                    fullWidth={true}
                 />
+             </div>
 
+             {/* Website and Invite - Side by Side */}
+             <div className="grid grid-cols-2 gap-3">
                 <ActionButton 
                     label="Наш сайт"
                     icon={<GlobeIcon className="w-6 h-6" />}
@@ -271,19 +277,22 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
                 />
                 
                 <ActionButton 
-                    label="Пригласить"
+                    label="Пригласить друга"
                     icon={<ShareIcon className="w-6 h-6" />}
                     onClick={handleInvite}
                     colorClass="text-green-500 bg-green-100 dark:bg-green-900/30"
                 />
+             </div>
 
-                <ActionButton 
-                    label="Поддержка"
-                    icon={<HeadsetIcon className="w-6 h-6" />}
+             {/* Care Service - Very Bottom, Distinct style */}
+             <div className="pt-2">
+                <button 
                     onClick={handleOpenSupport}
-                    colorClass="text-orange-500 bg-orange-100 dark:bg-orange-900/30"
-                />
-
+                    className="w-full py-4 text-center text-tg-hint text-sm font-medium hover:text-tg-link transition-colors flex items-center justify-center gap-2 opacity-80"
+                >
+                    <HeadsetIcon className="w-5 h-5" />
+                    <span>Служба заботы</span>
+                </button>
              </div>
         </div>
        )}
