@@ -84,6 +84,82 @@ const StatusBadge: React.FC<{ status?: string | null; isCompact?: boolean }> = (
 };
 
 
+const TireWidget: React.FC<{ count: string; size: string; disks: string; season: string }> = ({ count, size, disks, season }) => {
+    // Basic Parsing for Tire Size "175/55 R14"
+    let width = "", profile = "", diameter = "";
+    
+    // Regex matches common formats like:
+    // 175/55 R14, 175/55R14, 175/55 14
+    const sizeMatch = size ? size.match(/(\d{3})\s*[\/]?\s*(\d{2})?\s*[R|r|Z?R|D|d]?\s*(\d{2})/i) : null;
+    
+    if (sizeMatch) {
+        width = sizeMatch[1];
+        profile = sizeMatch[2];
+        diameter = sizeMatch[3];
+    }
+
+    const hasDisks = disks && (disks.toLowerCase().includes('с дисками') || disks.toLowerCase().includes('да') || disks.toLowerCase().includes('есть'));
+    
+    // Determine season icon
+    const seasonLower = season ? season.toLowerCase() : '';
+    const isSummer = seasonLower.includes('лет');
+    const isWinter = seasonLower.includes('зим') || seasonLower.includes('шип');
+
+    return (
+        <div className="border border-tg-hint/20 rounded-xl p-3 flex items-stretch bg-white dark:bg-gray-800/80 mb-3 shadow-sm">
+             {/* Col 1: Count */}
+             <div className="flex flex-col justify-center items-center pr-4 border-r border-tg-hint/20 min-w-[60px]">
+               <span className="text-[10px] uppercase text-tg-hint font-bold tracking-wider mb-0.5">Кол-во</span>
+               <div className="flex items-baseline">
+                   <span className="text-2xl font-bold text-tg-text leading-none">{count || '-'}</span>
+                   <span className="text-sm font-medium text-tg-hint ml-1">шт</span>
+               </div>
+             </div>
+        
+             {/* Col 2: Size */}
+             <div className="flex-1 flex items-center justify-center px-2">
+                {sizeMatch ? (
+                    <div className="flex items-baseline">
+                        <span className="text-2xl font-bold text-tg-text leading-none">{width}</span>
+                        {profile && (
+                            <>
+                                <span className="text-xl text-tg-hint/50 mx-1 font-light">/</span>
+                                <span className="text-2xl font-bold text-tg-text leading-none">{profile}</span>
+                            </>
+                        )}
+                        <span className="text-sm font-bold text-tg-hint/70 ml-1.5 mr-0.5 self-end mb-0.5">R</span>
+                        <span className="text-2xl font-bold text-tg-text leading-none">{diameter}</span>
+                    </div>
+                ) : (
+                    <span className="text-lg font-bold text-tg-text break-all text-center leading-tight">
+                        {size || 'Размер не указан'}
+                    </span>
+                )}
+             </div>
+             
+             {/* Divider */}
+             <div className="w-px bg-tg-hint/20 mx-2"></div>
+        
+             {/* Col 3: Details */}
+             <div className="flex flex-col justify-center pl-1 min-w-[80px]">
+                <div className="flex gap-4 justify-center">
+                   {/* Disk */}
+                   <div className="flex flex-col items-center">
+                      <span className="text-[9px] uppercase text-tg-hint mb-1 font-bold tracking-wide">Диски</span>
+                      <DiskIcon active={!!hasDisks} />
+                   </div>
+                   {/* Season */}
+                   <div className="flex flex-col items-center">
+                      <span className="text-[9px] uppercase text-tg-hint mb-1 font-bold tracking-wide">Сезон</span>
+                      <SeasonIcon isSummer={isSummer} isWinter={isWinter} hasValue={!!season} />
+                   </div>
+                </div>
+             </div>
+        </div>
+    );
+};
+
+
 const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoading }) => {
   if (isLoading) {
     return <InfoCardSkeleton />;
@@ -97,7 +173,9 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   const isFieldVisible = (field: string) => visibleSet.has(field);
 
   // Section Visibility Logic
-  const isMainInfoVisible = isFieldVisible('Заказ - QR') || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков') || isFieldVisible('DOT CODE');
+  // Show main info if any key field is visible. Now includes "Размер шин".
+  const isMainInfoVisible = isFieldVisible('Заказ - QR') || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков') || isFieldVisible('Размер шин') || isFieldVisible('DOT CODE');
+  
   const isTimingVisible = (isFieldVisible('Начало') && isFieldVisible('Окончание')) || isFieldVisible('Напомнить') || isFieldVisible('Срок');
   
   // Finance Section Visibility
@@ -202,9 +280,25 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
         {isMainInfoVisible && (
             <Section title="Основная информация" icon={<CarIcon />} isCompact={true}>
                 <InfoItem label="Заказ - QR" value={clientData['Заказ - QR']} isEmphasized isCompact={true} />
-                <div className="grid grid-cols-2 gap-2 pt-1">
-                    <InfoItem label="Кол-во шин" value={clientData['Кол-во шин']} isCompact={true} />
-                    <InfoItem label="Наличие дисков" value={clientData['Наличие дисков']} isCompact={true} />
+                
+                {/* Tire Widget replaces Count/Disks/Size list items */}
+                {(isFieldVisible('Размер шин') || isFieldVisible('Кол-во шин')) && (
+                     <div className="pt-2 pb-1">
+                        <TireWidget 
+                            count={clientData['Кол-во шин']}
+                            size={clientData['Размер шин']}
+                            disks={clientData['Наличие дисков']}
+                            season={clientData['Сезон']}
+                        />
+                     </div>
+                )}
+                
+                {/* Fallback items if widget is not shown or DOT code */}
+                <div className="grid grid-cols-2 gap-2">
+                    {/* Render standard items only if widget is NOT rendering them (or simple backup)
+                        But here we assume widget handles Count/Size/Disks/Season. 
+                        So we only render leftovers here if any. 
+                     */}
                     <InfoItem label="DOT CODE" value={clientData['DOT CODE']} isCompact={true} />
                 </div>
             </Section>
@@ -284,5 +378,30 @@ const LocationIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
+
+const DiskIcon: React.FC<{active: boolean}> = ({active}) => (
+    <div className={`w-5 h-5 rounded-full border-[3px] flex items-center justify-center ${active ? 'border-tg-link' : 'border-tg-hint/30'}`}>
+        <div className={`w-2 h-2 rounded-full ${active ? 'bg-tg-link' : 'bg-transparent'}`}></div>
+    </div>
+);
+
+const SeasonIcon: React.FC<{isSummer: boolean; isWinter: boolean; hasValue: boolean}> = ({isSummer, isWinter, hasValue}) => {
+    if (!hasValue) return <div className="w-5 h-5 rounded-full border-2 border-dashed border-tg-hint/30"></div>;
+    
+    if (isWinter) {
+        return (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+               <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18m0-18l3.5 3.5M12 3L8.5 6.5M12 21l3.5-3.5M12 21l-3.5-3.5M3 12h18m-18 0l3.5-3.5M3 12l3.5 3.5M21 12l-3.5-3.5M21 12l-3.5 3.5m-3.965-8.485l-7.07 7.07M17.657 5.636l-3.5 3.5M10.586 12.707l-3.5 3.5m10.607 1.414l-7.07-7.07M17.657 18.364l-3.5-3.5M10.586 11.293l-3.5-3.5" />
+            </svg>
+        );
+    }
+    
+    // Default to Summer/Sun if not winter, or if generic 'active'
+    return (
+         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+         </svg>
+    );
+}
 
 export default InfoCard;
