@@ -31,6 +31,55 @@ const HeaderSkeleton: React.FC = () => (
     </>
 );
 
+const LicensePlateWidget: React.FC<{ value: string }> = ({ value }) => {
+  // Normalize value: remove spaces, special chars, keep alphanumeric
+  const cleanValue = value.replace(/[^a-zA-Zа-яА-Я0-9]/g, '').toUpperCase();
+  
+  // Standard Russian format: X 000 XX 00(0)
+  // Regex groups: 1:Letter, 2:Numbers(3), 3:Letters(2), 4:Region(2-3)
+  // Matches Latin or Cyrillic characters
+  const regex = /^([A-ZА-Я])(\d{3})([A-ZА-Я]{2})(\d{2,3})$/;
+  const match = cleanValue.match(regex);
+
+  if (match) {
+    const [_, char1, nums, char2, region] = match;
+    return (
+      <div className="inline-flex items-stretch bg-white text-black border-2 border-black rounded-[4px] shadow-sm select-none overflow-hidden h-[34px] font-sans mx-1">
+        {/* Left Section: Num & Letters */}
+        <div className="flex items-baseline px-2 gap-1 self-center">
+           <span className="text-[12px] font-bold leading-none">{char1}</span>
+           <span className="text-[22px] font-bold leading-none tracking-widest">{nums}</span>
+           <span className="text-[12px] font-bold leading-none">{char2}</span>
+        </div>
+        
+        {/* Vertical Divider */}
+        <div className="w-0.5 bg-black h-full"></div>
+        
+        {/* Right Section: Region & Flag */}
+        <div className="flex flex-col items-center justify-between w-10 py-0.5">
+             <span className="text-[14px] font-bold leading-none -mt-0.5">{region}</span>
+             <div className="flex items-center gap-0.5 mt-auto mb-0.5">
+                <span className="text-[6px] font-bold leading-none">RUS</span>
+                {/* Flag */}
+                <div className="border-[0.5px] border-gray-400 flex flex-col h-[6px] w-[9px]">
+                    <div className="h-1/3 bg-white"></div>
+                    <div className="h-1/3 bg-blue-700"></div>
+                    <div className="h-1/3 bg-red-600"></div>
+                </div>
+             </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback for non-standard numbers
+  return (
+      <div className="inline-block px-2 py-1 bg-white border-2 border-black rounded-[4px] text-black font-bold text-sm shadow-sm whitespace-nowrap">
+        {value}
+      </div>
+  );
+};
+
 
 const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHistory, isDemo, onBack, visibleFields, isLoading }) => {
   const [activeTab, setActiveTab] = useState<Tab>('current');
@@ -122,7 +171,14 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
             {isHeaderInfoVisible && (
               <div className="bg-tg-secondary-bg p-4 rounded-lg shadow-md space-y-3">
                   {visibleSet.has('Телефон') && <InfoRow icon={<PhoneIcon />} value={clientData['Телефон']} />}
-                  {visibleSet.has('Номер Авто') && <InfoRow icon={<CarPlateIcon />} value={clientData['Номер Авто']} />}
+                  
+                  {visibleSet.has('Номер Авто') && clientData['Номер Авто'] && (
+                      <div className="flex items-center gap-3 text-tg-text">
+                         <div className="flex-shrink-0 w-5 h-5 text-tg-hint"><CarPlateIcon /></div>
+                         <LicensePlateWidget value={clientData['Номер Авто']} />
+                      </div>
+                  )}
+
                   {visibleSet.has('Адрес клиента') && <InfoRow icon={<HomeIcon />} value={clientData['Адрес клиента']} />}
                   {clientData['Статус сделки'] === 'Ожидает обработки' && (
                       <div className="flex items-center gap-3">
