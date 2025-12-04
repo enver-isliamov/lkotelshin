@@ -219,8 +219,8 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   const isFieldVisible = (field: string) => visibleSet.has(field);
 
   // Section Visibility Logic
-  // Show main info if any key field is visible. Now includes "Размер шин".
-  const isMainInfoVisible = isFieldVisible('Заказ - QR') || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков') || isFieldVisible('Размер шин') || isFieldVisible('DOT CODE');
+  // Show main info if any key field is visible. Replaced "Заказ - QR" with "Бренд_Модель".
+  const isMainInfoVisible = isFieldVisible('Бренд_Модель') || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков') || isFieldVisible('Размер шин') || isFieldVisible('DOT CODE');
   
   const isTimingVisible = (isFieldVisible('Начало') && isFieldVisible('Окончание')) || isFieldVisible('Напомнить') || isFieldVisible('Срок');
   
@@ -241,7 +241,8 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
     
     // Check visibility using fieldKey if provided, otherwise use label
     const keyToCheck = fieldKey || label;
-    if (keyToCheck !== 'Заказ - QR' && !isFieldVisible(keyToCheck)) return null;
+    // Special handling was removed since 'Заказ - QR' is no longer the key field
+    if (!isFieldVisible(keyToCheck)) return null;
 
     const containerClass = isEmphasized 
         ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-2.5 rounded-lg border border-tg-hint/10" 
@@ -325,7 +326,8 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
 
         {isMainInfoVisible && (
             <Section title="Основная информация" icon={<CarIcon />} isCompact={true}>
-                <InfoItem label="Заказ - QR" value={clientData['Заказ - QR']} isEmphasized isCompact={true} />
+                {/* Changed "Заказ - QR" to "Модель" (mapped to Бренд_Модель) */}
+                <InfoItem label="Модель" fieldKey="Бренд_Модель" value={clientData['Бренд_Модель']} isEmphasized isCompact={true} />
                 
                 {/* Tire Widget replaces Count/Disks/Size list items */}
                 {(isFieldVisible('Размер шин') || isFieldVisible('Кол-во шин')) && (
