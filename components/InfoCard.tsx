@@ -235,7 +235,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
                 )}
 
                 {isStorageOrDetailsVisible && (
-                    <Section title="Склад и Инфо" icon={<LocationIcon />} isCompact={true}>
+                    <Section title="ХРАНЕНИЕ" icon={<LocationIcon />} isCompact={true}>
                          <div className="flex flex-col gap-2">
                              <StatusItem label="Статус" fieldKey="Статус сделки" value={clientData['Статус сделки']} isCompact={true} />
                             
