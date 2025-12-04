@@ -14,10 +14,8 @@ interface ClientDashboardProps {
   onBack?: () => void;
 }
 
-type Tab = 'current' | 'archive';
-
 const HeaderSkeleton: React.FC = () => (
-    <div className="animate-pulse space-y-4">
+    <div className="animate-pulse space-y-4 mb-6">
         {/* Title and Badge */}
         <div className="flex justify-between items-start gap-4">
             <div className="h-7 w-2/3 bg-gray-200 dark:bg-gray-700 rounded-md"></div>
@@ -85,9 +83,26 @@ const LicensePlateWidget: React.FC<{ value: string }> = ({ value }) => {
   );
 };
 
+const ActionButton: React.FC<{
+  icon: React.ReactNode;
+  label: string;
+  onClick: () => void;
+  colorClass?: string;
+}> = ({ icon, label, onClick, colorClass = "text-tg-link" }) => (
+  <button 
+    onClick={onClick}
+    className="bg-tg-secondary-bg p-4 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 active:scale-[0.98] transition-all hover:bg-tg-bg/50 h-full min-h-[100px]"
+  >
+    <div className={`p-2 rounded-full bg-tg-bg/50 ${colorClass}`}>
+      {icon}
+    </div>
+    <span className="font-semibold text-sm text-tg-text leading-tight">{label}</span>
+  </button>
+);
+
 
 const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHistory, isDemo, onBack, visibleFields, isLoading }) => {
-  const [activeTab, setActiveTab] = useState<Tab>('current');
+  const [showArchive, setShowArchive] = useState(false);
   const visibleSet = useMemo(() => new Set(visibleFields), [visibleFields]);
 
   const isHeaderInfoVisible = useMemo(() => {
@@ -111,6 +126,24 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
     }
   };
 
+  const handleOpenWebsite = () => {
+      const tg = window.Telegram?.WebApp;
+      if (tg && tg.openTelegramLink) {
+          tg.openTelegramLink(WEBSITE_URL);
+      } else {
+          window.open(WEBSITE_URL, '_blank');
+      }
+  };
+
+  const handleOpenSupport = () => {
+      const tg = window.Telegram?.WebApp;
+      if (tg && tg.openTelegramLink) {
+          tg.openTelegramLink(SUPPORT_URL);
+      } else {
+          window.open(SUPPORT_URL, '_blank');
+      }
+  };
+
   if (!isLoading && !clientData) {
     return (
       <div className="flex items-center justify-center h-screen p-4 text-center">
@@ -122,31 +155,31 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
     );
   }
 
-  const TabButton = ({ tab, label }: { tab: Tab; label: string }) => (
-    <button
-      onClick={() => setActiveTab(tab)}
-      className={`py-2 px-4 w-full text-center font-semibold rounded-md transition-all duration-200 ${
-        activeTab === tab 
-          ? 'bg-tg-button text-tg-button-text shadow-sm' 
-          : 'bg-tg-secondary-bg text-tg-text hover:bg-black/5 dark:hover:bg-white/5'
-      }`}
-    >
-      {label}
-    </button>
-  );
+  // Back handler: Close archive if open, otherwise trigger parent onBack (for Admin view)
+  const handleBack = () => {
+      if (showArchive) {
+          setShowArchive(false);
+      } else if (onBack) {
+          onBack();
+      }
+  };
+
+  const showBackButton = showArchive || onBack;
 
   return (
     <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6 pb-8">
-        {onBack && (
-         <button onClick={onBack} className="flex items-center text-tg-link font-semibold transition-opacity hover:opacity-80 -mb-2">
+        {/* Navigation Bar */}
+        {showBackButton && (
+         <button onClick={handleBack} className="flex items-center text-tg-link font-semibold transition-opacity hover:opacity-80 -mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
                 <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
             </svg>
-            Назад к списку
+            {showArchive ? 'Назад к заказу' : 'Назад к списку'}
         </button>
       )}
 
-      {isLoading ? <HeaderSkeleton /> : clientData && (
+      {/* Header Info (Always visible unless in Archive mode and explicit design choice, but here we keep it) */}
+      {isLoading ? <HeaderSkeleton /> : clientData && !showArchive && (
           <>
             <div className="flex justify-between items-start gap-4">
                 <div className="flex-1 pt-1">
@@ -204,60 +237,54 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
         </>
       )}
 
-      {/* Tabs */}
-      <div className="grid grid-cols-2 gap-1 p-1 bg-tg-secondary-bg rounded-lg shadow-sm border border-tg-hint/5">
-        <TabButton tab="current" label="Текущий заказ" />
-        <TabButton tab="archive" label="Архив" />
-      </div>
-
-      <main>
-        <div style={{ display: activeTab === 'current' ? 'block' : 'none' }}>
-            <InfoCard clientData={clientData} visibleFields={visibleFields} isLoading={isLoading} />
-        </div>
-        <div style={{ display: activeTab === 'archive' ? 'block' : 'none' }}>
-            <HistoryTable history={orderHistory} isLoading={isLoading} />
-        </div>
+      <main className="min-h-[200px]">
+        {showArchive ? (
+             <div className="animate-fade-in">
+                 <h2 className="text-xl font-bold mb-4 px-1">История заказов</h2>
+                 <HistoryTable history={orderHistory} isLoading={isLoading} />
+             </div>
+        ) : (
+            <div className="animate-fade-in">
+                <InfoCard clientData={clientData} visibleFields={visibleFields} isLoading={isLoading} />
+            </div>
+        )}
       </main>
 
-       {/* Footer Actions */}
-       {!isLoading && clientData && !onBack && (
-        <div className="pt-4 space-y-3">
-             {/* Primary Actions Row */}
+       {/* Footer Actions Grid - Hidden if in Archive view to keep focus, or can be kept if desired. 
+           Design choice: Hide to allow "Back" to be primary nav. */}
+       {!isLoading && clientData && !showArchive && (
+        <div className="pt-2">
              <div className="grid grid-cols-2 gap-3">
-                <a 
-                    href={WEBSITE_URL} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="bg-tg-secondary-bg p-3.5 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 text-tg-text active:scale-[0.98] transition-all hover:bg-tg-bg/50"
-                >
-                    <GlobeIcon className="w-6 h-6 text-blue-500" />
-                    <span className="font-semibold text-sm">Наш сайт</span>
-                </a>
                 
-                <button 
-                    onClick={handleInvite}
-                    className="bg-tg-secondary-bg p-3.5 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 text-tg-text active:scale-[0.98] transition-all hover:bg-tg-bg/50"
-                >
-                    <ShareIcon className="w-6 h-6 text-green-500" />
-                    <span className="font-semibold text-sm">Пригласить</span>
-                </button>
-             </div>
+                <ActionButton 
+                    label="История"
+                    icon={<ClockIcon className="w-6 h-6" />}
+                    onClick={() => setShowArchive(true)}
+                    colorClass="text-purple-500 bg-purple-100 dark:bg-purple-900/30"
+                />
 
-             {/* Care Service - Bottom full width */}
-             <a 
-                href={SUPPORT_URL} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="w-full bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 p-4 rounded-xl shadow-sm border border-blue-200 dark:border-blue-800/30 flex items-center justify-center gap-3 text-tg-text active:scale-[0.98] transition-all group"
-            >
-                <div className="bg-white dark:bg-blue-900/50 p-2 rounded-full shadow-sm">
-                     <HeadsetIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div className="flex flex-col items-start">
-                    <span className="font-bold text-sm leading-tight">Служба заботы</span>
-                    <span className="text-xs text-tg-hint leading-tight">Поддержка 24/7</span>
-                </div>
-            </a>
+                <ActionButton 
+                    label="Наш сайт"
+                    icon={<GlobeIcon className="w-6 h-6" />}
+                    onClick={handleOpenWebsite}
+                    colorClass="text-blue-500 bg-blue-100 dark:bg-blue-900/30"
+                />
+                
+                <ActionButton 
+                    label="Пригласить"
+                    icon={<ShareIcon className="w-6 h-6" />}
+                    onClick={handleInvite}
+                    colorClass="text-green-500 bg-green-100 dark:bg-green-900/30"
+                />
+
+                <ActionButton 
+                    label="Поддержка"
+                    icon={<HeadsetIcon className="w-6 h-6" />}
+                    onClick={handleOpenSupport}
+                    colorClass="text-orange-500 bg-orange-100 dark:bg-orange-900/30"
+                />
+
+             </div>
         </div>
        )}
     </div>
@@ -295,5 +322,11 @@ const ShareIcon = ({className = "w-6 h-6"}: {className?: string}) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
     </svg>
 );
+const ClockIcon = ({className = "w-6 h-6"}: {className?: string}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+
 
 export default ClientDashboard;
