@@ -7,7 +7,7 @@
 // 3. После выполнения инструкции вы получите URL веб-приложения.
 // 4. Вставьте этот URL ниже, заменив 'ВАШ_URL_СКРИПТА'.
 
-export const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaxDbFNpQneJjzvj-r9vT2uL7KTt0FUSv0Iu9W-Pjnfxc2Dp8qNSBX5KNphtwEiTAk/exec'; // <-- ВСТАВЬТЕ СЮДА URL ВАШЕГО СКРИПТА https://script.google.com/macros/s/AKfycbwBpzI86dxWlDI6IDZbSmq7tCK3Gdr0FSr2Jk6FYYGantLyALjOvdYf3VHg0Oqq5TDv/exec
+export const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyaxDbFNpQneJjzvj-r9vT2uL7KTt0FUSv0Iu9W-Pjnfxc2Dp8qNSBX5KNphtwEiTAk/exec'; // <-- ВСТАВЬТЕ СЮДА URL ВАШЕГО СКРИПТА
 
 // Chat ID администратора для доступа к панели настроек
 export const ADMIN_CHAT_ID = '96609347'; // <-- УКАЖИТЕ СВОЙ CHAT_ID АДМИНА
