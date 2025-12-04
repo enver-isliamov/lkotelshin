@@ -270,7 +270,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
              {/* Website and Invite - Side by Side */}
              <div className="grid grid-cols-2 gap-3">
                 <ActionButton 
-                    label="Наш сайт"
+                    label="OtelShin.ru"
                     icon={<GlobeIcon className="w-6 h-6" />}
                     onClick={handleOpenWebsite}
                     colorClass="text-blue-500 bg-blue-100 dark:bg-blue-900/30"
