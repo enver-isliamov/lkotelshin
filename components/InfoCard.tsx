@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { ClientData } from '../types';
 
@@ -156,6 +157,28 @@ const TireWidget: React.FC<{ count: string; size: string; disks: string; season:
     );
 };
 
+const DotCodeWidget: React.FC<{ value?: string }> = ({ value }) => {
+    if (!value) return null;
+    // Split by comma, dot, semicolon, slash or space. 
+    // Example: "1111 2222" -> ["1111", "2222"]
+    const codes = value.split(/[,.;/ \n]+/).map(s => s.trim()).filter(s => s.length > 0);
+    
+    if (codes.length === 0) return null;
+
+    return (
+        <div className="flex items-center gap-3 py-1 min-w-0">
+             <span className="text-[10px] uppercase text-tg-hint font-bold tracking-wider flex-shrink-0">DOT CODE</span>
+             <div className="flex flex-wrap gap-2">
+                 {codes.map((code, i) => (
+                     <span key={i} className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-tg-bg border border-tg-hint/20 text-xs font-medium text-tg-text shadow-sm">
+                         {code}
+                     </span>
+                 ))}
+             </div>
+        </div>
+    );
+};
+
 
 const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoading }) => {
   if (isLoading) {
@@ -290,10 +313,10 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
                      </div>
                 )}
                 
-                {/* Fallback items if widget is not shown or DOT code */}
-                <div className="grid grid-cols-2 gap-2">
-                    <InfoItem label="DOT CODE" value={clientData['DOT CODE']} isCompact={true} />
-                </div>
+                {/* DOT CODE Widget displayed as horizontal badges */}
+                {isFieldVisible('DOT CODE') && (
+                    <DotCodeWidget value={clientData['DOT CODE']} />
+                )}
             </Section>
         )}
         
