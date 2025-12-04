@@ -115,7 +115,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
   );
 
   return (
-    <div className="w-full max-w-2xl mx-auto space-y-6">
+    <div className="w-full max-w-2xl mx-auto space-y-4 sm:space-y-6">
         {onBack && (
          <button onClick={onBack} className="flex items-center text-tg-link font-semibold transition-opacity hover:opacity-80 -mb-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
@@ -136,16 +136,6 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
                         <div className="bg-tg-secondary-bg border border-tg-hint/20 px-2 py-1 rounded-md flex items-center text-xs text-tg-hint" role="alert">
                           <span>Демо</span>
                         </div>
-                    )}
-                    {!onBack && (
-                        <a 
-                          href="https://t.me/EnrikeTomas" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex-shrink-0 bg-tg-button text-tg-button-text font-medium text-sm px-3 py-1.5 rounded-lg hover:opacity-90 transition-colors"
-                        >
-                          Связаться
-                        </a>
                     )}
                 </div>
             </div>
@@ -190,6 +180,21 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
                   )}
               </div>
             )}
+            
+            {/* Care Service Button */}
+            {!onBack && (
+                <a 
+                    href="https://t.me/EnrikeTomas" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="w-full bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex items-center justify-center gap-3 text-tg-text active:scale-[0.98] transition-all group"
+                >
+                    <div className="p-2 bg-blue-50 text-blue-600 rounded-full dark:bg-blue-900/20 dark:text-blue-400 group-hover:scale-110 transition-transform">
+                        <HeadsetIcon className="w-5 h-5" />
+                    </div>
+                    <span className="font-semibold text-sm">Служба заботы</span>
+                </a>
+            )}
         </>
       )}
 
@@ -225,6 +230,11 @@ const HomeIcon = ({className = "w-6 h-6"}: {className?: string}) => (
 const StatusIcon = ({className = "w-6 h-6"}: {className?: string}) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+const HeadsetIcon = ({className = "w-6 h-6"}: {className?: string}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.25 2.25h3.5a8.25 8.25 0 018.25 8.25v2.25a6 6 0 01-6 6v-4.5a2.25 2.25 0 00-2.25-2.25H12a2.25 2.25 0 00-2.25 2.25v4.5a6 6 0 01-6-6v-2.25a8.25 8.25 0 018.25-8.25zM12.75 14.25v6.75m-1.5-6.75v6.75" />
     </svg>
 );
 
