@@ -20,13 +20,13 @@ const parseDate = (dateString: string): Date | null => {
   return null;
 };
 
-const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode }> = ({ title, icon, children }) => (
-  <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-    <div className="flex items-center mb-3">
-      <div className="mr-3 text-tg-link">{icon}</div>
-      <h3 className="text-lg font-semibold text-tg-text">{title}</h3>
+const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode; isCompact?: boolean }> = ({ title, icon, children, isCompact }) => (
+  <div className={`bg-gray-50 dark:bg-gray-800/50 rounded-lg ${isCompact ? 'p-2.5' : 'p-4'}`}>
+    <div className={`flex items-center ${isCompact ? 'mb-2' : 'mb-3'}`}>
+      <div className={`mr-2 text-tg-link ${isCompact ? 'scale-75 origin-left' : ''}`}>{icon}</div>
+      <h3 className={`font-semibold text-tg-text ${isCompact ? 'text-xs uppercase tracking-wide leading-tight' : 'text-lg'}`}>{title}</h3>
     </div>
-    <div className="space-y-3">{children}</div>
+    <div className={isCompact ? 'space-y-2' : 'space-y-3'}>{children}</div>
   </div>
 );
 
@@ -35,7 +35,7 @@ const InfoCardSkeleton: React.FC = () => (
     <div className="h-7 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md mb-6 border-b border-tg-hint/20 pb-3"></div>
     <div className="space-y-5">
       {/* Skeleton for each section */}
-      {[...Array(5)].map((_, i) => (
+      {[...Array(4)].map((_, i) => (
         <div key={i} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
           <div className="flex items-center mb-3">
             <div className="h-6 w-6 mr-3 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
@@ -74,10 +74,10 @@ const getStatusStyling = (status: string) => {
     }
 };
 
-const StatusBadge: React.FC<{ status?: string | null }> = ({ status }) => {
+const StatusBadge: React.FC<{ status?: string | null; isCompact?: boolean }> = ({ status, isCompact }) => {
     if (!status) return null;
     return (
-        <span className={`px-2.5 py-1 text-sm font-medium rounded-full ${getStatusStyling(status)}`}>
+        <span className={`inline-block font-medium rounded-full ${getStatusStyling(status)} ${isCompact ? 'px-2 py-0.5 text-xs truncate max-w-full' : 'px-2.5 py-1 text-sm'}`}>
             {status}
         </span>
     );
@@ -99,47 +99,70 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   // Section Visibility Logic
   const isMainInfoVisible = isFieldVisible('Заказ - QR') || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков') || isFieldVisible('DOT CODE');
   const isTimingVisible = (isFieldVisible('Начало') && isFieldVisible('Окончание')) || isFieldVisible('Напомнить') || isFieldVisible('Срок');
+  
+  // Finance Section Visibility
   const isFinanceVisible = isFieldVisible('Общая сумма') || isFieldVisible('Долг') || isFieldVisible('Цена за месяц');
-  const isLocationVisible = isFieldVisible('Склад хранения') || isFieldVisible('Ячейка');
-  const isDealDetailsVisible = isFieldVisible('Договор') || isFieldVisible('Статус сделки') || isFieldVisible('Источник трафика');
+  
+  // Merged "Storage & Info" Section Visibility
+  const isStorageOrDetailsVisible = 
+    isFieldVisible('Склад хранения') || 
+    isFieldVisible('Ячейка') || 
+    isFieldVisible('Договор') || 
+    isFieldVisible('Статус сделки') || 
+    isFieldVisible('Источник трафика');
 
 
-  const InfoItem: React.FC<{ label: string; value?: string | null; isEmphasized?: boolean }> = ({ label, value, isEmphasized = false }) => {
+  const InfoItem: React.FC<{ label: string; fieldKey?: string; value?: string | null; isEmphasized?: boolean; isCompact?: boolean }> = ({ label, fieldKey, value, isEmphasized = false, isCompact = false }) => {
     if (!value) return null;
-    // Always show "Заказ - QR", but respect visibility settings for other fields
-    if (label !== 'Заказ - QR' && !isFieldVisible(label)) return null;
+    
+    // Check visibility using fieldKey if provided, otherwise use label
+    const keyToCheck = fieldKey || label;
+    if (keyToCheck !== 'Заказ - QR' && !isFieldVisible(keyToCheck)) return null;
+
+    const containerClass = isEmphasized 
+        ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-3 rounded-lg border border-tg-hint/10" 
+        : "";
+    
+    const labelClass = isCompact ? "text-xs text-tg-hint leading-tight" : "text-sm text-tg-hint";
+    const valueClass = isCompact 
+        ? `text-sm font-medium leading-tight break-words ${isEmphasized ? 'text-tg-link' : 'text-tg-text'}`
+        : `text-md font-medium ${isEmphasized ? 'text-lg text-tg-link' : 'text-tg-text'}`;
 
     return (
-      <div className={isEmphasized ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-3 rounded-lg border border-tg-hint/10" : ""}>
-        <p className="text-sm text-tg-hint">{label}</p>
-        <p className={`text-md font-medium ${isEmphasized ? 'text-lg text-tg-link' : 'text-tg-text'}`}>{value}</p>
+      <div className={containerClass}>
+        <p className={labelClass}>{label}</p>
+        <p className={valueClass}>{value}</p>
       </div>
     );
   };
   
-  const StatusItem: React.FC<{ label: string; value?: string | null; }> = ({ label, value }) => {
-    if (!value || !isFieldVisible(label)) return null;
+  const StatusItem: React.FC<{ label: string; fieldKey?: string; value?: string | null; isCompact?: boolean }> = ({ label, fieldKey, value, isCompact }) => {
+    const keyToCheck = fieldKey || label;
+    if (!value || !isFieldVisible(keyToCheck)) return null;
 
     return (
-      <div>
-        <p className="text-sm text-tg-hint">{label}</p>
-        <div className="mt-1">
-          <StatusBadge status={value} />
+      <div className="min-w-0">
+        <p className={isCompact ? "text-xs text-tg-hint mb-0.5" : "text-sm text-tg-hint"}>{label}</p>
+        <div className={isCompact ? "" : "mt-1"}>
+          <StatusBadge status={value} isCompact={isCompact} />
         </div>
       </div>
     );
   };
 
-  const FinancialItem: React.FC<{ label: string; value?: string | null; isDebt?: boolean }> = ({ label, value, isDebt = false }) => {
-      if (!value || !isFieldVisible(label)) return null;
+  const FinancialItem: React.FC<{ label: string; fieldKey?: string; value?: string | null; isDebt?: boolean; isCompact?: boolean }> = ({ label, fieldKey, value, isDebt = false, isCompact = false }) => {
+      const keyToCheck = fieldKey || label;
+      if (!value || !isFieldVisible(keyToCheck)) return null;
       
       const isValuePositive = parseFloat(value.replace(/\s/g, '')) > 0;
-      const valueClass = isDebt && isValuePositive ? "text-red-500 font-bold" : "text-tg-text";
+      const valueBaseClass = isCompact ? "text-sm font-medium" : "text-md font-medium";
+      const valueClass = isDebt && isValuePositive ? `${valueBaseClass} text-red-500 font-bold` : `${valueBaseClass} text-tg-text`;
+      const labelClass = isCompact ? "text-xs text-tg-hint leading-tight" : "text-sm text-tg-hint";
 
       return (
           <div>
-              <p className="text-sm text-tg-hint">{label}</p>
-              <p className={`text-md font-medium ${valueClass}`}>{value}</p>
+              <p className={labelClass}>{label}</p>
+              <p className={valueClass}>{value}</p>
           </div>
       )
   }
@@ -174,7 +197,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   
   return (
     <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6">
-      <div className="space-y-5">
+      <div className="space-y-4">
 
         {isMainInfoVisible && (
             <Section title="Основная информация" icon={<CarIcon />}>
@@ -197,33 +220,36 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
             </Section>
         )}
 
-        {isFinanceVisible && (
-            <Section title="Финансы" icon={<WalletIcon />}>
-                <div className="grid grid-cols-2 gap-4">
-                    <InfoItem label="Общая сумма" value={clientData['Общая сумма']} />
-                    <InfoItem label="Цена за месяц" value={clientData['Цена за месяц']} />
-                    <FinancialItem label="Долг" value={clientData['Долг']} isDebt />
-                </div>
-            </Section>
-        )}
+        {/* Two Column Layout for Finance and Merged Details */}
+        {(isFinanceVisible || isStorageOrDetailsVisible) && (
+            <div className={`grid gap-3 ${isFinanceVisible && isStorageOrDetailsVisible ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                
+                {isFinanceVisible && (
+                    <Section title="Финансы" icon={<WalletIcon />} isCompact={true}>
+                        <div className="flex flex-col gap-2">
+                            <FinancialItem label="Общая сумма" value={clientData['Общая сумма']} isCompact={true} />
+                            <FinancialItem label="В месяц" fieldKey="Цена за месяц" value={clientData['Цена за месяц']} isCompact={true} />
+                            <FinancialItem label="Долг" value={clientData['Долг']} isDebt isCompact={true} />
+                        </div>
+                    </Section>
+                )}
 
-        {isLocationVisible && (
-            <Section title="Место хранения" icon={<LocationIcon />}>
-                <div className="grid grid-cols-2 gap-4">
-                    <InfoItem label="Склад хранения" value={clientData['Склад хранения']} />
-                    <InfoItem label="Ячейка" value={clientData['Ячейка']} />
-                </div>
-            </Section>
-        )}
-
-        {isDealDetailsVisible && (
-            <Section title="Детали сделки" icon={<DocumentIcon />}>
-                <div className="grid grid-cols-2 gap-4">
-                    <InfoItem label="Договор" value={clientData['Договор']} />
-                    <InfoItem label="Источник трафика" value={clientData['Источник трафика']} />
-                </div>
-                <StatusItem label="Статус сделки" value={clientData['Статус сделки']} />
-            </Section>
+                {isStorageOrDetailsVisible && (
+                    <Section title="Склад и Инфо" icon={<LocationIcon />} isCompact={true}>
+                         <div className="flex flex-col gap-2">
+                             <StatusItem label="Статус" fieldKey="Статус сделки" value={clientData['Статус сделки']} isCompact={true} />
+                            
+                            {/* Storage Info */}
+                            <InfoItem label="Склад" fieldKey="Склад хранения" value={clientData['Склад хранения']} isCompact={true} />
+                            <InfoItem label="Ячейка" value={clientData['Ячейка']} isCompact={true} />
+                            
+                            {/* Deal Info */}
+                            <InfoItem label="Договор" value={clientData['Договор']} isCompact={true} />
+                            <InfoItem label="Трафик" fieldKey="Источник трафика" value={clientData['Источник трафика']} isCompact={true} />
+                        </div>
+                    </Section>
+                )}
+            </div>
         )}
         
       </div>
@@ -253,11 +279,6 @@ const LocationIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
-);
-const DocumentIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-    </svg>
 );
 
 export default InfoCard;
