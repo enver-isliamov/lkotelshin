@@ -120,7 +120,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
     if (keyToCheck !== 'Заказ - QR' && !isFieldVisible(keyToCheck)) return null;
 
     const containerClass = isEmphasized 
-        ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-3 rounded-lg border border-tg-hint/10" 
+        ? "bg-tg-bg/50 dark:bg-tg-bg/10 p-2.5 rounded-lg border border-tg-hint/10" 
         : "";
     
     const labelClass = isCompact ? "text-xs text-tg-hint leading-tight" : "text-sm text-tg-hint";
@@ -155,7 +155,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
       if (!value || !isFieldVisible(keyToCheck)) return null;
       
       const isValuePositive = parseFloat(value.replace(/\s/g, '')) > 0;
-      const valueBaseClass = isCompact ? "text-sm font-medium" : "text-md font-medium";
+      const valueBaseClass = isCompact ? "text-sm font-medium leading-tight" : "text-md font-medium";
       const valueClass = isDebt && isValuePositive ? `${valueBaseClass} text-red-500 font-bold` : `${valueBaseClass} text-tg-text`;
       const labelClass = isCompact ? "text-xs text-tg-hint leading-tight" : "text-sm text-tg-hint";
 
@@ -183,13 +183,13 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
     progress = Math.max(0, Math.min(100, progress)); // Clamp between 0 and 100
 
     return (
-      <div>
-        <div className="flex justify-between text-sm text-tg-hint mb-1">
+      <div className="mb-2">
+        <div className="flex justify-between text-xs text-tg-hint mb-1">
           <span>{start}</span>
           <span>{end}</span>
         </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-          <div className="bg-tg-link h-2.5 rounded-full" style={{ width: `${progress}%` }}></div>
+        <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+          <div className="bg-tg-link h-2 rounded-full" style={{ width: `${progress}%` }}></div>
         </div>
       </div>
     );
@@ -197,25 +197,25 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   
   return (
     <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6">
-      <div className="space-y-4">
+      <div className="space-y-3">
 
         {isMainInfoVisible && (
-            <Section title="Основная информация" icon={<CarIcon />}>
-                <InfoItem label="Заказ - QR" value={clientData['Заказ - QR']} isEmphasized />
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                    <InfoItem label="Кол-во шин" value={clientData['Кол-во шин']} />
-                    <InfoItem label="Наличие дисков" value={clientData['Наличие дисков']} />
-                    <InfoItem label="DOT CODE" value={clientData['DOT CODE']} />
+            <Section title="Основная информация" icon={<CarIcon />} isCompact={true}>
+                <InfoItem label="Заказ - QR" value={clientData['Заказ - QR']} isEmphasized isCompact={true} />
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                    <InfoItem label="Кол-во шин" value={clientData['Кол-во шин']} isCompact={true} />
+                    <InfoItem label="Наличие дисков" value={clientData['Наличие дисков']} isCompact={true} />
+                    <InfoItem label="DOT CODE" value={clientData['DOT CODE']} isCompact={true} />
                 </div>
             </Section>
         )}
         
         {isTimingVisible && (
-            <Section title="Сроки хранения" icon={<CalendarIcon />}>
+            <Section title="Сроки хранения" icon={<CalendarIcon />} isCompact={true}>
                 <ProgressBar start={clientData['Начало']} end={clientData['Окончание']} />
-                <div className="grid grid-cols-2 gap-4 pt-2">
-                    <InfoItem label="Срок" value={clientData['Срок']} />
-                    <InfoItem label="Напомнить" value={clientData['Напомнить']} />
+                <div className="grid grid-cols-2 gap-2 pt-1">
+                    <InfoItem label="Срок" value={clientData['Срок']} isCompact={true} />
+                    <InfoItem label="Напомнить" value={clientData['Напомнить']} isCompact={true} />
                 </div>
             </Section>
         )}
