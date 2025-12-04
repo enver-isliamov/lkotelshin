@@ -21,6 +21,8 @@ export interface ClientData {
   'Статус сделки': string;
   'Источник трафика': string;
   'DOT CODE': string;
+  'Размер шин': string;
+  'Сезон': string;
 }
 
 export interface OrderHistory {
