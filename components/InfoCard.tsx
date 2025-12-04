@@ -21,10 +21,10 @@ const parseDate = (dateString: string): Date | null => {
 };
 
 const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode; isCompact?: boolean }> = ({ title, icon, children, isCompact }) => (
-  <div className={`bg-gray-50 dark:bg-gray-800/50 rounded-lg ${isCompact ? 'p-2.5' : 'p-4'}`}>
+  <div className={`bg-gray-50 dark:bg-gray-800/50 rounded-lg ${isCompact ? 'p-3' : 'p-4'}`}>
     <div className={`flex items-center ${isCompact ? 'mb-2' : 'mb-3'}`}>
-      <div className={`mr-2 text-tg-link ${isCompact ? 'scale-75 origin-left' : ''}`}>{icon}</div>
-      <h3 className={`font-semibold text-tg-text ${isCompact ? 'text-xs uppercase tracking-wide leading-tight' : 'text-lg'}`}>{title}</h3>
+      <div className={`mr-2 text-tg-link ${isCompact ? 'scale-90 origin-left' : ''}`}>{icon}</div>
+      <h3 className={`font-semibold text-tg-text ${isCompact ? 'text-xs uppercase tracking-wider' : 'text-lg'}`}>{title}</h3>
     </div>
     <div className={isCompact ? 'space-y-2' : 'space-y-3'}>{children}</div>
   </div>
@@ -32,30 +32,30 @@ const Section: React.FC<{ title: string; icon: React.ReactNode; children: React.
 
 const InfoCardSkeleton: React.FC = () => (
   <div className="bg-tg-secondary-bg rounded-lg shadow-lg p-4 sm:p-6 animate-pulse">
-    <div className="h-7 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md mb-6 border-b border-tg-hint/20 pb-3"></div>
-    <div className="space-y-5">
-      {/* Skeleton for each section */}
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-          <div className="flex items-center mb-3">
-            <div className="h-6 w-6 mr-3 bg-gray-300 dark:bg-gray-700 rounded-full"></div>
-            <div className="h-6 w-1/3 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
-          </div>
-          <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <div className="h-4 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
-                <div className="h-5 w-3/4 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
-              </div>
-              <div className="space-y-2">
-                <div className="h-4 w-1/2 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
-                <div className="h-5 w-3/4 bg-gray-300 dark:bg-gray-700 rounded-md"></div>
-              </div>
+     <div className="space-y-4">
+        {/* Simulating 3 sections of different sizes */}
+        <div className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-lg h-32">
+            <div className="flex items-center mb-3">
+                 <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded-full mr-2"></div>
+                 <div className="w-24 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
             </div>
-          </div>
+            <div className="w-full h-12 bg-white dark:bg-gray-800 rounded mb-2"></div>
+            <div className="w-1/2 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
         </div>
-      ))}
-    </div>
+
+        <div className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-lg h-24">
+             <div className="flex items-center mb-3">
+                 <div className="w-5 h-5 bg-gray-200 dark:bg-gray-700 rounded-full mr-2"></div>
+                 <div className="w-20 h-4 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
+            <div className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full mt-4"></div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3">
+            <div className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-lg h-32"></div>
+            <div className="bg-gray-100 dark:bg-gray-800/50 p-3 rounded-lg h-32"></div>
+        </div>
+     </div>
   </div>
 );
 
@@ -106,29 +106,29 @@ const TireWidget: React.FC<{ count: string; size: string; disks: string; season:
     const isWinter = seasonLower.includes('зим') || seasonLower.includes('шип');
 
     return (
-        <div className="border border-tg-hint/20 rounded-xl p-2 flex items-stretch bg-white dark:bg-gray-800/80 mb-3 shadow-sm select-none overflow-hidden">
+        <div className="border border-tg-hint/10 rounded-xl p-2 flex items-stretch bg-white dark:bg-gray-800/80 mb-3 shadow-sm select-none overflow-hidden">
              {/* Col 1: Count */}
-             <div className="flex flex-col justify-center items-center pr-2 sm:pr-4 border-r border-tg-hint/20 min-w-[3.5rem] sm:min-w-[4.5rem]">
+             <div className="flex flex-col justify-center items-center pr-2 sm:pr-4 border-r border-tg-hint/10 min-w-[3.5rem] sm:min-w-[4.5rem]">
                <span className="text-[9px] uppercase text-tg-hint font-bold tracking-wider mb-0.5 sm:mb-1">Кол-во</span>
-               <div className="flex items-baseline">
-                   <span className="text-xl sm:text-2xl font-bold text-tg-text leading-none">{count || '-'}</span>
-                   <span className="text-[10px] font-medium text-tg-hint ml-0.5">шт</span>
+               <div className="flex items-baseline text-tg-text">
+                   <span className="text-xl sm:text-2xl font-bold leading-none">{count || '-'}</span>
+                   <span className="text-[10px] font-medium opacity-60 ml-0.5">шт</span>
                </div>
              </div>
         
              {/* Col 2: Size */}
              <div className="flex-1 flex items-center justify-center px-1 min-w-0">
                 {sizeMatch ? (
-                    <div className="flex items-baseline whitespace-nowrap">
-                        <span className="text-xl sm:text-2xl font-bold text-tg-text leading-none">{width}</span>
+                    <div className="flex items-baseline whitespace-nowrap text-tg-text">
+                        <span className="text-xl sm:text-2xl font-bold leading-none">{width}</span>
                         {profile && (
                             <>
-                                <span className="text-lg text-tg-hint/30 mx-0.5 font-light">/</span>
-                                <span className="text-xl sm:text-2xl font-bold text-tg-text leading-none">{profile}</span>
+                                <span className="text-lg opacity-40 mx-0.5 font-light">/</span>
+                                <span className="text-xl sm:text-2xl font-bold leading-none">{profile}</span>
                             </>
                         )}
-                        <span className="text-xs font-bold text-tg-hint/60 ml-1 mr-0.5 self-end mb-0.5 sm:mb-1">R</span>
-                        <span className="text-xl sm:text-2xl font-bold text-tg-text leading-none">{diameter}</span>
+                        <span className="text-xs font-bold opacity-60 ml-1 mr-0.5 self-end mb-0.5 sm:mb-1">R</span>
+                        <span className="text-xl sm:text-2xl font-bold leading-none">{diameter}</span>
                     </div>
                 ) : (
                     <span className="text-sm font-bold text-tg-text break-words text-center leading-tight line-clamp-2">
@@ -138,7 +138,7 @@ const TireWidget: React.FC<{ count: string; size: string; disks: string; season:
              </div>
              
              {/* Divider */}
-             <div className="w-px bg-tg-hint/20 mx-1"></div>
+             <div className="w-px bg-tg-hint/10 mx-1"></div>
         
              {/* Col 3: Details */}
              <div className="flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2">
@@ -170,7 +170,7 @@ const DotCodeWidget: React.FC<{ value?: string }> = ({ value }) => {
              <span className="text-[10px] uppercase text-tg-hint font-bold tracking-wider flex-shrink-0">DOT CODE</span>
              <div className="flex flex-wrap gap-2">
                  {codes.map((code, i) => (
-                     <span key={i} className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-tg-bg border border-tg-hint/20 text-xs font-medium text-tg-text shadow-sm">
+                     <span key={i} className="inline-flex items-center justify-center px-2 py-0.5 rounded bg-tg-bg border border-tg-hint/20 text-xs font-mono font-bold text-tg-text shadow-sm tracking-wide">
                          {code}
                      </span>
                  ))}
@@ -314,7 +314,7 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
                 )}
                 
                 {/* DOT CODE Widget displayed as horizontal badges */}
-                {isFieldVisible('DOT CODE') && (
+                {isFieldVisible('DOT CODE') && clientData['DOT CODE'] && (
                     <DotCodeWidget value={clientData['DOT CODE']} />
                 )}
             </Section>
