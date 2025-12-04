@@ -92,7 +92,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
   }, [clientData, visibleSet]);
   
   const handleInvite = () => {
-    const botLink = `https://t.me/${BOT_USERNAME}`;
+    const botLink = `https://t.me/${BOT_USERNAME}?start=ref`;
     const text = "Рекомендую Отель Шин! Удобное хранение шин и запись на шиномонтаж.";
     const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(botLink)}&text=${encodeURIComponent(text)}`;
     
