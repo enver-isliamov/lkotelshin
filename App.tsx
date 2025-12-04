@@ -22,6 +22,7 @@ declare global {
         };
         ready: () => void;
         themeParams: { [key: string]: string };
+        openTelegramLink?: (url: string) => void;
       };
     };
   }
