@@ -3,6 +3,29 @@ import { APPS_SCRIPT_URL } from '../constants';
 import { ClientData, OrderHistory } from '../types';
 
 /**
+ * Normalizes client data keys to ensure compatibility with the app.
+ * Specifically handles variation in the "DOT CODE" column name (e.g., "DOT-код").
+ */
+function normalizeClientData(data: any[]): ClientData[] {
+  return data.map(row => {
+    const normalizedRow: any = { ...row };
+    
+    // Fix for DOT CODE: Map various header styles to the standard "DOT CODE" key
+    // The Google Sheet might have "DOT-код" (Russian/Hyphen) or "DOT код", etc.
+    if (!normalizedRow['DOT CODE']) {
+      normalizedRow['DOT CODE'] = 
+        normalizedRow['DOT-код'] || 
+        normalizedRow['DOT код'] || 
+        normalizedRow['DOT_CODE'] || 
+        normalizedRow['DotCode'] || 
+        '';
+    }
+    
+    return normalizedRow as ClientData;
+  });
+}
+
+/**
  * A generic error handler and response parser for fetch requests to the Apps Script.
  * This function is now robust and guarantees that the return value is always an array.
  * @param promise The fetch promise to process.
@@ -22,8 +45,6 @@ async function handleApiResponse<T>(promise: Promise<Response>, context: string)
 
     // CRITICAL FIX: The API should ALWAYS return an array. If it returns a single
     // object or something else, it's a sign of a server-side or deployment error.
-    // Instead of trying to guess and fix the data (which hid the root cause),
-    // we now throw a clear error so the user knows exactly what's wrong.
     if (Array.isArray(data)) {
       return data;
     }
@@ -49,7 +70,14 @@ async function handleApiResponse<T>(promise: Promise<Response>, context: string)
  */
 export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive', adminChatId: string): Promise<T[]> {
   const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&chatId=${adminChatId}&_=${new Date().getTime()}`;
-  return handleApiResponse<T>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение всех данных с листа ${sheetName}`);
+  const data = await handleApiResponse<T>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение всех данных с листа ${sheetName}`);
+  
+  // Apply normalization only for Client Data (WebBase)
+  if (sheetName === 'WebBase') {
+    return normalizeClientData(data) as unknown as T[];
+  }
+  
+  return data;
 }
 
 
@@ -61,7 +89,14 @@ export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive', adm
  */
 export async function fetchSheetDataByChatId<T>(sheetName: 'WebBase' | 'Archive', chatId: string): Promise<T[]> {
   const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&chatId=${chatId}&_=${new Date().getTime()}`;
-  return handleApiResponse<T>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение данных по chatId с листа ${sheetName}`);
+  const data = await handleApiResponse<T>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение данных по chatId с листа ${sheetName}`);
+
+  // Apply normalization only for Client Data (WebBase)
+  if (sheetName === 'WebBase') {
+    return normalizeClientData(data) as unknown as T[];
+  }
+
+  return data;
 }
 
 
