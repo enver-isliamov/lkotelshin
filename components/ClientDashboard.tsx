@@ -3,7 +3,7 @@ import React, { useState, useMemo } from 'react';
 import { ClientData, OrderHistory } from '../types';
 import InfoCard from './InfoCard';
 import HistoryTable from './HistoryTable';
-import { WEBSITE_URL, BOT_USERNAME, SUPPORT_URL } from '../constants';
+import { BOT_USERNAME, SUPPORT_URL } from '../constants';
 
 interface ClientDashboardProps {
   clientData: ClientData | null;
@@ -91,12 +91,12 @@ const CompactFooterButton: React.FC<{
 }> = ({ icon, label, onClick, colorClass }) => (
     <button
         onClick={onClick}
-        className="bg-tg-secondary-bg p-2 sm:p-3 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 active:scale-[0.96] transition-all hover:bg-tg-bg min-h-[70px]"
+        className="bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex flex-col items-center justify-center gap-2 active:scale-[0.96] transition-all hover:bg-tg-bg min-h-[80px]"
     >
-        <div className={`p-1.5 sm:p-2 rounded-full bg-opacity-20 ${colorClass.split(' ')[0].replace('text-', 'bg-')} ${colorClass}`}>
+        <div className={`p-2 rounded-full bg-opacity-20 ${colorClass.split(' ')[0].replace('text-', 'bg-')} ${colorClass}`}>
             {icon}
         </div>
-        <span className="font-semibold text-[11px] sm:text-xs text-tg-text leading-tight">{label}</span>
+        <span className="font-semibold text-xs text-tg-text leading-tight">{label}</span>
     </button>
 );
 
@@ -126,15 +126,6 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
     } else {
         window.open(shareUrl, '_blank');
     }
-  };
-
-  const handleOpenWebsite = () => {
-      const tg = window.Telegram?.WebApp;
-      if (tg && tg.openTelegramLink) {
-          tg.openTelegramLink(WEBSITE_URL);
-      } else {
-          window.open(WEBSITE_URL, '_blank');
-      }
   };
 
   const handleOpenSupport = () => {
@@ -252,41 +243,41 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
         )}
       </main>
 
-       {/* Footer Actions - Compact Row */}
+       {/* Footer Actions */}
        {!isLoading && clientData && !showArchive && (
         <div className="pt-4 space-y-3">
-             {/* Unified Row for History, Site, Invite */}
-             <div className="grid grid-cols-3 gap-2">
+             {/* Unified Row for History and Invite */}
+             <div className="grid grid-cols-2 gap-3">
                  <CompactFooterButton 
                     label="История"
-                    icon={<ClockIcon className="w-5 h-5" />}
+                    icon={<ClockIcon className="w-6 h-6" />}
                     onClick={() => setShowArchive(true)}
                     colorClass="text-purple-600 dark:text-purple-400"
                  />
                  <CompactFooterButton 
-                    label="Сайт"
-                    icon={<GlobeIcon className="w-5 h-5" />}
-                    onClick={handleOpenWebsite}
-                    colorClass="text-blue-600 dark:text-blue-400"
-                 />
-                 <CompactFooterButton 
                     label="Пригласить"
-                    icon={<ShareIcon className="w-5 h-5" />}
+                    icon={<ShareIcon className="w-6 h-6" />}
                     onClick={handleInvite}
                     colorClass="text-green-600 dark:text-green-400"
                  />
              </div>
 
-             {/* Care Service - Bottom Link */}
-             <div className="pt-2">
-                <button 
-                    onClick={handleOpenSupport}
-                    className="w-full py-3 text-center text-tg-hint text-sm font-medium hover:text-tg-link transition-colors flex items-center justify-center gap-2 opacity-70 hover:opacity-100"
-                >
-                    <HeadsetIcon className="w-4 h-4" />
-                    <span>Служба заботы</span>
-                </button>
-             </div>
+             {/* Care Service - Large styled button */}
+             <button 
+                onClick={handleOpenSupport}
+                className="w-full bg-tg-secondary-bg p-3 rounded-xl shadow-sm border border-tg-hint/10 flex items-center gap-4 active:scale-[0.98] transition-transform hover:bg-tg-bg"
+             >
+                <div className="p-2.5 bg-blue-100 text-blue-600 rounded-full dark:bg-blue-900/30 dark:text-blue-400 flex-shrink-0">
+                    <HeadsetIcon className="w-6 h-6" />
+                </div>
+                <div className="flex flex-col items-start text-left flex-1 min-w-0">
+                    <span className="font-bold text-tg-text text-sm">Служба заботы</span>
+                    <span className="text-xs text-tg-hint truncate w-full">Написать в чат поддержки</span>
+                </div>
+                 <div className="text-tg-hint/30 pr-1">
+                    <ChevronRightIcon className="w-5 h-5" />
+                 </div>
+             </button>
         </div>
        )}
     </div>
@@ -314,11 +305,6 @@ const HeadsetIcon = ({className = "w-6 h-6"}: {className?: string}) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M10.25 2.25h3.5a8.25 8.25 0 018.25 8.25v2.25a6 6 0 01-6 6v-4.5a2.25 2.25 0 00-2.25-2.25H12a2.25 2.25 0 00-2.25 2.25v4.5a6 6 0 01-6-6v-2.25a8.25 8.25 0 018.25-8.25zM12.75 14.25v6.75m-1.5-6.75v6.75" />
     </svg>
 );
-const GlobeIcon = ({className = "w-6 h-6"}: {className?: string}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-    </svg>
-);
 const ShareIcon = ({className = "w-6 h-6"}: {className?: string}) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
@@ -327,6 +313,11 @@ const ShareIcon = ({className = "w-6 h-6"}: {className?: string}) => (
 const ClockIcon = ({className = "w-6 h-6"}: {className?: string}) => (
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+const ChevronRightIcon = ({className = "w-6 h-6"}: {className?: string}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
     </svg>
 );
 
