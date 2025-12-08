@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ClientData } from '../types';
 
 interface InfoCardProps {
@@ -83,127 +83,100 @@ const StatusBadge: React.FC<{ status?: string | null; isCompact?: boolean }> = (
     );
 };
 
+// --- NEW TIRE CARD COMPONENT AND LOGIC ---
 
-const TireWidget: React.FC<{ count: string; size: string; disks: string; season: string }> = ({ count, size, disks, season }) => {
-    // Basic Parsing for Tire Size "175/55 R14"
-    let width = "", profile = "", diameter = "";
-    
-    // Regex matches common formats like:
-    // 175/55 R14, 175/55R14, 175/55 14, 215/60 R 17
-    const sizeMatch = size ? size.match(/(\d{3})\s*[\/]?\s*(\d{2})?\s*[R|r|Z?R|D|d]?\s*(\d{2})/i) : null;
-    
-    if (sizeMatch) {
-        width = sizeMatch[1];
-        profile = sizeMatch[2];
-        diameter = sizeMatch[3];
+interface TireSet {
+  brand: string;
+  model: string; // Not explicitly used if brand contains full name, but good to have
+  size: string;
+  count: string;
+  season: string;
+  disks: string;
+  dot: string;
+}
+
+const parseTireData = (clientData: ClientData): TireSet[] => {
+    const split = (str: string) => str ? str.split('\n').map(s => s.trim()) : [];
+
+    const brands = split(clientData['Бренд_Модель']);
+    const sizes = split(clientData['Размер шин']);
+    const counts = split(clientData['Кол-во шин']);
+    const dots = split(clientData['DOT CODE']);
+    const seasons = split(clientData['Сезон']);
+    const disks = split(clientData['Наличие дисков']);
+
+    // Determine the number of tire sets based on the field with the most lines (usually brand or size)
+    const maxSets = Math.max(brands.length, sizes.length, counts.length);
+    const sets: TireSet[] = [];
+
+    for (let i = 0; i < maxSets; i++) {
+        sets.push({
+            brand: brands[i] || brands[0] || '', // Fallback to first line if subsequent are empty (common in sheets)
+            model: '',
+            size: sizes[i] || sizes[0] || '',
+            count: counts[i] || counts[0] || '',
+            season: seasons[i] || seasons[0] || '',
+            disks: disks[i] || disks[0] || '',
+            dot: dots[i] || (i === 0 ? dots[0] : '') || '', // DOT might only be listed once
+        });
     }
+    return sets;
+};
 
-    const hasDisks = disks && (disks.toLowerCase().includes('с дисками') || disks.toLowerCase().includes('да') || disks.toLowerCase().includes('есть'));
+const TireCard: React.FC<{ data: TireSet }> = ({ data }) => {
+    const hasDisks = data.disks && (data.disks.toLowerCase().includes('с дисками') || data.disks.toLowerCase().includes('да') || data.disks.toLowerCase().includes('есть'));
     
-    // Determine season icon
-    const seasonLower = season ? season.toLowerCase() : '';
-    const isSummer = seasonLower.includes('лет');
-    const isWinter = seasonLower.includes('зим') || seasonLower.includes('шип');
+    // Clean up count (remove "шт" if present to add it cleanly later)
+    const cleanCount = data.count.replace(/\D/g, '');
 
     return (
-        <div className="border border-tg-hint/10 rounded-xl p-2 flex items-stretch bg-white dark:bg-gray-800/80 mb-3 shadow-sm select-none overflow-hidden">
-             {/* Col 1: Count */}
-             <div className="flex flex-col justify-center items-center pr-2 sm:pr-4 border-r border-tg-hint/10 min-w-[3.5rem] sm:min-w-[4.5rem]">
-               <span className="text-[9px] uppercase text-tg-hint font-bold tracking-wider mb-0.5 sm:mb-1">Кол-во</span>
-               <div className="flex items-baseline text-tg-text">
-                   <span className="text-xl sm:text-2xl font-bold leading-none">{count || '-'}</span>
-                   <span className="text-[10px] font-medium opacity-60 ml-0.5">шт</span>
-               </div>
-             </div>
-        
-             {/* Col 2: Size */}
-             <div className="flex-1 flex items-center justify-center px-1 min-w-0">
-                {sizeMatch ? (
-                    <div className="flex items-baseline whitespace-nowrap text-tg-text">
-                        <span className="text-xl sm:text-2xl font-bold leading-none">{width}</span>
-                        {profile && (
-                            <>
-                                <span className="text-lg opacity-40 mx-0.5 font-light">/</span>
-                                <span className="text-xl sm:text-2xl font-bold leading-none">{profile}</span>
-                            </>
-                        )}
-                        <span className="text-xs font-bold opacity-60 ml-1 mr-0.5 self-end mb-0.5 sm:mb-1">R</span>
-                        <span className="text-xl sm:text-2xl font-bold leading-none">{diameter}</span>
-                    </div>
-                ) : (
-                    <span className="text-sm font-bold text-tg-text break-words text-center leading-tight line-clamp-2">
-                        {size || 'Размер не указан'}
-                    </span>
-                )}
-             </div>
-             
-             {/* Divider */}
-             <div className="w-px bg-tg-hint/10 mx-1"></div>
-        
-             {/* Col 3: Details */}
-             <div className="flex items-center gap-2 sm:gap-3 pl-1 sm:pl-2">
-                {/* Disk */}
-                <div className="flex flex-col items-center w-8">
-                   <span className="text-[8px] sm:text-[9px] uppercase text-tg-hint mb-0.5 sm:mb-1 font-bold tracking-wider">Диски</span>
-                   <DiskIcon active={!!hasDisks} />
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 mb-2 shadow-sm">
+            {/* Top Row: Count | Size */}
+            <div className="flex items-center gap-3 mb-1.5">
+                <div className="flex items-baseline">
+                    <span className="font-bold text-lg text-tg-text">{cleanCount || '-'}</span>
+                    <span className="text-sm font-medium ml-1 text-tg-text">шт</span>
                 </div>
-                {/* Season */}
-                <div className="flex flex-col items-center w-8">
-                   <span className="text-[8px] sm:text-[9px] uppercase text-tg-hint mb-0.5 sm:mb-1 font-bold tracking-wider">Сезон</span>
-                   <SeasonIcon isSummer={isSummer} isWinter={isWinter} hasValue={!!season} />
+                
+                <div className="h-5 w-px bg-gray-300 dark:bg-gray-600"></div>
+                
+                <span className="font-bold text-xl text-tg-link tracking-tight">{data.size || 'Размер не указан'}</span>
+            </div>
+
+            {/* Middle Row: Brand + Badges */}
+            <div className="flex flex-wrap items-center gap-y-2 gap-x-2 mb-2">
+                <span className="font-medium text-tg-text mr-1 leading-snug">
+                    {data.brand || 'Модель не указана'}
+                </span>
+                
+                <div className="flex gap-2">
+                    {data.season && (
+                        <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 text-xs font-semibold">
+                            {data.season}
+                        </span>
+                    )}
+                    
+                    {hasDisks && (
+                        <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-semibold">
+                            Диски
+                        </span>
+                    )}
                 </div>
-             </div>
+            </div>
+
+            {/* Bottom Row: DOT */}
+            {data.dot && (
+                <div className="text-xs text-tg-hint font-mono mt-1 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                    DOT: {data.dot}
+                </div>
+            )}
+            
+             {/* Delete Icon would go here, but omitted for Client View as requested by context logic */}
         </div>
     );
 };
 
-const DotCodeWidget: React.FC<{ value?: string }> = ({ value }) => {
-    if (!value) return null;
-    
-    // Split input by newline to treat each line as a specific tire/entry
-    const lines = value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-    
-    if (lines.length === 0) return null;
-
-    // Helper to render text with highlighting for parentheses (notes)
-    const renderContent = (text: string) => {
-        // Regex to split by parentheses: "1121 (Латка)" -> ["1121 ", "(Латка)", ""]
-        const parts = text.split(/(\(.*\))/); 
-        
-        return (
-            <span>
-                {parts.map((part, i) => {
-                    // Detect content in brackets/parentheses and style it
-                    if (part.startsWith('(') && part.endsWith(')')) {
-                        return <span key={i} className="text-red-500 font-medium ml-1 text-xs tracking-wide">{part}</span>
-                    }
-                    if (!part.trim()) return null;
-                    return <span key={i} className="font-mono font-bold text-tg-text">{part}</span>
-                })}
-            </span>
-        );
-    };
-
-    return (
-        <div className="flex flex-col gap-1 py-1 w-full mt-2">
-             <span className="text-[10px] uppercase text-tg-hint font-bold tracking-wider block">DOT</span>
-             <div className="flex flex-wrap gap-2">
-                 {lines.map((line, i) => {
-                     // Remove "#1:", "#1.", "#1 " prefixes to show just the data
-                     const content = line.replace(/^#?\d+[:.]?\s*/, '');
-
-                     return (
-                         <div key={i} className="inline-flex items-center bg-white dark:bg-gray-700/50 border border-tg-hint/20 rounded px-2 py-1 shadow-sm">
-                             <div className="text-sm">
-                                 {renderContent(content)}
-                             </div>
-                         </div>
-                     );
-                 })}
-             </div>
-        </div>
-    );
-};
+// --- END NEW TIRE COMPONENTS ---
 
 
 const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoading }) => {
@@ -218,8 +191,11 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
   const visibleSet = new Set(visibleFields);
   const isFieldVisible = (field: string) => visibleSet.has(field);
 
+  // Parse Tire Data for the new display
+  const tireSets = useMemo(() => parseTireData(clientData), [clientData]);
+
   // Section Visibility Logic
-  // Show main info if any key field is visible. Replaced "Заказ - QR" with "Бренд_Модель".
+  // Show main info if any key field is visible.
   const isMainInfoVisible = isFieldVisible('Бренд_Модель') || isFieldVisible('Кол-во шин') || isFieldVisible('Наличие дисков') || isFieldVisible('Размер шин') || isFieldVisible('DOT CODE');
   
   const isTimingVisible = (isFieldVisible('Начало') && isFieldVisible('Окончание')) || isFieldVisible('Напомнить') || isFieldVisible('Срок');
@@ -241,7 +217,6 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
     
     // Check visibility using fieldKey if provided, otherwise use label
     const keyToCheck = fieldKey || label;
-    // Special handling was removed since 'Заказ - QR' is no longer the key field
     if (!isFieldVisible(keyToCheck)) return null;
 
     const containerClass = isEmphasized 
@@ -326,25 +301,11 @@ const InfoCard: React.FC<InfoCardProps> = ({ clientData, visibleFields, isLoadin
 
         {isMainInfoVisible && (
             <Section title="Основная информация" icon={<CarIcon />} isCompact={true}>
-                {/* Changed "Заказ - QR" to "Модель" (mapped to Бренд_Модель) */}
-                <InfoItem label="Модель" fieldKey="Бренд_Модель" value={clientData['Бренд_Модель']} isEmphasized isCompact={true} />
-                
-                {/* Tire Widget replaces Count/Disks/Size list items */}
-                {(isFieldVisible('Размер шин') || isFieldVisible('Кол-во шин')) && (
-                     <div className="pt-2 pb-1">
-                        <TireWidget 
-                            count={clientData['Кол-во шин']}
-                            size={clientData['Размер шин']}
-                            disks={clientData['Наличие дисков']}
-                            season={clientData['Сезон']}
-                        />
-                     </div>
-                )}
-                
-                {/* DOT CODE Widget displayed as horizontal badges */}
-                {isFieldVisible('DOT CODE') && clientData['DOT CODE'] && (
-                    <DotCodeWidget value={clientData['DOT CODE']} />
-                )}
+                <div className="pt-1">
+                   {tireSets.map((set, index) => (
+                       <TireCard key={index} data={set} />
+                   ))}
+                </div>
             </Section>
         )}
         
@@ -422,30 +383,5 @@ const LocationIcon = () => (
     <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
   </svg>
 );
-
-const DiskIcon: React.FC<{active: boolean}> = ({active}) => (
-    <div className={`w-5 h-5 rounded-full border-[3px] flex items-center justify-center ${active ? 'border-tg-link' : 'border-tg-hint/30'}`}>
-        <div className={`w-2 h-2 rounded-full ${active ? 'bg-tg-link' : 'bg-transparent'}`}></div>
-    </div>
-);
-
-const SeasonIcon: React.FC<{isSummer: boolean; isWinter: boolean; hasValue: boolean}> = ({isSummer, isWinter, hasValue}) => {
-    if (!hasValue) return <div className="w-5 h-5 rounded-full border-2 border-dashed border-tg-hint/30"></div>;
-    
-    if (isWinter) {
-        return (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-               <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v18m0-18l3.5 3.5M12 3L8.5 6.5M12 21l3.5-3.5M12 21l-3.5-3.5M3 12h18m-18 0l3.5-3.5M3 12l3.5 3.5M21 12l-3.5-3.5M21 12l-3.5 3.5m-3.965-8.485l-7.07 7.07M17.657 5.636l-3.5 3.5M10.586 12.707l-3.5 3.5m10.607 1.414l-7.07-7.07M17.657 18.364l-3.5-3.5M10.586 11.293l-3.5-3.5" />
-            </svg>
-        );
-    }
-    
-    // Default to Summer/Sun if not winter, or if generic 'active'
-    return (
-         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-orange-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-         </svg>
-    );
-}
 
 export default InfoCard;
