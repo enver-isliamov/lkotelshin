@@ -107,7 +107,7 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
 
   const isHeaderInfoVisible = useMemo(() => {
     if (!clientData) return false;
-    const fieldsToCheck = ['Телефон', 'Номер Авто', 'Адрес клиента'];
+    const fieldsToCheck = ['Телефон', 'Номер Авто', 'Адрес клиента', 'Chat ID'];
     const hasVisibleFields = fieldsToCheck.some(field => visibleSet.has(field) && clientData[field]);
     const hasPendingStatus = clientData['Статус сделки'] === 'Ожидает обработки';
     return hasVisibleFields || hasPendingStatus;
@@ -207,13 +207,19 @@ const ClientDashboard: React.FC<ClientDashboardProps> = ({ clientData, orderHist
                       )}
                   </div>
                   
-                  {/* Bottom Row: Address and Status */}
-                  {(visibleSet.has('Адрес клиента') || clientData['Статус сделки'] === 'Ожидает обработки') && (
+                  {/* Bottom Row: Address, Status, Chat ID */}
+                  {(visibleSet.has('Адрес клиента') || visibleSet.has('Chat ID') || clientData['Статус сделки'] === 'Ожидает обработки') && (
                       <div className="flex flex-col gap-2 pt-2 border-t border-tg-hint/10">
                            {visibleSet.has('Адрес клиента') && clientData['Адрес клиента'] && (
                                 <div className="flex items-start gap-2 text-tg-hint text-sm">
                                     <HomeIcon className="w-4 h-4 mt-0.5 flex-shrink-0 opacity-70" />
                                     <span className="leading-snug">{clientData['Адрес клиента']}</span>
+                                </div>
+                           )}
+
+                           {visibleSet.has('Chat ID') && clientData['Chat ID'] && (
+                                <div className="flex items-center gap-2 text-tg-hint text-xs font-mono opacity-70" title="Telegram Chat ID">
+                                    <span className="bg-tg-hint/10 px-1.5 py-0.5 rounded">ID: {clientData['Chat ID']}</span>
                                 </div>
                            )}
                            
