@@ -1,8 +1,8 @@
 
 import React, { useState, useMemo, useEffect, useRef } from 'react';
-import { ClientData } from '../types';
-import { DEMO_CHAT_ID } from '../constants';
-import { sendMessageFromBot } from '../services/googleSheetService';
+import { ClientData, MessageTemplate } from '../types';
+import { ADMIN_CHAT_ID, DEMO_CHAT_ID } from '../constants';
+import { sendMessageFromBot, fetchAllSheetData } from '../services/googleSheetService';
 
 interface AdminSettingsProps {
   allClients: ClientData[];
@@ -60,7 +60,7 @@ const PREDEFINED_GROUPS: Record<string, string[]> = {
 
 // --- Sub-components ---
 
-const SendMessageModal: React.FC<{client: ClientData; onClose: () => void}> = ({ client, onClose }) => {
+const SendMessageModal: React.FC<{client: ClientData; templates: MessageTemplate[]; onClose: () => void}> = ({ client, templates, onClose }) => {
     const [text, setText] = useState('');
     const [status, setStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
     const [error, setError] = useState('');
@@ -78,6 +78,16 @@ const SendMessageModal: React.FC<{client: ClientData; onClose: () => void}> = ({
         } catch (e) {
             setStatus('error');
             setError(e instanceof Error ? e.message : 'Неизвестная ошибка');
+        }
+    };
+
+    const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedIndex = e.target.selectedIndex;
+        if (selectedIndex > 0) { // 0 is "Select template..."
+            const template = templates[selectedIndex - 1];
+            // Replace placeholders if any (optional future enhancement)
+            // For now, just set the text
+            setText(template['Текст']);
         }
     };
     
@@ -109,11 +119,28 @@ const SendMessageModal: React.FC<{client: ClientData; onClose: () => void}> = ({
                 <h3 className="text-lg font-bold mb-1">Сообщение</h3>
                 <p className="text-tg-hint text-sm mb-4 truncate pr-8">Кому: {client['Имя клиента']}</p>
                 
+                {templates.length > 0 && (
+                    <div className="mb-3">
+                         <select
+                            onChange={handleTemplateChange}
+                            className="w-full p-2.5 text-sm border border-tg-hint/20 rounded-xl bg-tg-bg text-tg-text focus:outline-none focus:ring-2 focus:ring-tg-link appearance-none"
+                            style={{ backgroundImage: 'none' }} // Remove default arrow if needed, but keeping standard is better for a11y
+                        >
+                            <option value="">-- Выберите шаблон --</option>
+                            {templates.map((tpl, index) => (
+                                <option key={index} value={tpl['Название']}>
+                                    {tpl['Название']}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+                
                 <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
-                    placeholder="Введите ваше сообщение..."
-                    rows={4}
+                    placeholder="Введите текст сообщения или выберите шаблон..."
+                    rows={6}
                     className="w-full p-3 border border-tg-hint/20 rounded-xl bg-tg-bg focus:outline-none focus:ring-2 focus:ring-tg-link text-base resize-none"
                     disabled={status === 'sending' || status === 'sent'}
                 />
@@ -156,6 +183,23 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [messagingClient, setMessagingClient] = useState<ClientData | null>(null);
+  const [templates, setTemplates] = useState<MessageTemplate[]>([]);
+
+  // Load templates on mount
+  useEffect(() => {
+    const loadTemplates = async () => {
+        try {
+            const data = await fetchAllSheetData<MessageTemplate>('Шаблоны сообщений', ADMIN_CHAT_ID);
+            // Basic validation to ensure we have Name and Text
+            const validTemplates = data.filter(t => t['Название'] && t['Текст']);
+            setTemplates(validTemplates);
+        } catch (e) {
+            console.error("Failed to load message templates:", e);
+            // Silent error, modal will just work without templates
+        }
+    };
+    loadTemplates();
+  }, []);
 
   // Discover all dynamic columns from actual data + hardcoded defaults
   const allAvailableColumns = useMemo(() => {
@@ -420,6 +464,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
       {messagingClient && (
         <SendMessageModal 
           client={messagingClient}
+          templates={templates}
           onClose={() => setMessagingClient(null)}
         />
       )}
