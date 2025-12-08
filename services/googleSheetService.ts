@@ -1,6 +1,6 @@
 
 import { APPS_SCRIPT_URL } from '../constants';
-import { ClientData, OrderHistory } from '../types';
+import { ClientData, OrderHistory, MessageTemplate } from '../types';
 
 /**
  * Normalizes client data keys to ensure compatibility with the app.
@@ -23,6 +23,17 @@ function normalizeClientData(data: any[]): ClientData[] {
     
     return normalizedRow as ClientData;
   });
+}
+
+/**
+ * Normalizes message templates to standard keys.
+ * Maps 'Название шаблона' -> 'title' and 'Содержимое (HTML)' -> 'text'.
+ */
+function normalizeTemplates(data: any[]): MessageTemplate[] {
+  return data.map(row => ({
+    title: row['Название шаблона'] || row['Название'] || '',
+    text: row['Содержимое (HTML)'] || row['Содержимое'] || row['Текст'] || ''
+  }));
 }
 
 /**
@@ -72,9 +83,13 @@ export async function fetchAllSheetData<T>(sheetName: 'WebBase' | 'Archive' | '�
   const url = `${APPS_SCRIPT_URL}?sheet=${sheetName}&chatId=${adminChatId}&_=${new Date().getTime()}`;
   const data = await handleApiResponse<T>(fetch(url, { method: 'GET', redirect: 'follow' }), `получение всех данных с листа ${sheetName}`);
   
-  // Apply normalization only for Client Data (WebBase)
+  // Apply normalization based on sheet name
   if (sheetName === 'WebBase') {
     return normalizeClientData(data) as unknown as T[];
+  }
+  
+  if (sheetName === 'Шаблоны сообщений') {
+    return normalizeTemplates(data) as unknown as T[];
   }
   
   return data;
