@@ -192,8 +192,8 @@ const TireCard: React.FC<{ data: TireSet }> = ({ data }) => {
     
     return (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 mb-2 shadow-sm">
-            {/* Top Row: Count | Size */}
-            <div className="flex items-center gap-3 mb-1.5">
+            {/* Top Row: Count | Size | Badges */}
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-1.5">
                 <div className="flex items-baseline">
                     <span className="font-bold text-lg text-tg-text">{data.count || '-'}</span>
                     <span className="text-sm font-medium ml-1 text-tg-text">шт</span>
@@ -201,28 +201,30 @@ const TireCard: React.FC<{ data: TireSet }> = ({ data }) => {
                 
                 <div className="h-5 w-px bg-gray-300 dark:bg-gray-600"></div>
                 
-                <span className="font-bold text-xl text-tg-link tracking-tight">{data.size || 'Размер не указан'}</span>
+                <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-bold text-lg text-tg-link tracking-tight">{data.size || 'Размер не указан'}</span>
+                    
+                    <div className="flex gap-1.5">
+                        {data.season && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 text-[10px] font-bold uppercase tracking-wide">
+                                {data.season}
+                            </span>
+                        )}
+                        
+                        {hasDisks && (
+                            <span className="px-1.5 py-0.5 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 text-[10px] font-bold uppercase tracking-wide">
+                                Диски
+                            </span>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            {/* Middle Row: Brand + Badges */}
-            <div className="flex flex-wrap items-center gap-y-2 gap-x-2 mb-2">
-                <span className="font-medium text-tg-text mr-1 leading-snug">
+            {/* Middle Row: Brand */}
+            <div className="mb-2">
+                <span className="font-medium text-tg-text leading-snug block">
                     {data.brand || 'Модель не указана'}
                 </span>
-                
-                <div className="flex gap-2">
-                    {data.season && (
-                        <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300 text-xs font-semibold">
-                            {data.season}
-                        </span>
-                    )}
-                    
-                    {hasDisks && (
-                        <span className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 dark:bg-blue-900/40 dark:text-blue-300 text-xs font-semibold">
-                            Диски
-                        </span>
-                    )}
-                </div>
             </div>
 
             {/* Bottom Row: DOT */}
