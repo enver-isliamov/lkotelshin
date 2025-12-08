@@ -51,17 +51,17 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
       <div className="flex-1 overflow-y-auto pb-[400px] scrollbar-hide">
         
         {/* Hero Section */}
-        <div className="relative pt-12 pb-8 px-6 text-center">
+        <div className="relative pt-12 pb-6 px-6 text-center">
             {/* Background Glow */}
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-gradient-to-b from-blue-500/10 to-transparent rounded-b-[50px] pointer-events-none"></div>
             
             <div className="relative z-10 flex flex-col items-center">
-                {/* Logo Removed Here */}
                 <h1 className="text-3xl font-extrabold text-tg-text mb-3 leading-tight mt-4">
                     Отель Шин
                 </h1>
-                <p className="text-tg-hint text-lg leading-snug max-w-[260px]">
-                   Освободите балкон для жизни, а мы позаботимся о колесах.
+                <p className="text-tg-hint text-lg leading-snug max-w-[280px]">
+                   Профессиональное хранение в оптимальных условиях. <br/>
+                   <span className="text-tg-link font-semibold">Вывоз от дома — бесплатно.</span>
                 </p>
             </div>
         </div>
@@ -69,34 +69,56 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
         {/* Value Proposition Cards */}
         <div className="px-5 space-y-4">
             <FeatureCard 
-                icon={<SunIcon />}
-                title="Правильный климат"
-                text="Храним шины в сухом, проветриваемом складе без доступа ультрафиолета. Резина не стареет и не трескается."
+                icon={<TruckIcon />}
+                title="Вывоз бесплатно"
+                text="Заберем шины от дома или офиса. Избавим вас от погрузки тяжестей и грязи в салоне."
             />
             <FeatureCard 
-                icon={<MuscleIcon />}
-                title="Никаких тяжестей"
-                text="Забудьте о погрузке грязных колес в салон. Приезжайте налегке — шины уже будут ждать вас на посту."
+                icon={<SunIcon />}
+                title="Климат-контроль"
+                text="Склад с контролем температуры и влажности. Защита от старения и деформации резины."
             />
             <FeatureCard 
                 icon={<ShieldIcon />}
-                title="Страховка и охрана"
-                text="Заключаем официальный договор. Ваши колеса застрахованы и находятся под круглосуточным видеонаблюдением."
+                title="Безопасность 24/7"
+                text="Официальный договор, индивидуальная маркировка, охрана и 100% гарантия сохранности."
             />
+        </div>
+
+        {/* How We Work Steps */}
+        <div className="mt-8 px-6">
+            <h3 className="text-lg font-bold text-tg-text mb-4 text-center">Как мы работаем</h3>
+            <div className="flex justify-between items-start text-center relative">
+                {/* Connecting Line */}
+                <div className="absolute top-4 left-10 right-10 h-0.5 bg-tg-hint/10 -z-10"></div>
+
+                <div className="flex flex-col items-center gap-2 flex-1">
+                    <div className="w-8 h-8 rounded-full bg-tg-bg border-2 border-tg-link text-tg-link flex items-center justify-center font-bold text-sm z-10">1</div>
+                    <p className="text-xs font-medium text-tg-text">Приём и<br/>фотоотчет</p>
+                </div>
+                <div className="flex flex-col items-center gap-2 flex-1">
+                    <div className="w-8 h-8 rounded-full bg-tg-bg border-2 border-tg-link text-tg-link flex items-center justify-center font-bold text-sm z-10">2</div>
+                    <p className="text-xs font-medium text-tg-text">Мойка и<br/>хранение</p>
+                </div>
+                <div className="flex flex-col items-center gap-2 flex-1">
+                    <div className="w-8 h-8 rounded-full bg-tg-bg border-2 border-tg-link text-tg-link flex items-center justify-center font-bold text-sm z-10">3</div>
+                    <p className="text-xs font-medium text-tg-text">Выдача за<br/>15 минут</p>
+                </div>
+            </div>
         </div>
 
         {/* What's inside the app */}
         <div className="mt-10 px-6 mb-6">
             <div className="text-center mb-6">
                  <h3 className="text-xl font-bold text-tg-text">Ваш Личный Кабинет</h3>
-                 <p className="text-sm text-tg-hint mt-1">Всё под контролем в вашем телефоне</p>
+                 <p className="text-sm text-tg-hint mt-1">Полный контроль над вашими шинами</p>
             </div>
             
             <div className="grid grid-cols-2 gap-3">
-                <MiniBenefit icon={<CameraIcon />} label="Фотоотчеты" />
-                <MiniBenefit icon={<RulerIcon />} label="Остаток протектора" />
-                <MiniBenefit icon={<CalendarIcon />} label="Онлайн-запись" />
-                <MiniBenefit icon={<FileIcon />} label="История заказов" />
+                <MiniBenefit icon={<CameraIcon />} label="Фотофиксация" />
+                <MiniBenefit icon={<BellIcon />} label="Напоминания" />
+                <MiniBenefit icon={<WrenchIcon />} label="Запись на сервис" />
+                <MiniBenefit icon={<FileIcon />} label="Договор и история" />
             </div>
         </div>
       </div>
@@ -150,7 +172,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     </button>
                     
                     <p className="text-[10px] text-center text-tg-hint/50 leading-tight px-4">
-                        Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности сервиса OtelShin.ru
+                        Нажимая кнопку, вы соглашаетесь с условиями сервиса OtelShin
                     </p>
                 </form>
              </div>
@@ -191,9 +213,10 @@ const SunIcon = () => (
     </svg>
 );
 
-const MuscleIcon = () => (
+const TruckIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
     </svg>
 );
 
@@ -210,15 +233,16 @@ const CameraIcon = () => (
     </svg>
 );
 
-const RulerIcon = () => (
+const BellIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
     </svg>
 );
 
-const CalendarIcon = () => (
+const WrenchIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
     </svg>
 );
 
