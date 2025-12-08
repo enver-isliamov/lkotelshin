@@ -32,6 +32,6 @@ export interface OrderHistory {
 }
 
 export interface MessageTemplate {
-  'Название': string;
-  'Текст': string;
+  title: string;
+  text: string;
 }
