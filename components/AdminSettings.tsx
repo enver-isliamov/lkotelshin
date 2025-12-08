@@ -271,36 +271,35 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
       <div className="max-w-2xl mx-auto h-screen flex flex-col">
           {/* --- Minimalist Header --- */}
           <header className="flex-shrink-0 bg-tg-secondary-bg/80 backdrop-blur-md sticky top-0 z-20 border-b border-tg-hint/10 px-4 py-3">
-              <div className="flex justify-between items-center mb-3">
-                  <div className="flex items-baseline gap-2">
-                      <h1 className="text-xl font-bold text-tg-text">Клиенты</h1>
-                      {!isLoading && (
-                          <span className="text-xs font-bold bg-tg-button/10 text-tg-button px-2 py-0.5 rounded-full">
-                              Всего: {allClients.length}
-                          </span>
-                      )}
+              <div className="flex items-center gap-3">
+                  {/* Counter Widget */}
+                  <div className="flex flex-col items-start flex-shrink-0 min-w-[50px]">
+                      <span className="text-[10px] font-bold text-tg-hint uppercase tracking-wider leading-tight">Клиентов</span>
+                      <span className="text-xl font-bold text-tg-text leading-none">{!isLoading ? allClients.length : '-'}</span>
                   </div>
+
+                  {/* Search Bar */}
+                  <div className="relative flex-1">
+                      <input
+                          type="text"
+                          placeholder="Поиск..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 text-sm border border-transparent bg-tg-bg rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-link transition-shadow h-10"
+                      />
+                      <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-tg-hint">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                      </div>
+                  </div>
+
+                  {/* Settings Button */}
                   <button 
                       onClick={() => setIsSettingsOpen(true)}
-                      className="p-2 -mr-2 text-tg-hint hover:text-tg-text active:scale-95 transition-transform"
+                      className="flex-shrink-0 p-2 text-tg-hint hover:text-tg-text active:scale-95 transition-transform"
                       title="Настройки полей"
                   >
                       <SlidersIcon className="w-6 h-6" />
                   </button>
-              </div>
-
-              {/* Search Bar */}
-              <div className="relative">
-                  <input
-                      type="text"
-                      placeholder="Поиск..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 text-sm border border-transparent bg-tg-bg rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-link transition-shadow"
-                  />
-                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-tg-hint">
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                  </div>
               </div>
           </header>
           
@@ -429,4 +428,3 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
 };
 
 export default AdminSettings;
-    
