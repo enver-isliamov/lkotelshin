@@ -30,3 +30,8 @@ export interface ClientData {
 export interface OrderHistory {
   [key: string]: string;
 }
+
+export interface MessageTemplate {
+  'Название': string;
+  'Текст': string;
+}
