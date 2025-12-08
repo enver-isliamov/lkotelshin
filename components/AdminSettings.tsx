@@ -13,8 +13,6 @@ interface AdminSettingsProps {
   isLoading: boolean;
 }
 
-type Tab = 'clients' | 'settings';
-
 const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
         case 'активен':
@@ -28,7 +26,7 @@ const getStatusColor = (status: string) => {
     }
 }
 
-// Action Icons
+// --- Icons ---
 const PhoneIcon: React.FC = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
         <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
@@ -39,15 +37,28 @@ const ChatIcon: React.FC = () => (
         <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
      </svg>
 );
+const SlidersIcon: React.FC<{className?: string}> = ({className = "h-6 w-6"}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 18H7.5M3.75 12h9.75m-9.75 0a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M16.5 12h2.25" />
+    </svg>
+);
+const XMarkIcon: React.FC<{className?: string}> = ({className = "h-6 w-6"}) => (
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+);
 
-const fieldGroups: Record<string, string[]> = {
-  "Контактная информация": ["Имя клиента", "Телефон", "Номер Авто", "Адрес клиента"],
-  "Детали заказа": ["Бренд_Модель", "Размер шин", "Кол-во шин", "Наличие дисков", "Сезон", "DOT CODE"],
-  "Сроки и даты": ["Начало", "Окончание", "Срок", "Напомнить"],
-  "Место хранения": ["Склад хранения", "Ячейка"],
+// --- Constants ---
+const PREDEFINED_GROUPS: Record<string, string[]> = {
+  "Контакты": ["Имя клиента", "Телефон", "Номер Авто", "Адрес клиента", "Chat ID"],
+  "Заказ": ["Бренд_Модель", "Размер шин", "Кол-во шин", "Наличие дисков", "Сезон", "DOT CODE"],
+  "Сроки": ["Начало", "Окончание", "Срок", "Напомнить"],
+  "Хранение": ["Склад хранения", "Ячейка"],
   "Финансы": ["Цена за месяц", "Общая сумма", "Долг"],
-  "Информация о сделке": ["Договор", "Статус сделки", "Источник трафика"],
+  "Сделка": ["Договор", "Статус сделки", "Источник трафика"],
 };
+
+// --- Sub-components ---
 
 const SendMessageModal: React.FC<{client: ClientData; onClose: () => void}> = ({ client, onClose }) => {
     const [text, setText] = useState('');
@@ -81,32 +92,29 @@ const SendMessageModal: React.FC<{client: ClientData; onClose: () => void}> = ({
 
     return (
         <div 
-            className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
             onClick={onClose}
         >
             <div 
-                className="bg-tg-secondary-bg rounded-lg shadow-2xl w-full max-w-md p-6 relative"
+                className="bg-tg-secondary-bg rounded-2xl shadow-2xl w-full max-w-md p-6 relative transform transition-all scale-100"
                 onClick={(e) => e.stopPropagation()}
             >
                 <button 
                     onClick={onClose}
-                    className="absolute top-3 right-3 text-tg-hint hover:text-tg-text transition-colors"
-                    aria-label="Закрыть"
+                    className="absolute top-4 right-4 text-tg-hint hover:text-tg-text transition-colors"
                 >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
+                    <XMarkIcon className="h-6 w-6" />
                 </button>
 
-                <h3 className="text-lg font-semibold mb-1">Сообщение клиенту</h3>
-                <p className="text-tg-hint text-sm mb-4 truncate">Кому: {client['Имя клиента']}</p>
+                <h3 className="text-lg font-bold mb-1">Сообщение</h3>
+                <p className="text-tg-hint text-sm mb-4 truncate pr-8">Кому: {client['Имя клиента']}</p>
                 
                 <textarea
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     placeholder="Введите ваше сообщение..."
-                    rows={5}
-                    className="w-full p-2 border border-tg-hint/30 rounded-lg bg-tg-bg focus:outline-none focus:ring-2 focus:ring-tg-link text-sm"
+                    rows={4}
+                    className="w-full p-3 border border-tg-hint/20 rounded-xl bg-tg-bg focus:outline-none focus:ring-2 focus:ring-tg-link text-base resize-none"
                     disabled={status === 'sending' || status === 'sent'}
                 />
                 
@@ -115,8 +123,8 @@ const SendMessageModal: React.FC<{client: ClientData; onClose: () => void}> = ({
                 <button 
                     onClick={handleSend}
                     disabled={!text.trim() || status === 'sending' || status === 'sent'}
-                    className={`mt-4 w-full font-bold py-2.5 px-4 rounded-lg transition-all duration-300 disabled:opacity-60
-                        ${status === 'sent' ? 'bg-green-500 text-white' : 'bg-tg-button text-tg-button-text hover:opacity-90'}`}
+                    className={`mt-4 w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 disabled:opacity-60
+                        ${status === 'sent' ? 'bg-green-500 text-white' : 'bg-tg-button text-tg-button-text hover:brightness-110 active:scale-[0.98]'}`}
                 >
                     {getButtonText()}
                 </button>
@@ -125,16 +133,55 @@ const SendMessageModal: React.FC<{client: ClientData; onClose: () => void}> = ({
     );
 };
 
+const FieldToggle: React.FC<{ field: string; isVisible: boolean; onToggle: (field: string) => void }> = ({ field, isVisible, onToggle }) => (
+    <div
+      onClick={() => onToggle(field)}
+      className="flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all hover:bg-tg-bg active:scale-[0.99] border border-transparent hover:border-tg-hint/10"
+    >
+      <span className="font-medium text-tg-text select-none text-sm">{field}</span>
+      <div className={`w-11 h-6 rounded-full relative transition-colors duration-200 ease-in-out ${isVisible ? 'bg-tg-link' : 'bg-gray-200 dark:bg-gray-600'}`}>
+         <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full shadow transition-transform duration-200 ease-in-out ${isVisible ? 'translate-x-5' : 'translate-x-0'}`}></div>
+      </div>
+    </div>
+);
+
 
 const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumns, onClientSelect, initialVisibleFields, onConfigSave, isLoading }) => {
-  const [activeTab, setActiveTab] = useState<Tab>('clients');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set(initialVisibleFields));
   const [searchTerm, setSearchTerm] = useState('');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [messagingClient, setMessagingClient] = useState<ClientData | null>(null);
 
+  // Discover all dynamic columns from actual data + hardcoded defaults
+  const allAvailableColumns = useMemo(() => {
+      const distinctFields = new Set<string>(webBaseColumns);
+      // Scan the first few clients (or all) to find extra columns not in webBaseColumns
+      allClients.forEach(client => {
+          Object.keys(client).forEach(key => distinctFields.add(key));
+      });
+      return Array.from(distinctFields);
+  }, [allClients, webBaseColumns]);
 
-  // Sync state with props when the initial config loads
+  // Group fields dynamically
+  const groupedFields = useMemo(() => {
+      const groups: Record<string, string[]> = JSON.parse(JSON.stringify(PREDEFINED_GROUPS));
+      const usedFields = new Set<string>();
+      
+      // Mark predefined fields as used
+      Object.values(groups).flat().forEach(f => usedFields.add(f));
+
+      const leftoverFields = allAvailableColumns.filter(f => !usedFields.has(f));
+      
+      if (leftoverFields.length > 0) {
+          groups["Дополнительно"] = leftoverFields;
+      }
+      
+      // Remove empty groups
+      return Object.entries(groups).filter(([_, fields]) => fields.some(f => allAvailableColumns.includes(f)));
+  }, [allAvailableColumns]);
+
+
   useEffect(() => {
     setVisibleFields(new Set(initialVisibleFields));
   }, [initialVisibleFields]);
@@ -167,7 +214,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
       newSet.add(field);
     }
     setVisibleFields(newSet);
-    setSaveStatus('idle'); // Reset save status on change
+    setSaveStatus('idle'); 
   };
   
   const handleSaveConfig = async () => {
@@ -175,20 +222,13 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
     try {
         await onConfigSave(Array.from(visibleFields));
         setSaveStatus('saved');
-        setTimeout(() => setSaveStatus('idle'), 2500);
+        setTimeout(() => {
+            setSaveStatus('idle');
+            setIsSettingsOpen(false); // Close modal on success
+        }, 1500);
     } catch (e) {
         console.error('Failed to save config:', e);
         setSaveStatus('error');
-        setTimeout(() => setSaveStatus('idle'), 3000);
-    }
-  };
-
-  const getSaveButtonText = () => {
-    switch (saveStatus) {
-        case 'saving': return 'Сохранение...';
-        case 'saved': return '✓ Сохранено!';
-        case 'error': return 'Ошибка! Повторите';
-        default: return 'Сохранить настройки';
     }
   };
 
@@ -199,188 +239,154 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
   
   const handleOpenMessageModal = (client: ClientData) => {
     if (!client['Chat ID'] || client['Chat ID'] === DEMO_CHAT_ID) {
-      alert('Невозможно отправить сообщение этому пользователю (отсутствует реальный Chat ID).');
+      alert('Нет Chat ID.');
       return;
     }
     setMessagingClient(client);
   };
 
   const ListSkeleton = () => (
-    <div className="animate-pulse">
-        <div className="sticky top-0 bg-tg-secondary-bg/95 px-4 sm:px-6 py-1 border-b border-t border-tg-hint/20 z-10 h-[37px]">
-            <div className="h-5 w-1/4 bg-gray-300 dark:bg-gray-700 rounded-md mt-2"></div>
-        </div>
-        <ul className="divide-y divide-tg-hint/20">
-            {[...Array(5)].map((_, i) => (
-                <li key={i} className="flex items-center gap-4 px-4 sm:px-6 py-3">
-                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gray-300 dark:bg-gray-700"></div>
-                    <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-gray-300 dark:bg-gray-700 rounded w-3/4"></div>
-                        <div className="h-3 bg-gray-300 dark:bg-gray-700 rounded w-1/2"></div>
-                    </div>
-                </li>
-            ))}
-        </ul>
-    </div>
-  );
-  
-  const TabButton = ({ tab, label }: { tab: Tab; label: string }) => (
-    <button
-      onClick={() => setActiveTab(tab)}
-      className={`py-2 px-4 w-full text-center font-semibold rounded-md transition-colors duration-300 ${
-        activeTab === tab 
-          ? 'bg-tg-button text-tg-button-text shadow-sm' 
-          : 'bg-tg-secondary-bg text-tg-text hover:bg-gray-300 dark:hover:bg-gray-600'
-      }`}
-    >
-      {label}
-    </button>
-  );
-
-  const FieldToggle: React.FC<{ field: string; isVisible: boolean; onToggle: (field: string) => void }> = ({ field, isVisible, onToggle }) => (
-    <div
-      onClick={() => onToggle(field)}
-      className="flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors hover:bg-tg-bg"
-      role="checkbox"
-      aria-checked={isVisible}
-      tabIndex={0}
-      onKeyDown={(e) => (e.key === ' ' || e.key === 'Enter') && onToggle(field)}
-    >
-      <div className={`w-5 h-5 rounded flex-shrink-0 border-2 ${isVisible ? 'bg-tg-link border-tg-link' : 'border-tg-hint/50 bg-tg-bg'} flex items-center justify-center transition-all`}>
-        {isVisible && (
-          <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-          </svg>
-        )}
-      </div>
-      <span className="font-medium text-tg-text select-none">{field}</span>
+    <div className="animate-pulse space-y-4 pt-2">
+        {[...Array(6)].map((_, i) => (
+            <div key={i} className="flex items-center gap-4 px-4">
+                <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700"></div>
+                <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-2/3"></div>
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
+                </div>
+            </div>
+        ))}
     </div>
   );
 
   return (
     <>
-      <div className="bg-gray-50 dark:bg-gray-800/20 p-2 sm:p-4 rounded-xl">
-          <div className="w-full max-w-3xl mx-auto space-y-6">
-            <header className="text-center pt-2">
-              <h2 className="font-semibold">Панель администратора</h2>
-              <p className="text-tg-hint mt-1 text-sm">Всего клиентов в базе: {isLoading ? '...' : allClients.length}</p>
-            </header>
-            
-            <div className="grid grid-cols-2 gap-2 p-1 bg-tg-secondary-bg rounded-lg shadow-inner">
-              <TabButton tab="clients" label="Клиенты" />
-              <TabButton tab="settings" label="Настройки" />
-            </div>
-
-            <main>
-              {/* Client List Section */}
-              <div style={{ display: activeTab === 'clients' ? 'block' : 'none' }}>
-                <div className="bg-tg-secondary-bg rounded-lg shadow-lg overflow-hidden">
-                  <div className="p-4 sm:p-6 border-b border-tg-hint/20">
-                      <div className="relative">
-                          <input
-                              type="text"
-                              placeholder="Поиск по имени..."
-                              value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
-                              className="w-full pl-10 pr-4 py-2 border border-tg-hint/30 rounded-lg bg-tg-bg focus:outline-none focus:ring-2 focus:ring-tg-link"
-                          />
-                          <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                              <svg className="w-5 h-5 text-tg-hint" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                          </div>
-                      </div>
+      <div className="max-w-2xl mx-auto h-screen flex flex-col">
+          {/* --- Minimalist Header --- */}
+          <header className="flex-shrink-0 bg-tg-secondary-bg/80 backdrop-blur-md sticky top-0 z-20 border-b border-tg-hint/10 px-4 py-3">
+              <div className="flex justify-between items-center mb-3">
+                  <div className="flex items-baseline gap-2">
+                      <h1 className="text-xl font-bold text-tg-text">Клиенты</h1>
+                      {!isLoading && (
+                          <span className="text-xs font-bold bg-tg-button/10 text-tg-button px-2 py-0.5 rounded-full">
+                              Всего: {allClients.length}
+                          </span>
+                      )}
                   </div>
-
-                  <div className="max-h-[60vh] overflow-y-auto">
-                      {isLoading ? (
-                          <ListSkeleton />
-                       ) : Object.keys(groupedAndFilteredClients).length > 0 ? (
-                          Object.keys(groupedAndFilteredClients).sort().map(letter => (
-                              <div key={letter}>
-                                  <div className="sticky top-0 bg-tg-secondary-bg/95 backdrop-blur-sm px-4 sm:px-6 py-1 border-b border-t border-tg-hint/20 z-10">
-                                      <h3 className="text-sm font-bold uppercase text-tg-hint tracking-wider">{letter}</h3>
-                                  </div>
-                                  <ul className="divide-y divide-tg-hint/20">
-                                      {groupedAndFilteredClients[letter].map(client => (
-                                          <li key={client['Chat ID']} className="group flex w-full items-center justify-between gap-4 px-4 sm:px-6 py-3 hover:bg-tg-bg transition-colors text-left">
-                                              <div
-                                                  onClick={() => onClientSelect(client)}
-                                                  title={`Открыть кабинет клиента: ${client['Имя клиента']}`}
-                                                  className="flex flex-1 items-center gap-4 cursor-pointer min-w-0"
-                                              >
-                                                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-tg-link text-white flex items-center justify-center font-bold text-base transition-transform group-hover:scale-110">
-                                                      {getInitials(client['Имя клиента'])}
-                                                  </div>
-                                                  <div className="flex-1 min-w-0">
-                                                      <div className="flex items-center gap-2">
-                                                          <span className={`h-2.5 w-2.5 rounded-full ${getStatusColor(client['Статус сделки'])}`} title={`Статус: ${client['Статус сделки']}`}></span>
-                                                          <p className="font-semibold text-sm text-tg-text truncate">{client['Имя клиента'] || 'Имя не указано'}</p>
-                                                      </div>
-                                                      <p className="text-sm text-tg-hint pl-[18px] truncate">{client['Телефон'] || `ID: ${client['Chat ID']}`}</p>
-                                                  </div>
-                                              </div>
-                                              
-                                              <div className="flex flex-shrink-0 items-center gap-2 text-tg-hint">
-                                                  {client['Телефон'] && (
-                                                      <a
-                                                          href={`tel:${client['Телефон'].replace(/\D/g, '')}`}
-                                                          onClick={(e) => e.stopPropagation()}
-                                                          title={`Позвонить ${client['Телефон']}`}
-                                                          className="p-2 rounded-full hover:bg-tg-hint/10 hover:text-tg-link transition-colors"
-                                                      >
-                                                          <PhoneIcon />
-                                                      </a>
-                                                  )}
-                                                  <button
-                                                      onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        handleOpenMessageModal(client);
-                                                      }}
-                                                      title={`Написать клиенту в Telegram от имени бота`}
-                                                      className="p-2 rounded-full hover:bg-tg-hint/10 hover:text-tg-link transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                                      disabled={!client['Chat ID'] || client['Chat ID'] === DEMO_CHAT_ID}
-                                                  >
-                                                      <ChatIcon />
-                                                  </button>
-                                                  <div className="text-tg-hint opacity-50 group-hover:opacity-100 transition-opacity pl-1">
-                                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                                                          <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                                      </svg>
-                                                  </div>
-                                              </div>
-                                          </li>
-                                      ))}
-                                  </ul>
-                              </div>
-                          ))
-                       ) : (
-                          <div className="text-center py-12 px-4">
-                               <svg xmlns="http://www.w3.org/2000/svg" className="mx-auto h-12 w-12 text-tg-hint" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l-2.293-2.293a1 1 0 010-1.414l7-7a1 1 0 011.414 0l7 7a1 1 0 010 1.414L15 21m-5-4h2" />
-                              </svg>
-                              <h3 className="mt-2 text-lg font-medium text-tg-text">Клиенты не найдены</h3>
-                              <p className="mt-1 text-sm text-tg-hint">Попробуйте изменить поисковый запрос.</p>
-                          </div>
-                       )}
-                  </div>
-                </div>
+                  <button 
+                      onClick={() => setIsSettingsOpen(true)}
+                      className="p-2 -mr-2 text-tg-hint hover:text-tg-text active:scale-95 transition-transform"
+                      title="Настройки полей"
+                  >
+                      <SlidersIcon className="w-6 h-6" />
+                  </button>
               </div>
 
-              {/* Field Configuration Section */}
-              <div style={{ display: activeTab === 'settings' ? 'block' : 'none' }}>
-                <div className="bg-tg-secondary-bg p-4 sm:p-6 rounded-lg shadow-lg">
-                  <div className="mb-6 pb-3 border-b border-tg-hint/20">
-                    <h2 className="text-xl font-semibold">Настройка видимых полей</h2>
-                    <p className="text-tg-hint mt-1">Выберите информацию, которую будут видеть клиенты в своем кабинете.</p>
+              {/* Search Bar */}
+              <div className="relative">
+                  <input
+                      type="text"
+                      placeholder="Поиск..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 text-sm border border-transparent bg-tg-bg rounded-xl focus:outline-none focus:ring-2 focus:ring-tg-link transition-shadow"
+                  />
+                  <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-tg-hint">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                  </div>
+              </div>
+          </header>
+          
+          {/* --- Client List --- */}
+          <main className="flex-1 overflow-y-auto pb-10">
+              {isLoading ? (
+                  <ListSkeleton />
+               ) : Object.keys(groupedAndFilteredClients).length > 0 ? (
+                  <div className="pb-4">
+                      {Object.keys(groupedAndFilteredClients).sort().map(letter => (
+                          <div key={letter}>
+                              <div className="sticky top-0 bg-tg-secondary-bg/95 backdrop-blur px-4 py-1.5 z-10 text-xs font-bold text-tg-hint/70 uppercase tracking-wide">
+                                  {letter}
+                              </div>
+                              <ul className="divide-y divide-tg-hint/10">
+                                  {groupedAndFilteredClients[letter].map(client => (
+                                      <li key={client['Chat ID']} className="group flex items-center justify-between px-4 py-3 hover:bg-tg-bg/50 transition-colors cursor-pointer" onClick={() => onClientSelect(client)}>
+                                          <div className="flex items-center gap-3 min-w-0">
+                                              <div className="flex-shrink-0 h-10 w-10 rounded-full bg-gradient-to-br from-tg-link to-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-sm">
+                                                  {getInitials(client['Имя клиента'])}
+                                              </div>
+                                              <div className="min-w-0">
+                                                  <div className="flex items-center gap-1.5">
+                                                      <p className="font-semibold text-tg-text truncate text-[15px]">{client['Имя клиента'] || 'Без имени'}</p>
+                                                      {client['Статус сделки'] && (
+                                                         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${getStatusColor(client['Статус сделки'])}`} />
+                                                      )}
+                                                  </div>
+                                                  <p className="text-xs text-tg-hint truncate">{client['Телефон'] || `ID: ${client['Chat ID']}`}</p>
+                                              </div>
+                                          </div>
+                                          
+                                          <div className="flex items-center gap-1">
+                                              {client['Телефон'] && (
+                                                  <a
+                                                      href={`tel:${client['Телефон'].replace(/\D/g, '')}`}
+                                                      onClick={(e) => e.stopPropagation()}
+                                                      className="p-2 rounded-full text-tg-hint/70 hover:text-green-500 hover:bg-green-50 dark:hover:bg-green-900/20 transition-all"
+                                                  >
+                                                      <PhoneIcon />
+                                                  </a>
+                                              )}
+                                              <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleOpenMessageModal(client);
+                                                  }}
+                                                  className="p-2 rounded-full text-tg-hint/70 hover:text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all"
+                                              >
+                                                  <ChatIcon />
+                                              </button>
+                                          </div>
+                                      </li>
+                                  ))}
+                              </ul>
+                          </div>
+                      ))}
+                  </div>
+               ) : (
+                  <div className="flex flex-col items-center justify-center h-64 text-center px-6">
+                      <div className="bg-tg-bg p-4 rounded-full mb-3">
+                        <svg className="w-8 h-8 text-tg-hint" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                      </div>
+                      <p className="text-tg-hint">Ничего не найдено</p>
+                  </div>
+               )}
+          </main>
+      </div>
+
+      {/* --- Settings Modal (Slide-up / Overlay) --- */}
+      {isSettingsOpen && (
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+              {/* Backdrop */}
+              <div 
+                  className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity" 
+                  onClick={() => setIsSettingsOpen(false)}
+              ></div>
+              
+              {/* Sheet */}
+              <div className="relative bg-tg-secondary-bg w-full max-w-lg h-[85vh] sm:h-auto sm:max-h-[85vh] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col animate-slide-up sm:animate-fade-in overflow-hidden">
+                  <div className="flex items-center justify-between p-4 border-b border-tg-hint/10">
+                      <h2 className="text-lg font-bold">Настройка полей</h2>
+                      <button onClick={() => setIsSettingsOpen(false)} className="p-2 -mr-2 text-tg-hint hover:text-tg-text">
+                          <XMarkIcon />
+                      </button>
                   </div>
                   
-                  <div className="space-y-6">
-                      {Object.entries(fieldGroups).map(([groupName, fields]) => (
+                  <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                       {groupedFields.map(([groupName, fields]) => (
                           <div key={groupName}>
-                              <h4 className="text-md font-semibold text-tg-text mb-2 pb-2 border-b border-tg-hint/10">{groupName}</h4>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1">
-                                  {fields
-                                    .filter(field => webBaseColumns.includes(field))
-                                    .map(field => (
+                              <h4 className="text-xs font-bold text-tg-hint uppercase tracking-wider mb-2 ml-1">{groupName}</h4>
+                              <div className="bg-tg-bg rounded-xl overflow-hidden border border-tg-hint/5 divide-y divide-tg-hint/5">
+                                  {fields.map(field => (
                                       <FieldToggle 
                                         key={field}
                                         field={field} 
@@ -393,19 +399,21 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
                       ))}
                   </div>
 
-                  <button 
-                      onClick={handleSaveConfig} 
-                      disabled={saveStatus === 'saving'}
-                      className={`mt-8 w-full font-bold py-3 px-4 rounded-lg transition-all duration-300 disabled:opacity-70
-                          ${saveStatus === 'saved' ? 'bg-green-500 text-white' : 'bg-tg-button text-tg-button-text hover:opacity-90'}`}
-                  >
-                    {getSaveButtonText()}
-                  </button>
-                </div>
+                  <div className="p-4 border-t border-tg-hint/10 bg-tg-secondary-bg">
+                      <button 
+                          onClick={handleSaveConfig} 
+                          disabled={saveStatus === 'saving'}
+                          className={`w-full font-bold py-3.5 px-4 rounded-xl transition-all duration-300 disabled:opacity-70 flex justify-center items-center gap-2
+                              ${saveStatus === 'saved' ? 'bg-green-500 text-white' : 'bg-tg-button text-tg-button-text hover:brightness-105 active:scale-[0.98]'}`}
+                      >
+                         {saveStatus === 'saving' && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
+                         {saveStatus === 'saving' ? 'Сохранение...' : saveStatus === 'saved' ? 'Сохранено!' : 'Применить'}
+                      </button>
+                  </div>
               </div>
-            </main>
           </div>
-      </div>
+      )}
+
       {messagingClient && (
         <SendMessageModal 
           client={messagingClient}
