@@ -47,7 +47,8 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
     <div className="flex flex-col h-screen bg-tg-bg overflow-hidden font-sans">
       
       {/* --- SCROLLABLE CONTENT --- */}
-      <div className="flex-1 overflow-y-auto pb-32 scrollbar-hide">
+      {/* Увеличен padding-bottom до 400px, чтобы контент прокручивался над шторкой */}
+      <div className="flex-1 overflow-y-auto pb-[400px] scrollbar-hide">
         
         {/* Hero Section */}
         <div className="relative pt-12 pb-8 px-6 text-center">
@@ -55,10 +56,8 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-gradient-to-b from-blue-500/10 to-transparent rounded-b-[50px] pointer-events-none"></div>
             
             <div className="relative z-10 flex flex-col items-center">
-                <div className="w-20 h-20 bg-white dark:bg-gray-800 rounded-2xl shadow-xl shadow-blue-900/10 flex items-center justify-center mb-6 transform -rotate-6 border border-gray-100 dark:border-gray-700">
-                    <LogoIcon className="w-12 h-12 text-tg-link" />
-                </div>
-                <h1 className="text-3xl font-extrabold text-tg-text mb-3 leading-tight">
+                {/* Logo Removed Here */}
+                <h1 className="text-3xl font-extrabold text-tg-text mb-3 leading-tight mt-4">
                     Отель Шин
                 </h1>
                 <p className="text-tg-hint text-lg leading-snug max-w-[260px]">
@@ -185,13 +184,6 @@ const MiniBenefit: React.FC<{ icon: React.ReactNode; label: string }> = ({ icon,
 
 
 // --- Icons ---
-
-const LogoIcon = ({ className }: { className?: string }) => (
-    <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 10a7 7 0 11-14 0" />
-    </svg>
-);
 
 const SunIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
