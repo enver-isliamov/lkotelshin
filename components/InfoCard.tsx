@@ -87,7 +87,7 @@ const StatusBadge: React.FC<{ status?: string | null; isCompact?: boolean }> = (
 
 interface TireSet {
   brand: string;
-  model: string; // Not explicitly used if brand contains full name, but good to have
+  model: string; 
   size: string;
   count: string;
   season: string;
@@ -96,28 +96,92 @@ interface TireSet {
 }
 
 const parseTireData = (clientData: ClientData): TireSet[] => {
-    const split = (str: string) => str ? str.split('\n').map(s => s.trim()) : [];
+    // Helper to split string by newline and filter empty strings
+    const split = (str: string) => str ? str.split('\n').map(s => s.trim()).filter(s => s !== '') : [];
 
-    const brands = split(clientData['Бренд_Модель']);
-    const sizes = split(clientData['Размер шин']);
-    const counts = split(clientData['Кол-во шин']);
-    const dots = split(clientData['DOT CODE']);
-    const seasons = split(clientData['Сезон']);
-    const disks = split(clientData['Наличие дисков']);
+    const rawBrands = split(clientData['Бренд_Модель']);
+    const rawSizes = split(clientData['Размер шин']);
+    const rawCounts = split(clientData['Кол-во шин']);
+    const rawDots = split(clientData['DOT CODE']);
+    const rawSeasons = split(clientData['Сезон']);
+    const rawDisks = split(clientData['Наличие дисков']);
 
-    // Determine the number of tire sets based on the field with the most lines (usually brand or size)
-    const maxSets = Math.max(brands.length, sizes.length, counts.length);
+    // Determine the number of tire sets (e.g., front/rear are 2 sets)
+    // Based on whether brands or sizes are split into multiple lines
+    const maxSets = Math.max(rawBrands.length, rawSizes.length);
+    // If we have data but no splits, it's 1 set
+    const effectiveSets = maxSets > 0 ? maxSets : 1;
+
     const sets: TireSet[] = [];
 
-    for (let i = 0; i < maxSets; i++) {
+    // Helper to parse "2x Value" or "2шт Value"
+    const parsePrefix = (str: string) => {
+        // Regex looks for Start -> Number -> "x", "х"(rus), "*", "шт" -> Space -> Remaining Text
+        const match = str.match(/^(\d+)\s*(?:x|х|шт|\*)\s+(.*)$/i);
+        if (match) {
+            return { count: match[1], text: match[2] };
+        }
+        return { count: null, text: str };
+    };
+
+    for (let i = 0; i < effectiveSets; i++) {
+        // Get raw values for this index, fallback to first index if it's a shared property (like Season often is)
+        let brandStr = rawBrands[i] || rawBrands[0] || '';
+        let sizeStr = rawSizes[i] || rawSizes[0] || '';
+        let seasonStr = rawSeasons[i] || rawSeasons[0] || '';
+        let diskStr = rawDisks[i] || rawDisks[0] || '';
+
+        // Check for and strip prefixes like "2x "
+        const brandParsed = parsePrefix(brandStr);
+        const sizeParsed = parsePrefix(sizeStr);
+
+        // Determine Count
+        let count = '0';
+        
+        // Priority 1: Use count explicitly extracted from Brand or Size prefix (e.g. "2x Michelin")
+        if (brandParsed.count) {
+            count = brandParsed.count;
+        } else if (sizeParsed.count) {
+            count = sizeParsed.count;
+        } 
+        // Priority 2: Explicit line in 'Кол-во шин' column matching this index
+        else if (rawCounts[i]) {
+             count = rawCounts[i];
+        } 
+        // Priority 3: If only one total count exists (e.g., "4") but we have multiple sets (e.g., 2), divide it
+        else if (rawCounts.length === 1 && !isNaN(parseInt(rawCounts[0]))) {
+             const total = parseInt(rawCounts[0]);
+             count = String(Math.floor(total / effectiveSets));
+        } else {
+             // Fallback
+             count = rawCounts[0] || '?';
+        }
+
+        // DOT Logic: 
+        // If 1 Set: Show all DOTs joined.
+        // If Multiple Sets: Distribute DOTs evenly among sets.
+        let dotStr = '';
+        if (rawDots.length > 0) {
+            if (effectiveSets === 1) {
+                // One set, show all DOTs
+                dotStr = rawDots.join(', ');
+            } else {
+                // Multiple sets (e.g. Front/Rear), distribute DOTs
+                const dotsPerSet = Math.ceil(rawDots.length / effectiveSets);
+                const startIdx = i * dotsPerSet;
+                const endIdx = startIdx + dotsPerSet;
+                dotStr = rawDots.slice(startIdx, endIdx).join(', ');
+            }
+        }
+
         sets.push({
-            brand: brands[i] || brands[0] || '', // Fallback to first line if subsequent are empty (common in sheets)
+            brand: brandParsed.text, // Use cleaned text (without "2x")
             model: '',
-            size: sizes[i] || sizes[0] || '',
-            count: counts[i] || counts[0] || '',
-            season: seasons[i] || seasons[0] || '',
-            disks: disks[i] || disks[0] || '',
-            dot: dots[i] || (i === 0 ? dots[0] : '') || '', // DOT might only be listed once
+            size: sizeParsed.text,   // Use cleaned text (without "2x")
+            count: count.replace(/\D/g, ''), // Ensure count is just digits
+            season: seasonStr,
+            disks: diskStr,
+            dot: dotStr,
         });
     }
     return sets;
@@ -126,15 +190,12 @@ const parseTireData = (clientData: ClientData): TireSet[] => {
 const TireCard: React.FC<{ data: TireSet }> = ({ data }) => {
     const hasDisks = data.disks && (data.disks.toLowerCase().includes('с дисками') || data.disks.toLowerCase().includes('да') || data.disks.toLowerCase().includes('есть'));
     
-    // Clean up count (remove "шт" if present to add it cleanly later)
-    const cleanCount = data.count.replace(/\D/g, '');
-
     return (
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-3 mb-2 shadow-sm">
             {/* Top Row: Count | Size */}
             <div className="flex items-center gap-3 mb-1.5">
                 <div className="flex items-baseline">
-                    <span className="font-bold text-lg text-tg-text">{cleanCount || '-'}</span>
+                    <span className="font-bold text-lg text-tg-text">{data.count || '-'}</span>
                     <span className="text-sm font-medium ml-1 text-tg-text">шт</span>
                 </div>
                 
@@ -166,12 +227,10 @@ const TireCard: React.FC<{ data: TireSet }> = ({ data }) => {
 
             {/* Bottom Row: DOT */}
             {data.dot && (
-                <div className="text-xs text-tg-hint font-mono mt-1 pt-2 border-t border-gray-100 dark:border-gray-700/50">
+                <div className="text-xs text-tg-hint font-mono mt-1 pt-2 border-t border-gray-100 dark:border-gray-700/50 break-words">
                     DOT: {data.dot}
                 </div>
             )}
-            
-             {/* Delete Icon would go here, but omitted for Client View as requested by context logic */}
         </div>
     );
 };
