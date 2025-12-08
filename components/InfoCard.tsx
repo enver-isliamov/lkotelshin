@@ -113,7 +113,12 @@ const parseTireData = (clientData: ClientData): TireSet[] => {
     const rawBrands = split(clientData['Бренд_Модель']);
     const rawSizes = split(clientData['Размер шин']);
     const rawCounts = split(clientData['Кол-во шин']);
-    const rawDots = split(clientData['DOT CODE']);
+    
+    // Clean DOT codes: Remove enumeration prefixes like "#1", "№1", "1.", "1)"
+    const rawDots = split(clientData['DOT CODE']).map(dot => {
+         return dot.replace(/^(?:[#№]\d+|\d+[\.\)])\s*/, '');
+    });
+
     const rawSeasons = split(clientData['Сезон']);
     const rawDisks = split(clientData['Наличие дисков']);
 
