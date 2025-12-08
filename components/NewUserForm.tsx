@@ -60,8 +60,8 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     Отель Шин
                 </h1>
                 <p className="text-tg-hint text-lg leading-snug max-w-[280px]">
-                   Профессиональное хранение в оптимальных условиях. <br/>
-                   <span className="text-tg-link font-semibold">Вывоз от дома — бесплатно.</span>
+                   Освободите балкон для жизни. <br/>
+                   Ваши шины в надежных руках по доступной цене.
                 </p>
             </div>
         </div>
@@ -70,24 +70,24 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
         <div className="px-5 space-y-4">
             <FeatureCard 
                 icon={<TruckIcon />}
-                title="Вывоз бесплатно"
-                text="Заберем шины от дома или офиса. Избавим вас от погрузки тяжестей и грязи в салоне."
+                title="Заберем бесплатно"
+                text="Бережем вашу спину и чистоту салона. Сами приедем, погрузим и увезем тяжелые колеса. Это включено."
             />
             <FeatureCard 
                 icon={<SunIcon />}
-                title="Климат-контроль"
-                text="Склад с контролем температуры и влажности. Защита от старения и деформации резины."
+                title="Продлим жизнь шин"
+                text="В гараже резина стареет. Наш климат-контроль сохраняет свойства шин, экономя вам деньги на покупке новых."
             />
             <FeatureCard 
                 icon={<ShieldIcon />}
-                title="Безопасность 24/7"
-                text="Официальный договор, индивидуальная маркировка, охрана и 100% гарантия сохранности."
+                title="Гарантия спокойствия"
+                text="Заключаем договор. Ваши колеса застрахованы, промаркированы и под камерами 24/7."
             />
         </div>
 
         {/* How We Work Steps */}
         <div className="mt-8 px-6">
-            <h3 className="text-lg font-bold text-tg-text mb-4 text-center">Как мы работаем</h3>
+            <h3 className="text-lg font-bold text-tg-text mb-4 text-center">Процесс прост</h3>
             <div className="flex justify-between items-start text-center relative">
                 {/* Connecting Line */}
                 <div className="absolute top-4 left-10 right-10 h-0.5 bg-tg-hint/10 -z-10"></div>
@@ -98,20 +98,21 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                 </div>
                 <div className="flex flex-col items-center gap-2 flex-1">
                     <div className="w-8 h-8 rounded-full bg-tg-bg border-2 border-tg-link text-tg-link flex items-center justify-center font-bold text-sm z-10">2</div>
-                    <p className="text-xs font-medium text-tg-text">Мойка и<br/>хранение</p>
+                    <p className="text-xs font-medium text-tg-text">Маркировка<br/>и склад</p>
                 </div>
                 <div className="flex flex-col items-center gap-2 flex-1">
                     <div className="w-8 h-8 rounded-full bg-tg-bg border-2 border-tg-link text-tg-link flex items-center justify-center font-bold text-sm z-10">3</div>
                     <p className="text-xs font-medium text-tg-text">Выдача за<br/>15 минут</p>
                 </div>
             </div>
+            <p className="text-[10px] text-tg-hint text-center mt-3 opacity-70">*Мойка шин доступна как дополнительная опция</p>
         </div>
 
         {/* What's inside the app */}
         <div className="mt-10 px-6 mb-6">
             <div className="text-center mb-6">
                  <h3 className="text-xl font-bold text-tg-text">Ваш Личный Кабинет</h3>
-                 <p className="text-sm text-tg-hint mt-1">Полный контроль над вашими шинами</p>
+                 <p className="text-sm text-tg-hint mt-1">Полная прозрачность и управление в один клик</p>
             </div>
             
             <div className="grid grid-cols-2 gap-3">
@@ -119,6 +120,18 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                 <MiniBenefit icon={<BellIcon />} label="Напоминания" />
                 <MiniBenefit icon={<WrenchIcon />} label="Запись на сервис" />
                 <MiniBenefit icon={<FileIcon />} label="Договор и история" />
+            </div>
+        </div>
+
+        {/* Value Statement before form */}
+        <div className="px-6 mb-2 text-center">
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-4 border border-blue-100 dark:border-blue-800/30">
+                <p className="text-sm font-semibold text-tg-text mb-1">
+                    Комфорт стоит дешевле, чем вы думаете
+                </p>
+                <p className="text-xs text-tg-hint">
+                    Оставьте номер, чтобы узнать условия и забыть о проблемах с колесами навсегда.
+                </p>
             </div>
         </div>
       </div>
