@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ClientData } from '../types';
 import { DEMO_CHAT_ID } from '../constants';
 import { sendMessageFromBot } from '../services/googleSheetService';
@@ -150,7 +150,11 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [visibleFields, setVisibleFields] = useState<Set<string>>(new Set(initialVisibleFields));
   const [searchTerm, setSearchTerm] = useState('');
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  
+  // Auto-save logic states
+  const [isSaving, setIsSaving] = useState(false);
+  const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const [messagingClient, setMessagingClient] = useState<ClientData | null>(null);
 
   // Discover all dynamic columns from actual data + hardcoded defaults
@@ -207,6 +211,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
   }, [allClients, searchTerm]);
 
   const handleToggle = (field: string) => {
+    // 1. Optimistic UI update
     const newSet = new Set(visibleFields);
     if (newSet.has(field)) {
       newSet.delete(field);
@@ -214,24 +219,26 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
       newSet.add(field);
     }
     setVisibleFields(newSet);
-    setSaveStatus('idle'); 
+    
+    // 2. Background Save with Debounce
+    setIsSaving(true);
+    
+    if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Wait 1.5 seconds after the last click before sending to server
+    saveTimeoutRef.current = setTimeout(async () => {
+        try {
+            await onConfigSave(Array.from(newSet));
+        } catch (e) {
+            console.error("Failed to auto-save config:", e);
+        } finally {
+            setIsSaving(false);
+        }
+    }, 1500);
   };
   
-  const handleSaveConfig = async () => {
-    setSaveStatus('saving');
-    try {
-        await onConfigSave(Array.from(visibleFields));
-        setSaveStatus('saved');
-        setTimeout(() => {
-            setSaveStatus('idle');
-            setIsSettingsOpen(false); // Close modal on success
-        }, 1500);
-    } catch (e) {
-        console.error('Failed to save config:', e);
-        setSaveStatus('error');
-    }
-  };
-
   const getInitials = (name: string = '') => {
     if (!name) return '?';
     return name.charAt(0).toUpperCase();
@@ -373,9 +380,17 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
               ></div>
               
               {/* Sheet */}
-              <div className="relative bg-tg-secondary-bg w-full max-w-lg h-[85vh] sm:h-auto sm:max-h-[85vh] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col animate-slide-up sm:animate-fade-in overflow-hidden">
+              <div className="relative bg-tg-secondary-bg w-full max-w-lg h-[80vh] sm:h-auto sm:max-h-[85vh] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col animate-slide-up sm:animate-fade-in overflow-hidden">
                   <div className="flex items-center justify-between p-4 border-b border-tg-hint/10">
-                      <h2 className="text-lg font-bold">Настройка полей</h2>
+                      <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-bold">Настройка полей</h2>
+                        {isSaving && (
+                            <div className="flex items-center gap-1.5 text-xs text-tg-link font-medium animate-pulse">
+                                <div className="w-2 h-2 rounded-full bg-tg-link"></div>
+                                <span>Сохранение...</span>
+                            </div>
+                        )}
+                      </div>
                       <button onClick={() => setIsSettingsOpen(false)} className="p-2 -mr-2 text-tg-hint hover:text-tg-text">
                           <XMarkIcon />
                       </button>
@@ -398,18 +413,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
                           </div>
                       ))}
                   </div>
-
-                  <div className="p-4 border-t border-tg-hint/10 bg-tg-secondary-bg">
-                      <button 
-                          onClick={handleSaveConfig} 
-                          disabled={saveStatus === 'saving'}
-                          className={`w-full font-bold py-3.5 px-4 rounded-xl transition-all duration-300 disabled:opacity-70 flex justify-center items-center gap-2
-                              ${saveStatus === 'saved' ? 'bg-green-500 text-white' : 'bg-tg-button text-tg-button-text hover:brightness-105 active:scale-[0.98]'}`}
-                      >
-                         {saveStatus === 'saving' && <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>}
-                         {saveStatus === 'saving' ? 'Сохранение...' : saveStatus === 'saved' ? 'Сохранено!' : 'Применить'}
-                      </button>
-                  </div>
+                  {/* Footer removed for auto-save minimalist design */}
               </div>
           </div>
       )}
@@ -425,3 +429,4 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
 };
 
 export default AdminSettings;
+    
