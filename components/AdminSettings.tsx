@@ -81,13 +81,21 @@ const SendMessageModal: React.FC<{client: ClientData; templates: MessageTemplate
         }
     };
 
+    const replacePlaceholders = (template: string, clientData: ClientData) => {
+        return template.replace(/\{\{(.*?)\}\}/g, (match, key) => {
+            const trimmedKey = key.trim();
+            // Try to find the key in client data
+            return clientData[trimmedKey] || match;
+        });
+    };
+
     const handleTemplateChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedIndex = e.target.selectedIndex;
         if (selectedIndex > 0) { // 0 is "Select template..."
             const template = templates[selectedIndex - 1];
-            // Replace placeholders if any (optional future enhancement)
-            // For now, just set the text
-            setText(template['Текст']);
+            // Use 'text' key as per standardized interface
+            const processedText = replacePlaceholders(template.text, client);
+            setText(processedText);
         }
     };
     
@@ -106,55 +114,77 @@ const SendMessageModal: React.FC<{client: ClientData; templates: MessageTemplate
             onClick={onClose}
         >
             <div 
-                className="bg-tg-secondary-bg rounded-2xl shadow-2xl w-full max-w-md p-6 relative transform transition-all scale-100"
+                className="bg-tg-secondary-bg rounded-2xl shadow-2xl w-full max-w-2xl p-6 relative transform transition-all scale-100 flex flex-col max-h-[90vh]"
                 onClick={(e) => e.stopPropagation()}
             >
-                <button 
-                    onClick={onClose}
-                    className="absolute top-4 right-4 text-tg-hint hover:text-tg-text transition-colors"
-                >
-                    <XMarkIcon className="h-6 w-6" />
-                </button>
-
-                <h3 className="text-lg font-bold mb-1">Сообщение</h3>
-                <p className="text-tg-hint text-sm mb-4 truncate pr-8">Кому: {client['Имя клиента']}</p>
-                
-                {templates.length > 0 && (
-                    <div className="mb-3">
-                         <select
-                            onChange={handleTemplateChange}
-                            className="w-full p-2.5 text-sm border border-tg-hint/20 rounded-xl bg-tg-bg text-tg-text focus:outline-none focus:ring-2 focus:ring-tg-link appearance-none"
-                            style={{ backgroundImage: 'none' }} // Remove default arrow if needed, but keeping standard is better for a11y
-                        >
-                            <option value="">-- Выберите шаблон --</option>
-                            {templates.map((tpl, index) => (
-                                <option key={index} value={tpl['Название']}>
-                                    {tpl['Название']}
-                                </option>
-                            ))}
-                        </select>
+                <div className="flex justify-between items-center mb-4">
+                    <div>
+                         <h3 className="text-lg font-bold">Сообщение</h3>
+                         <p className="text-tg-hint text-sm truncate max-w-[200px] sm:max-w-md">Кому: <span className="text-tg-text font-medium">{client['Имя клиента']}</span></p>
                     </div>
-                )}
+                    <button 
+                        onClick={onClose}
+                        className="text-tg-hint hover:text-tg-text transition-colors p-1"
+                    >
+                        <XMarkIcon className="h-6 w-6" />
+                    </button>
+                </div>
+
+                <div className="overflow-y-auto pr-1 custom-scrollbar">
+                    {templates.length > 0 && (
+                        <div className="mb-4">
+                             <label className="block text-xs font-bold text-tg-hint uppercase mb-1.5">Шаблон</label>
+                             <select
+                                onChange={handleTemplateChange}
+                                className="w-full p-2.5 text-sm border border-tg-hint/20 rounded-xl bg-tg-bg text-tg-text focus:outline-none focus:ring-2 focus:ring-tg-link appearance-none cursor-pointer"
+                            >
+                                <option value="">-- Выберите шаблон --</option>
+                                {templates.map((tpl, index) => (
+                                    <option key={index} value={tpl.title}>
+                                        {tpl.title}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
+                    
+                    <div className="mb-4">
+                        <label className="block text-xs font-bold text-tg-hint uppercase mb-1.5">Редактор (HTML)</label>
+                        <textarea
+                            value={text}
+                            onChange={(e) => setText(e.target.value)}
+                            placeholder="Введите текст сообщения или выберите шаблон..."
+                            rows={6}
+                            className="w-full p-3 border border-tg-hint/20 rounded-xl bg-tg-bg focus:outline-none focus:ring-2 focus:ring-tg-link text-sm font-mono leading-relaxed resize-none"
+                            disabled={status === 'sending' || status === 'sent'}
+                        />
+                    </div>
+
+                    {text && (
+                        <div className="mb-4">
+                            <label className="block text-xs font-bold text-tg-hint uppercase mb-1.5">Предпросмотр</label>
+                            <div 
+                                className="p-4 border border-tg-hint/10 rounded-xl bg-tg-bg/50 text-tg-text text-sm leading-relaxed prose prose-sm max-w-none dark:prose-invert break-words"
+                                // Safety: We are previewing what admin typed. Admin is trusted. 
+                                // In production with untrusted input, sanitize this.
+                                dangerouslySetInnerHTML={{ __html: text.replace(/\n/g, '<br/>') }}
+                            />
+                        </div>
+                    )}
                 
-                <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    placeholder="Введите текст сообщения или выберите шаблон..."
-                    rows={6}
-                    className="w-full p-3 border border-tg-hint/20 rounded-xl bg-tg-bg focus:outline-none focus:ring-2 focus:ring-tg-link text-base resize-none"
-                    disabled={status === 'sending' || status === 'sent'}
-                />
+                    {error && <p className="text-red-500 text-xs mb-3 bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">{error}</p>}
+                </div>
                 
-                {error && <p className="text-red-500 text-xs mt-2">{error}</p>}
-                
-                <button 
-                    onClick={handleSend}
-                    disabled={!text.trim() || status === 'sending' || status === 'sent'}
-                    className={`mt-4 w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 disabled:opacity-60
-                        ${status === 'sent' ? 'bg-green-500 text-white' : 'bg-tg-button text-tg-button-text hover:brightness-110 active:scale-[0.98]'}`}
-                >
-                    {getButtonText()}
-                </button>
+                <div className="mt-4 pt-4 border-t border-tg-hint/10">
+                    <button 
+                        onClick={handleSend}
+                        disabled={!text.trim() || status === 'sending' || status === 'sent'}
+                        className={`w-full font-bold py-3 px-4 rounded-xl transition-all duration-300 disabled:opacity-60
+                            ${status === 'sent' ? 'bg-green-500 text-white' : 'bg-tg-button text-tg-button-text hover:brightness-110 active:scale-[0.98]'}`}
+                    >
+                        {getButtonText()}
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -189,13 +219,12 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
   useEffect(() => {
     const loadTemplates = async () => {
         try {
+            // Using 'Шаблоны сообщений' as per request, normalized in service
             const data = await fetchAllSheetData<MessageTemplate>('Шаблоны сообщений', ADMIN_CHAT_ID);
-            // Basic validation to ensure we have Name and Text
-            const validTemplates = data.filter(t => t['Название'] && t['Текст']);
+            const validTemplates = data.filter(t => t.title && t.text);
             setTemplates(validTemplates);
         } catch (e) {
             console.error("Failed to load message templates:", e);
-            // Silent error, modal will just work without templates
         }
     };
     loadTemplates();
@@ -456,7 +485,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
                           </div>
                       ))}
                   </div>
-                  {/* Footer removed for auto-save minimalist design */}
               </div>
           </div>
       )}
