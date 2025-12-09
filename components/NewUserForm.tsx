@@ -195,6 +195,11 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             </div>
         </div>
       </div>
+       <div className="text-center px-1">
+                        <p className="text-[11px] text-tg-hint font-medium leading-tight">
+                            Пока вы это читаете, мы уже создали для Вас Личный кабинет
+                        </p>
+                    </div>
 
       {/* --- BOTTOM SHEET FORM (Fixed) --- */}
       <div className="fixed bottom-0 left-0 right-0 z-30">
@@ -203,11 +208,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
           
           <div className="bg-tg-secondary-bg rounded-t-[30px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] p-6 pb-8 border-t border-tg-hint/10">
              <div className="max-w-md mx-auto">
-                <div className="text-center px-1">
-                        <p className="text-[11px] text-tg-hint font-medium leading-tight">
-                            Пока вы это читаете, мы уже создали для Вас Личный кабинет
-                        </p>
-                    </div>
+               
                 <div className="text-center mb-4">
                     <p className="text-sm font-medium text-tg-text">Введите номер телефона</p>
                 </div>
