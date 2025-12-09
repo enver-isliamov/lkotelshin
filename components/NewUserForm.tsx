@@ -98,7 +98,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     Ваш балкон для отдыха, а не для шин.
                 </p>
                 <p className="text-tg-hint text-base leading-snug max-w-[300px]">
-                   Заберем сегодня — вернем к началу сезона.
+                   Заберем сегодня — заменим перед сезоном.
                 </p>
             </div>
         </div>
