@@ -59,9 +59,9 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                 <h1 className="text-3xl font-extrabold text-tg-text mb-3 leading-tight mt-4">
                     Отель Шин
                 </h1>
-                <p className="text-tg-hint text-lg leading-snug max-w-[280px]">
-                   Освободите балкон для жизни. <br/>
-                   Ваши шины в надежных руках по доступной цене.
+                <p className="text-tg-hint text-lg leading-snug max-w-[290px]">
+                   Ваш балкон создан для отдыха, а не для склада. <br/>
+                   <span className="text-tg-text font-medium mt-1 block text-sm opacity-80">Заберем колеса сегодня — вернем, когда выпадет снег.</span>
                 </p>
             </div>
         </div>
@@ -71,17 +71,17 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             <FeatureCard 
                 icon={<TruckIcon />}
                 title="Заберем бесплатно"
-                text="Бережем вашу спину и чистоту салона. Сами приедем, погрузим и увезем тяжелые колеса. Это включено."
+                text="Бережем вашу спину и чистоту салона. Сами приедем, погрузим и увезем тяжелые колеса. Это наш стандарт сервиса."
             />
             <FeatureCard 
                 icon={<SunIcon />}
                 title="Продлим жизнь шин"
-                text="В гараже резина стареет. Наш климат-контроль сохраняет свойства шин, экономя вам деньги на покупке новых."
+                text="В гараже резина сохнет и стареет. Наш склад защищает шины от внешней среды, экономя ваш бюджет на покупке новых."
             />
             <FeatureCard 
                 icon={<ShieldIcon />}
-                title="Гарантия спокойствия"
-                text="Заключаем договор. Ваши колеса застрахованы, промаркированы и под камерами 24/7."
+                title="Закрытая территория"
+                text="Частный склад с ограниченным доступом. Посторонним вход воспрещен. Работаем честно по публичной оферте сайта."
             />
         </div>
 
@@ -105,7 +105,14 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     <p className="text-xs font-medium text-tg-text">Выдача за<br/>15 минут</p>
                 </div>
             </div>
-            <p className="text-[10px] text-tg-hint text-center mt-3 opacity-70">*Мойка шин доступна как дополнительная опция</p>
+            
+             {/* Objection Handler / Value add */}
+             <div className="mt-4 flex items-center justify-center gap-2 text-center opacity-80">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                <p className="text-[11px] text-tg-hint font-medium">
+                    Цена фиксируется в день сдачи. <br/>Никаких скрытых доплат при получении.
+                </p>
+            </div>
         </div>
 
         {/* What's inside the app */}
@@ -125,12 +132,12 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
 
         {/* Value Statement before form */}
         <div className="px-6 mb-2 text-center">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-4 border border-blue-100 dark:border-blue-800/30">
-                <p className="text-sm font-semibold text-tg-text mb-1">
-                    Комфорт стоит дешевле, чем вы думаете
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-4 border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                <p className="text-sm font-bold text-tg-text mb-1">
+                    Спокойствие стоит меньше, чем кофе
                 </p>
-                <p className="text-xs text-tg-hint">
-                    Оставьте номер, чтобы узнать условия и забыть о проблемах с колесами навсегда.
+                <p className="text-xs text-tg-hint leading-relaxed">
+                    Стоимость хранения сопоставима с одной чашкой кофе в месяц. Оставьте номер, чтобы освободить место для жизни.
                 </p>
             </div>
         </div>
@@ -185,7 +192,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     </button>
                     
                     <p className="text-[10px] text-center text-tg-hint/50 leading-tight px-4">
-                        Нажимая кнопку, вы соглашаетесь с условиями сервиса OtelShin
+                        Нажимая кнопку, вы принимаете условия публичной оферты сервиса OtelShin
                     </p>
                 </form>
              </div>
