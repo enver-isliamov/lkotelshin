@@ -95,10 +95,9 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     Отель Шин
                 </h1>
                 <p className="text-lg font-bold text-tg-link mb-3">
-                    Курорт для ваших колес
+                    Ваш балкон для отдыха, а не для шин.
                 </p>
                 <p className="text-tg-hint text-base leading-snug max-w-[300px]">
-                   Пока вы ездите, сменный комплект отдыхает. <br/>
                    Заберем сегодня — вернем к началу сезона.
                 </p>
             </div>
@@ -152,7 +151,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                 <div>
                      <p className="text-xs font-bold text-tg-text mb-0.5">Честная цена</p>
                      <p className="text-[11px] text-tg-hint leading-tight">
-                        Стоимость фиксируется в день сдачи. Никаких доплат за "срочность" или "перемещение" при выдаче.
+                        Стоимость фиксируется в день сдачи. Никаких скрытых доплат при получении или за "срочность".
                     </p>
                 </div>
             </div>
@@ -168,7 +167,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             <div className="grid grid-cols-2 gap-3">
                 <MiniBenefit icon={<CameraIcon />} label="Фотофиксация" />
                 <MiniBenefit icon={<BellIcon />} label="Напоминания" />
-                <MiniBenefit icon={<WrenchIcon />} label="Запись на сервис" />
+                <MiniBenefit icon={<WrenchIcon />} label="Запись на шиномоннтаж" />
                 <MiniBenefit icon={<FileIcon />} label="История заказов" />
             </div>
         </div>
@@ -204,11 +203,11 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
           
           <div className="bg-tg-secondary-bg rounded-t-[30px] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] p-6 pb-8 border-t border-tg-hint/10">
              <div className="max-w-md mx-auto">
-                <div className="text-center mb-5">
-                    <p className="text-sm font-medium text-tg-text">Введите номер телефона для входа</p>
+                <div className="text-center mb-4">
+                    <p className="text-sm font-medium text-tg-text">Введите номер телефона</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-3">
                     <div className="relative group">
                         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                              <span className="text-tg-hint group-focus-within:text-tg-link transition-colors">🇷🇺 +7</span>
@@ -236,16 +235,22 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                             {error}
                         </div>
                     )}
+                    
+                    <div className="text-center px-1">
+                        <p className="text-[11px] text-tg-hint font-medium leading-tight">
+                            Пока вы это читаете, мы уже создали для Вас Личный кабинет
+                        </p>
+                    </div>
 
                     <button 
                         type="submit" 
                         disabled={status === 'submitting' || phone.length < 10}
                         className="w-full bg-tg-button text-tg-button-text font-bold text-lg py-4 rounded-2xl shadow-lg shadow-tg-button/30 hover:brightness-110 active:scale-[0.98] transition-all disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                        {status === 'submitting' ? 'Обработка...' : 'Получить доступ'}
+                        {status === 'submitting' ? 'Входим...' : 'Войти'}
                     </button>
                     
-                    <p className="text-[10px] text-center text-tg-hint/50 leading-tight px-4">
+                    <p className="text-[10px] text-center text-tg-hint/50 leading-tight px-4 pt-1">
                         Нажимая кнопку, вы принимаете условия публичной оферты сервиса OtelShin
                     </p>
                 </form>
