@@ -63,7 +63,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     Курорт для ваших колес
                 </p>
                 <p className="text-tg-hint text-base leading-snug max-w-[300px]">
-                   Пока вы ездите, сменный комплект отдыхает. <br/>
+                   Симферополь. <br/>
                    Заберем сегодня — вернем к началу сезона.
                 </p>
             </div>
