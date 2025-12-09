@@ -56,12 +56,15 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-64 bg-gradient-to-b from-blue-500/10 to-transparent rounded-b-[50px] pointer-events-none"></div>
             
             <div className="relative z-10 flex flex-col items-center">
-                <h1 className="text-3xl font-extrabold text-tg-text mb-3 leading-tight mt-4">
+                <h1 className="text-3xl font-extrabold text-tg-text mb-2 leading-tight mt-4">
                     Отель Шин
                 </h1>
-                <p className="text-tg-hint text-lg leading-snug max-w-[290px]">
-                   Ваш балкон создан для отдыха, а не для склада. <br/>
-                   <span className="text-tg-text font-medium mt-1 block text-sm opacity-80">Заберем колеса сегодня — вернем, когда выпадет снег.</span>
+                <p className="text-lg font-bold text-tg-link mb-3">
+                    Курорт для ваших колес
+                </p>
+                <p className="text-tg-hint text-base leading-snug max-w-[300px]">
+                   Пока вы ездите, сменный комплект отдыхает. <br/>
+                   Заберем сегодня — вернем к началу сезона.
                 </p>
             </div>
         </div>
@@ -81,7 +84,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             <FeatureCard 
                 icon={<ShieldIcon />}
                 title="Закрытая территория"
-                text="Частный склад с ограниченным доступом. Посторонним вход воспрещен. Работаем честно по публичной оферте сайта."
+                text="Частный склад с ограниченным доступом. Посторонним вход воспрещен. Работаем прозрачно по оферте на сайте."
             />
         </div>
 
@@ -107,11 +110,16 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             </div>
             
              {/* Objection Handler / Value add */}
-             <div className="mt-4 flex items-center justify-center gap-2 text-center opacity-80">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                <p className="text-[11px] text-tg-hint font-medium">
-                    Цена фиксируется в день сдачи. <br/>Никаких скрытых доплат при получении.
-                </p>
+             <div className="mt-5 flex items-start justify-center gap-3 text-left bg-green-50 dark:bg-green-900/10 p-3 rounded-xl border border-green-100 dark:border-green-800/20 mx-2">
+                <div className="mt-0.5 text-green-600 dark:text-green-400">
+                    <CheckCircleIcon />
+                </div>
+                <div>
+                     <p className="text-xs font-bold text-tg-text mb-0.5">Честная цена</p>
+                     <p className="text-[11px] text-tg-hint leading-tight">
+                        Стоимость фиксируется в день сдачи. Никаких доплат за "срочность" или "перемещение" при выдаче.
+                    </p>
+                </div>
             </div>
         </div>
 
@@ -126,18 +134,18 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                 <MiniBenefit icon={<CameraIcon />} label="Фотофиксация" />
                 <MiniBenefit icon={<BellIcon />} label="Напоминания" />
                 <MiniBenefit icon={<WrenchIcon />} label="Запись на сервис" />
-                <MiniBenefit icon={<FileIcon />} label="Договор и история" />
+                <MiniBenefit icon={<FileIcon />} label="История заказов" />
             </div>
         </div>
 
         {/* Value Statement before form */}
         <div className="px-6 mb-2 text-center">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-4 border border-blue-100 dark:border-blue-800/30 shadow-sm">
-                <p className="text-sm font-bold text-tg-text mb-1">
-                    Спокойствие стоит меньше, чем кофе
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-5 border border-blue-100 dark:border-blue-800/30 shadow-sm">
+                <p className="text-base font-bold text-tg-text mb-2">
+                    Всего ~23 рубля в день
                 </p>
                 <p className="text-xs text-tg-hint leading-relaxed">
-                    Стоимость хранения сопоставима с одной чашкой кофе в месяц. Оставьте номер, чтобы освободить место для жизни.
+                    Это дешевле литра бензина. Освободите место на балконе и сохраните здоровье спины по цене поездки на автобусе.
                 </p>
             </div>
         </div>
@@ -275,6 +283,12 @@ const FileIcon = () => (
 const CheckIcon = ({ className }: { className?: string }) => (
     <svg xmlns="http://www.w3.org/2000/svg" className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+    </svg>
+);
+
+const CheckCircleIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
 );
 
