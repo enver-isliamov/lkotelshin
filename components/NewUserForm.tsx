@@ -1,15 +1,50 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface NewUserFormProps {
   chatId: string;
   onSubmit: (phone: string) => Promise<void>;
 }
 
+const ROTATING_BENEFITS = [
+    {
+        title: "Ваша квартира — не склад",
+        text: "Квадратный метр жилья стоит сотни тысяч. Хранить на нем грязную резину — экономически невыгодно. Освободите место для жизни."
+    },
+    {
+        title: "Один бизнес-ланч в месяц",
+        text: "Вы не заметите эту сумму в расходах, но семья точно оценит отсутствие запаха резины и грязи дома."
+    },
+    {
+        title: "Вы покупаете свободное время",
+        text: "Никаких поездок в гараж и погрузок. Приехали на переобувку и уехали за 15 минут. Ваше время стоит дороже."
+    },
+    {
+        title: "Всего ~23 рубля в день",
+        text: "Это меньше стоимости пакета в супермаркете. Смешная плата за то, чтобы забыть о проблеме колес."
+    }
+];
+
 const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
   const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [error, setError] = useState('');
+
+  // State for rotating benefits
+  const [benefitIndex, setBenefitIndex] = useState(0);
+  const [isBenefitVisible, setIsBenefitVisible] = useState(true);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+        setIsBenefitVisible(false); // Fade out
+        setTimeout(() => {
+            setBenefitIndex((prev) => (prev + 1) % ROTATING_BENEFITS.length);
+            setIsBenefitVisible(true); // Fade in
+        }, 300); // Duration of fade-out transition
+    }, 5000); // Change every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,10 +95,10 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     Отель Шин
                 </h1>
                 <p className="text-lg font-bold text-tg-link mb-3">
-                    Ваш балкон создан для отдыха, а не для склада.
+                    Курорт для ваших колес
                 </p>
                 <p className="text-tg-hint text-base leading-snug max-w-[300px]">
-                   Симферополь. <br/>
+                   Пока вы ездите, сменный комплект отдыхает. <br/>
                    Заберем сегодня — вернем к началу сезона.
                 </p>
             </div>
@@ -117,7 +152,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                 <div>
                      <p className="text-xs font-bold text-tg-text mb-0.5">Честная цена</p>
                      <p className="text-[11px] text-tg-hint leading-tight">
-                        Стоимость фиксируется в день сдачи. Никаких скрытых доплат при получении или за "срочность".
+                        Стоимость фиксируется в день сдачи. Никаких доплат за "срочность" или "перемещение" при выдаче.
                     </p>
                 </div>
             </div>
@@ -133,20 +168,31 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             <div className="grid grid-cols-2 gap-3">
                 <MiniBenefit icon={<CameraIcon />} label="Фотофиксация" />
                 <MiniBenefit icon={<BellIcon />} label="Напоминания" />
-                <MiniBenefit icon={<WrenchIcon />} label="Запись на шиномоннтаж" />
+                <MiniBenefit icon={<WrenchIcon />} label="Запись на сервис" />
                 <MiniBenefit icon={<FileIcon />} label="История заказов" />
             </div>
         </div>
 
-        {/* Value Statement before form */}
-        <div className="px-6 mb-2 text-center">
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-5 border border-blue-100 dark:border-blue-800/30 shadow-sm">
-                <p className="text-base font-bold text-tg-text mb-2">
-                    Всего ~23 рубля в день
+        {/* Value Statement Carousel */}
+        <div className="px-6 mb-2 text-center h-[140px] flex items-center justify-center">
+            <div 
+                className={`bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-2xl p-5 border border-blue-100 dark:border-blue-800/30 shadow-sm w-full transition-opacity duration-300 ease-in-out ${isBenefitVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+            >
+                <p className="text-base font-bold text-tg-text mb-2 transition-all">
+                    {ROTATING_BENEFITS[benefitIndex].title}
                 </p>
-                <p className="text-xs text-tg-hint leading-relaxed">
-                    Это дешевле литра бензина. Освободите место на балконе и сохраните здоровье спины по цене поездки на автобусе.
+                <p className="text-xs text-tg-hint leading-relaxed transition-all">
+                    {ROTATING_BENEFITS[benefitIndex].text}
                 </p>
+                {/* Dots Indicator */}
+                <div className="flex justify-center gap-1.5 mt-3">
+                    {ROTATING_BENEFITS.map((_, idx) => (
+                        <div 
+                            key={idx} 
+                            className={`h-1 rounded-full transition-all duration-300 ${idx === benefitIndex ? 'w-4 bg-tg-link' : 'w-1 bg-tg-hint/30'}`}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
       </div>
