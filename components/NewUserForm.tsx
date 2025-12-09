@@ -151,7 +151,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                 <div>
                      <p className="text-xs font-bold text-tg-text mb-0.5">Честная цена</p>
                      <p className="text-[11px] text-tg-hint leading-tight">
-                        Стоимость фиксируется в день сдачи. Никаких скрытых доплат при получении или за "срочность".
+                        Стоимость фиксируется в день сдачи. Никаких скрытых доплат при получении.
                     </p>
                 </div>
             </div>
