@@ -60,7 +60,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                     Отель Шин
                 </h1>
                 <p className="text-lg font-bold text-tg-link mb-3">
-                    Курорт для ваших колес
+                    Ваш балкон создан для отдыха, а не для склада.
                 </p>
                 <p className="text-tg-hint text-base leading-snug max-w-[300px]">
                    Симферополь. <br/>
@@ -117,7 +117,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
                 <div>
                      <p className="text-xs font-bold text-tg-text mb-0.5">Честная цена</p>
                      <p className="text-[11px] text-tg-hint leading-tight">
-                        Стоимость фиксируется в день сдачи. Никаких доплат за "срочность" или "перемещение" при выдаче.
+                        Стоимость фиксируется в день сдачи. Никаких скрытых доплат при получении или за "срочность".
                     </p>
                 </div>
             </div>
@@ -133,7 +133,7 @@ const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
             <div className="grid grid-cols-2 gap-3">
                 <MiniBenefit icon={<CameraIcon />} label="Фотофиксация" />
                 <MiniBenefit icon={<BellIcon />} label="Напоминания" />
-                <MiniBenefit icon={<WrenchIcon />} label="Запись на сервис" />
+                <MiniBenefit icon={<WrenchIcon />} label="Запись на шиномоннтаж" />
                 <MiniBenefit icon={<FileIcon />} label="История заказов" />
             </div>
         </div>
