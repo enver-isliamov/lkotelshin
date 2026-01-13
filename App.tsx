@@ -1,14 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  fetchAllClients, 
-  fetchClientByChatId, 
-  fetchAllHistory, 
-  fetchHistoryByChatId, 
-  addNewUser, 
-  fetchConfig, 
-  updateConfig 
-} from './services/dataProvider';
+import { fetchAllSheetData, addNewUser, fetchConfig, updateConfig, fetchSheetDataByChatId } from './services/googleSheetService';
 import { ClientData, OrderHistory } from './types';
 import { ADMIN_CHAT_ID, APPS_SCRIPT_URL, WEB_BASE_COLUMNS, DEMO_CHAT_ID, DEFAULT_VISIBLE_CLIENT_FIELDS } from './constants';
 import ClientDashboard from './components/ClientDashboard';
@@ -81,8 +73,6 @@ const demoOrderHistory: OrderHistory[] = [
     },
 ];
 
-// Check environment variable for data source
-const isSupabase = process.env.REACT_APP_DATA_SOURCE === 'supabase';
 
 const App: React.FC = () => {
   const [clientData, setClientData] = useState<ClientData | null>(null);
@@ -140,9 +130,8 @@ const App: React.FC = () => {
     }
     
     const loadData = async () => {
-      // Check for config ONLY if using Google Sheets AND NOT Supabase
-      if (!isSupabase && ((APPS_SCRIPT_URL as string) === 'ВАШ_URL_СКРИПТА' || !APPS_SCRIPT_URL)) {
-        setError("Пожалуйста, настройте URL-адрес Google Apps Script в файле constants.ts.");
+      if ((APPS_SCRIPT_URL as string) === 'ВАШ_URL_СКРИПТА' || !APPS_SCRIPT_URL) {
+        setError("Пожалуйста, настройте URL-адрес Google Apps Script в файле constants.ts. Инструкция находится в файле instructions.md.");
         setIsLoading(false);
         return;
       }
@@ -167,8 +156,8 @@ const App: React.FC = () => {
         if (isAdmin) {
             // Admin fetches all data, passing their userId for authentication
             const [webBaseData, archiveData] = await Promise.all([
-                fetchAllClients(userId),
-                fetchAllHistory(userId)
+                fetchAllSheetData<ClientData>('WebBase', userId),
+                fetchAllSheetData<OrderHistory>('Archive', userId)
             ]);
             setAllClients(webBaseData);
             setAllHistory(archiveData);
@@ -177,8 +166,8 @@ const App: React.FC = () => {
         
         // Regular user fetches only their specific data
         const [clientResult, historyResult] = await Promise.all([
-            fetchClientByChatId(userId),
-            fetchHistoryByChatId(userId)
+            fetchSheetDataByChatId<ClientData>('WebBase', userId),
+            fetchSheetDataByChatId<OrderHistory>('Archive', userId)
         ]);
 
         if (clientResult && clientResult.length > 0) {
