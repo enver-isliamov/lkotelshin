@@ -260,7 +260,7 @@ const App: React.FC = () => {
   }
 
   if (isNewUser && userId && !isAdmin) {
-    return <NewUserForm chatId={userId} onSubmit={handleNewUserSubmit} />;
+    return <NewUserForm onSubmit={handleNewUserSubmit} />;
   }
 
   if (error && !isAdmin) {
