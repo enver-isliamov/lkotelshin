@@ -1,24 +1,19 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <meta name="theme-color" content="#f0f2f5" />
-    <meta name="description" content="Личный кабинет OtelShin" />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>Отель Шин | Личный кабинет</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Client Cabinet</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
       :root {
-        --tg-theme-bg-color: #f0f2f5;
-        --tg-theme-text-color: #1c1e21;
-        --tg-theme-hint-color: #606770;
-        --tg-theme-link-color: #007bff;
-        --tg-theme-button-color: #007bff;
-        --tg-theme-button-text-color: #ffffff;
-        --tg-theme-secondary-bg-color: #ffffff;
+        --tg-theme-bg-color: #f0f2f5; /* Light gray background */
+        --tg-theme-text-color: #1c1e21; /* Dark text */
+        --tg-theme-hint-color: #606770; /* Muted text */
+        --tg-theme-link-color: #007bff; /* Standard blue link */
+        --tg-theme-button-color: #007bff; /* Blue button */
+        --tg-theme-button-text-color: #ffffff; /* White button text */
+        --tg-theme-secondary-bg-color: #ffffff; /* White for cards */
       }
     </style>
     <script>
@@ -38,34 +33,40 @@
         },
       }
     </script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  </head>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@^2.90.1"
+  }
+}
+</script>
+</head>
   <body class="bg-tg-bg text-tg-text">
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
-      // Apply Telegram theme params
+      // Logic to apply Telegram theme variables
       try {
         const tg = window.Telegram.WebApp;
         if (tg) {
-          tg.ready();
+          // Force the header and background color of the Telegram App frame to match our design
           if (tg.setHeaderColor) tg.setHeaderColor('#f0f2f5');
           if (tg.setBackgroundColor) tg.setBackgroundColor('#f0f2f5');
           
           if (tg.themeParams) {
             const root = document.documentElement;
-            root.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
-            root.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
-            root.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
-            root.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
-            root.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
-            root.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
-            root.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color || '#ffffff');
+            // Apply theme params
+            root.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color || '#007bff');
+            root.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color || '#007bff');
+            root.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color || '#ffffff');
           }
         }
       } catch (e) {
-        console.error("Telegram WebApp init error", e);
+        console.error("Failed to apply Telegram theme", e);
       }
     </script>
+    <div id="root"></div>
   </body>
 </html>
