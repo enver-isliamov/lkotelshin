@@ -3,74 +3,73 @@ import { supabase } from './supabaseClient';
 import { ClientData, OrderHistory, MessageTemplate } from '../types';
 
 // Helper to map DB columns (snake_case) to App types (Russian keys usually)
-// Явное приведение к String гарантирует соответствие интерфейсу ClientData
 const mapClientFromDB = (data: any): ClientData => ({
-    'Chat ID': String(data.chat_id || ''),
-    'Имя клиента': String(data.name || ''),
-    'Телефон': String(data.phone || ''),
-    'Номер Авто': String(data.car_number || ''),
-    'Заказ - QR': String(data.qr_code || ''),
-    'Бренд_Модель': String(data.brand_model || ''),
-    'Цена за месяц': String(data.price_month || ''),
-    'Кол-во шин': String(data.tire_count || ''),
-    'Наличие дисков': String(data.has_disks || ''),
-    'Начало': String(data.date_start || ''),
-    'Срок': String(data.storage_period || ''),
-    'Напомнить': String(data.remind_date || ''),
-    'Окончание': String(data.date_end || ''),
-    'Склад хранения': String(data.warehouse || ''),
-    'Ячейка': String(data.cell || ''),
-    'Общая сумма': String(data.total_amount || ''),
-    'Долг': String(data.debt || ''),
-    'Договор': String(data.contract_number || ''),
-    'Адрес клиента': String(data.address || ''),
-    'Статус сделки': String(data.status || ''),
-    'Источник трафика': String(data.traffic_source || ''),
-    'DOT CODE': String(data.dot_code || ''),
-    'Размер шин': String(data.tire_size || ''),
-    'Сезон': String(data.season || '')
+    'Chat ID': data.chat_id || '',
+    'Имя клиента': data.name || '',
+    'Телефон': data.phone || '',
+    'Номер Авто': data.car_number || '',
+    'Заказ - QR': data.qr_code || '',
+    'Бренд_Модель': data.brand_model || '',
+    'Цена за месяц': data.price_month || '',
+    'Кол-во шин': data.tire_count || '',
+    'Наличие дисков': data.has_disks || '',
+    'Начало': data.date_start || '',
+    'Срок': data.storage_period || '',
+    'Напомнить': data.remind_date || '',
+    'Окончание': data.date_end || '',
+    'Склад хранения': data.warehouse || '',
+    'Ячейка': data.cell || '',
+    'Общая сумма': data.total_amount || '',
+    'Долг': data.debt || '',
+    'Договор': data.contract_number || '',
+    'Адрес клиента': data.address || '',
+    'Статус сделки': data.status || '',
+    'Источник трафика': data.traffic_source || '',
+    'DOT CODE': data.dot_code || '',
+    'Размер шин': data.tire_size || '',
+    'Сезон': data.season || ''
 });
 
 const mapHistoryFromDB = (data: any): OrderHistory => ({
-    'Chat ID': String(data.chat_id || ''),
-    'Дата': String(data.date || ''),
-    'Услуга': String(data.service || ''),
-    'Сумма': String(data.amount || ''),
-    'Статус': String(data.status || '')
+    'Chat ID': data.chat_id,
+    'Дата': data.date,
+    'Услуга': data.service,
+    'Сумма': data.amount,
+    'Статус': data.status
 });
 
 const mapTemplateFromDB = (data: any): MessageTemplate => ({
-    title: String(data.title || ''),
-    text: String(data.text || '')
+    title: data.title,
+    text: data.text
 });
 
 export const fetchAllClients = async (): Promise<ClientData[]> => {
     const { data, error } = await supabase.from('clients').select('*');
-    if (error) throw new Error(error.message);
+    if (error) throw error;
     return (data || []).map(mapClientFromDB);
 };
 
 export const fetchClientByChatId = async (chatId: string): Promise<ClientData[]> => {
     const { data, error } = await supabase.from('clients').select('*').eq('chat_id', chatId);
-    if (error) throw new Error(error.message);
+    if (error) throw error;
     return (data || []).map(mapClientFromDB);
 };
 
 export const fetchAllHistory = async (): Promise<OrderHistory[]> => {
     const { data, error } = await supabase.from('orders').select('*');
-    if (error) throw new Error(error.message);
+    if (error) throw error;
     return (data || []).map(mapHistoryFromDB);
 };
 
 export const fetchHistoryByChatId = async (chatId: string): Promise<OrderHistory[]> => {
     const { data, error } = await supabase.from('orders').select('*').eq('chat_id', chatId);
-    if (error) throw new Error(error.message);
+    if (error) throw error;
     return (data || []).map(mapHistoryFromDB);
 };
 
 export const fetchTemplates = async (): Promise<MessageTemplate[]> => {
      const { data, error } = await supabase.from('templates').select('*');
-     if (error) throw new Error(error.message);
+     if (error) throw error;
      return (data || []).map(mapTemplateFromDB);
 }
 
@@ -111,6 +110,9 @@ export const updateConfig = async (key: string, value: any): Promise<{result: st
 };
 
 export const sendMessageFromBot = async (chatId: string, text: string): Promise<{result: string}> => {
+    // Supabase can't send TG messages directly without Edge Functions. 
+    // For now, we will throw an error or log it.
+    // In a full implementation, you'd call a Supabase Edge Function here.
     console.warn("Direct Telegram sending via Supabase requires Edge Functions. Feature disabled in this basic implementation.");
     return { result: 'success' }; 
 }

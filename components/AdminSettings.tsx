@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ClientData, MessageTemplate } from '../types';
 import { ADMIN_CHAT_ID, DEMO_CHAT_ID } from '../constants';
-import { sendMessage, fetchTemplates, getCurrentDataSource, setDataSource } from '../services/dataProvider';
+import { sendMessageFromBot, fetchAllSheetData } from '../services/googleSheetService';
 
 interface AdminSettingsProps {
   allClients: ClientData[];
@@ -47,11 +47,6 @@ const XMarkIcon: React.FC<{className?: string}> = ({className = "h-6 w-6"}) => (
         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
     </svg>
 );
-const DatabaseIcon: React.FC<{className?: string}> = ({className = "h-5 w-5"}) => (
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={className}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
-    </svg>
-);
 
 // --- Constants ---
 const PREDEFINED_GROUPS: Record<string, string[]> = {
@@ -75,7 +70,7 @@ const SendMessageModal: React.FC<{client: ClientData; templates: MessageTemplate
         setStatus('sending');
         setError('');
         try {
-            await sendMessage(client['Chat ID'], text);
+            await sendMessageFromBot(client['Chat ID'], text);
             setStatus('sent');
             setTimeout(() => {
                 onClose();
@@ -220,16 +215,12 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
   const [messagingClient, setMessagingClient] = useState<ClientData | null>(null);
   const [templates, setTemplates] = useState<MessageTemplate[]>([]);
 
-  // Current Data Source
-  const currentSource = getCurrentDataSource();
-  const isSupabase = currentSource === 'supabase';
-
   // Load templates on mount
   useEffect(() => {
     const loadTemplates = async () => {
         try {
-            // Using 'Шаблоны сообщений' as per request, normalized in service
-            const data = await fetchTemplates(ADMIN_CHAT_ID);
+            // Reverted to fetchAllSheetData from googleSheetService
+            const data = await fetchAllSheetData<MessageTemplate>('Шаблоны сообщений', ADMIN_CHAT_ID);
             const validTemplates = data.filter(t => t.title && t.text);
             setTemplates(validTemplates);
         } catch (e) {
@@ -334,13 +325,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
     setMessagingClient(client);
   };
 
-  const handleSourceChange = (source: 'google' | 'supabase') => {
-      if (source === currentSource) return;
-      if (window.confirm(`Вы уверены, что хотите переключиться на ${source === 'google' ? 'Google Таблицы' : 'Supabase'}? Страница будет перезагружена.`)) {
-          setDataSource(source);
-      }
-  };
-
   const ListSkeleton = () => (
     <div className="animate-pulse space-y-4 pt-2">
         {[...Array(6)].map((_, i) => (
@@ -362,9 +346,9 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
           <header className="flex-shrink-0 bg-tg-secondary-bg/80 backdrop-blur-md sticky top-0 z-20 border-b border-tg-hint/10 px-4 py-3">
               <div className="flex items-center gap-3">
                   {/* Counter Widget */}
-                  <div className="flex flex-col items-start flex-shrink-0 min-w-[50px] cursor-pointer" onClick={() => setIsSettingsOpen(true)}>
-                      <span className={`text-[10px] font-bold uppercase tracking-wider leading-tight ${isSupabase ? 'text-green-600' : 'text-blue-600'}`}>
-                        {isSupabase ? 'SB DB' : 'Google'}
+                  <div className="flex flex-col items-start flex-shrink-0 min-w-[50px]">
+                      <span className="text-[10px] font-bold text-tg-hint uppercase tracking-wider leading-tight">
+                        Google
                       </span>
                       <span className="text-xl font-bold text-tg-text leading-none">{!isLoading ? allClients.length : '-'}</span>
                   </div>
@@ -387,7 +371,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
                   <button 
                       onClick={() => setIsSettingsOpen(true)}
                       className="flex-shrink-0 p-2 text-tg-hint hover:text-tg-text active:scale-95 transition-transform"
-                      title="Настройки"
+                      title="Настройки полей"
                   >
                       <SlidersIcon className="w-6 h-6" />
                   </button>
@@ -473,7 +457,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
               <div className="relative bg-tg-secondary-bg w-full max-w-lg h-[80vh] sm:h-auto sm:max-h-[85vh] sm:rounded-2xl rounded-t-2xl shadow-2xl flex flex-col animate-slide-up sm:animate-fade-in overflow-hidden">
                   <div className="flex items-center justify-between p-4 border-b border-tg-hint/10">
                       <div className="flex items-center gap-2">
-                        <h2 className="text-lg font-bold">Настройки</h2>
+                        <h2 className="text-lg font-bold">Настройка полей</h2>
                         {isSaving && (
                             <div className="flex items-center gap-1.5 text-xs text-tg-link font-medium animate-pulse">
                                 <div className="w-2 h-2 rounded-full bg-tg-link"></div>
@@ -487,39 +471,6 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
                   </div>
                   
                   <div className="flex-1 overflow-y-auto p-4 space-y-6">
-                       {/* Data Source Switcher */}
-                       <div className="bg-tg-bg rounded-xl border border-tg-hint/10 p-4">
-                           <div className="flex items-center gap-2 mb-3">
-                               <DatabaseIcon className="w-5 h-5 text-tg-link" />
-                               <h4 className="text-sm font-bold text-tg-text uppercase tracking-wider">Источник данных</h4>
-                           </div>
-                           <div className="grid grid-cols-2 gap-2">
-                               <button
-                                   onClick={() => handleSourceChange('google')}
-                                   className={`p-3 rounded-lg text-sm font-semibold transition-all flex flex-col items-center justify-center gap-1 border ${
-                                       !isSupabase 
-                                       ? 'bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300 shadow-sm' 
-                                       : 'bg-transparent border-transparent text-tg-hint hover:bg-tg-secondary-bg'
-                                   }`}
-                               >
-                                   <span className="text-lg">📊</span>
-                                   Google Таблицы
-                               </button>
-                               <button
-                                   onClick={() => handleSourceChange('supabase')}
-                                   className={`p-3 rounded-lg text-sm font-semibold transition-all flex flex-col items-center justify-center gap-1 border ${
-                                       isSupabase 
-                                       ? 'bg-green-50 border-green-200 text-green-700 dark:bg-green-900/30 dark:border-green-800 dark:text-green-300 shadow-sm' 
-                                       : 'bg-transparent border-transparent text-tg-hint hover:bg-tg-secondary-bg'
-                                   }`}
-                               >
-                                   <span className="text-lg">⚡</span>
-                                   Supabase
-                               </button>
-                           </div>
-                       </div>
-                  
-                       {/* Fields Configuration */}
                        {groupedFields.map(([groupName, fields]) => (
                           <div key={groupName}>
                               <h4 className="text-xs font-bold text-tg-hint uppercase tracking-wider mb-2 ml-1">{groupName}</h4>

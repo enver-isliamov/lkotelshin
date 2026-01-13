@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 
 interface NewUserFormProps {
-  // chatId удален, так как он не используется внутри компонента
+  chatId: string;
   onSubmit: (phone: string) => Promise<void>;
 }
 
@@ -25,7 +25,7 @@ const ROTATING_BENEFITS = [
     }
 ];
 
-const NewUserForm: React.FC<NewUserFormProps> = ({ onSubmit }) => {
+const NewUserForm: React.FC<NewUserFormProps> = ({ chatId, onSubmit }) => {
   const [phone, setPhone] = useState('');
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
   const [error, setError] = useState('');
