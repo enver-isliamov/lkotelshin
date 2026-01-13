@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { fetchAllSheetData, addNewUser, fetchConfig, updateConfig, fetchSheetDataByChatId } from './services/googleSheetService';
+import { fetchAllClients, fetchClientByChatId, fetchAllHistory, fetchHistoryByChatId, addNewUser, fetchConfig, updateConfig } from './services/dataProvider';
 import { ClientData, OrderHistory } from './types';
 import { ADMIN_CHAT_ID, APPS_SCRIPT_URL, WEB_BASE_COLUMNS, DEMO_CHAT_ID, DEFAULT_VISIBLE_CLIENT_FIELDS } from './constants';
 import ClientDashboard from './components/ClientDashboard';
@@ -130,8 +130,10 @@ const App: React.FC = () => {
     }
     
     const loadData = async () => {
-      if ((APPS_SCRIPT_URL as string) === 'ВАШ_URL_СКРИПТА' || !APPS_SCRIPT_URL) {
-        setError("Пожалуйста, настройте URL-адрес Google Apps Script в файле constants.ts. Инструкция находится в файле instructions.md.");
+      // Check for config ONLY if using Google Sheets. If Supabase is active, we skip this check.
+      const isSupabase = process.env.REACT_APP_DATA_SOURCE === 'supabase';
+      if (!isSupabase && ((APPS_SCRIPT_URL as string) === 'ВАШ_URL_СКРИПТА' || !APPS_SCRIPT_URL)) {
+        setError("Пожалуйста, настройте URL-адрес Google Apps Script в файле constants.ts или переключитесь на Supabase.");
         setIsLoading(false);
         return;
       }
@@ -156,8 +158,8 @@ const App: React.FC = () => {
         if (isAdmin) {
             // Admin fetches all data, passing their userId for authentication
             const [webBaseData, archiveData] = await Promise.all([
-                fetchAllSheetData<ClientData>('WebBase', userId),
-                fetchAllSheetData<OrderHistory>('Archive', userId)
+                fetchAllClients(userId),
+                fetchAllHistory(userId)
             ]);
             setAllClients(webBaseData);
             setAllHistory(archiveData);
@@ -166,8 +168,8 @@ const App: React.FC = () => {
         
         // Regular user fetches only their specific data
         const [clientResult, historyResult] = await Promise.all([
-            fetchSheetDataByChatId<ClientData>('WebBase', userId),
-            fetchSheetDataByChatId<OrderHistory>('Archive', userId)
+            fetchClientByChatId(userId),
+            fetchHistoryByChatId(userId)
         ]);
 
         if (clientResult && clientResult.length > 0) {
