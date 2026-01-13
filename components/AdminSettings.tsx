@@ -2,7 +2,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { ClientData, MessageTemplate } from '../types';
 import { ADMIN_CHAT_ID, DEMO_CHAT_ID } from '../constants';
-import { sendMessage, fetchTemplates } from '../services/dataProvider';
+import { sendMessageFromBot, fetchAllSheetData } from '../services/googleSheetService';
 
 interface AdminSettingsProps {
   allClients: ClientData[];
@@ -70,7 +70,7 @@ const SendMessageModal: React.FC<{client: ClientData; templates: MessageTemplate
         setStatus('sending');
         setError('');
         try {
-            await sendMessage(client['Chat ID'], text);
+            await sendMessageFromBot(client['Chat ID'], text);
             setStatus('sent');
             setTimeout(() => {
                 onClose();
@@ -219,8 +219,8 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
   useEffect(() => {
     const loadTemplates = async () => {
         try {
-            // Updated to fetchTemplates from dataProvider
-            const data = await fetchTemplates(ADMIN_CHAT_ID);
+            // Using 'Шаблоны сообщений' as per request, normalized in service
+            const data = await fetchAllSheetData<MessageTemplate>('Шаблоны сообщений', ADMIN_CHAT_ID);
             const validTemplates = data.filter(t => t.title && t.text);
             setTemplates(validTemplates);
         } catch (e) {
@@ -347,10 +347,7 @@ const AdminSettings: React.FC<AdminSettingsProps> = ({ allClients, webBaseColumn
               <div className="flex items-center gap-3">
                   {/* Counter Widget */}
                   <div className="flex flex-col items-start flex-shrink-0 min-w-[50px]">
-                      <span className="text-[10px] font-bold text-tg-hint uppercase tracking-wider leading-tight">
-                        {/* Dynamic Label based on source could go here, keeping simple for now */}
-                        CLIENTS
-                      </span>
+                      <span className="text-[10px] font-bold text-tg-hint uppercase tracking-wider leading-tight">Клиентов</span>
                       <span className="text-xl font-bold text-tg-text leading-none">{!isLoading ? allClients.length : '-'}</span>
                   </div>
 
